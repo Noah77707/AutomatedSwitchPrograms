@@ -1,6 +1,6 @@
 README.txt
 
-This program uses switch_ESP32. It also uses pyqt6
+Built using code from Dinones program called Nintendo-Switch-Pokemon-Shiny-Hunter, esp32beans program called switch_ESP32, along with some debuging code from github.
 
 Buttons:
 A = 0
