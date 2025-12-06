@@ -56,6 +56,10 @@ class GUI(pyqt_w.QWidget):
         self.Command_queue = Command_queue
         self.image = image
 
+        self.game = str
+        self.program = str
+        self.state = str
+
         self.setWindowTitle('Auto Switch Programs')
 
         main_layout = pyqt_w.QHBoxLayout(self)
@@ -86,22 +90,30 @@ class GUI(pyqt_w.QWidget):
 
         # HOME tab
         Home_layout = pyqt_w.QVBoxLayout()
-        Home_layout.addWidget(pyqt_w.QLabel('HOME program UI here'))
+        Home_layout.addWidget(pyqt_w.QLabel('HOME programs'))
         CCT_HOME = pyqt_w.QPushButton('Controller Connection Test', self)
-        CCT_HOME.clicked.connect(lambda checked, p='Connect_Controller_Test': self.Run_script('HOME', p, checked))
+        CCT_HOME.clicked.connect(lambda checked, p='Connect_Controller_Test': self.update_script('HOME', p, checked))
         Home_layout.addWidget(CCT_HOME)
         RHT_HOME = pyqt_w.QPushButton('Return Home Test', self)
-        RHT_HOME.clicked.connect(lambda checked, p='Return_Home_Test': self.Run_script('Home', p, checked))
+        RHT_HOME.clicked.connect(lambda checked, p='Return_Home_Test': self.update_script('Home', p, checked))
         Home_layout.addWidget(RHT_HOME)
         self.items['tab_home'].setLayout(Home_layout)
 
         # SWSH tab
         SWSH_layout = pyqt_w.QVBoxLayout()
-        SWSH_layout.addWidget(pyqt_w.QLabel('SWSH program UI here'))
+        SWSH_layout.addWidget(pyqt_w.QLabel('SWSH programs'))
         STATIC_ENCOUNTER_SWSH = pyqt_w.QPushButton('Static Encounter', self)
-        STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, p='Static_Encounter_SWSH': self.Run_script('SWSH', p, checked))
+        STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, p='Static_Encounter_SWSH': self.update_script('SWSH', p, checked))
         SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
         self.items['tab_swsh'].setLayout(SWSH_layout)
+
+        # BDSP tab
+        BDSP_layout = pyqt_w.QVBoxLayout()
+        BDSP_layout.addWidget(pyqt_w.QLabel('BDSP programs'))
+        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher', self)
+        EGG_HATCHER_BDSP.clicked.connect(lambda checked, p='Egg_Hatcher_BDSP': self.update_script('BDSP', p, checked))
+        BDSP_layout.addWidget(EGG_HATCHER_BDSP)
+        self.items['tab_bdsp'].setLayout(BDSP_layout)
 
         self.tabs.addTab(self.items['tab_home'], 'HOME')
         self.tabs.addTab(self.items['tab_swsh'], 'SWSH')
@@ -135,14 +147,25 @@ class GUI(pyqt_w.QWidget):
         self.roi_button = pyqt_w.QPushButton('Select ROI from image', self)
         self.roi_button.clicked.connect(self.on_select_roi_clicked)
 
+        self.start_button = pyqt_w.QPushButton('Start Program', self)
+        self.start_button.clicked.connect(self.start_scripts)
+
+        self.stop_button = pyqt_w.QPushButton('Stop Program', self)
+        self.stop_button.clicked.connect(self.stop_scripts)
+
         self.items['start_stop_button'].setText("Start / Stop")
 
-        button_row = pyqt_w.QHBoxLayout()
-        button_row.addWidget(self.items['start_stop_button'])
-        button_row.addWidget(self.screenshot_button)
-        button_row.addWidget(self.roi_button)
+        button_row_debug = pyqt_w.QHBoxLayout()
+        button_row_debug.addWidget(self.items['start_stop_button'])
+        button_row_debug.addWidget(self.screenshot_button)
+        button_row_debug.addWidget(self.roi_button)
 
-        right_panel.addLayout(button_row)
+        button_row_program = pyqt_w.QHBoxLayout()
+        button_row_program.addWidget(self.start_button)
+        button_row_program.addWidget(self.stop_button)
+
+        right_panel.addLayout(button_row_debug)
+        right_panel.addLayout(button_row_program)
         right_panel.addStretch(1)
 
         # ---------- attach to main ----------
@@ -194,22 +217,16 @@ class GUI(pyqt_w.QWidget):
             'game': self.current_program_name
         })
 
-    def Run_script(self, game: str, program: str, checked: bool = False) -> None:
-        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': game, 'program': program, 'running': True})
+    def update_script(self, game: str, program: str, checked: bool = False) -> None:
+        self.game = game
+        self.program = program
 
-    def _on_start_clicked(self):
-        port = self.controller_port.text().strip()
-        try:
-            cap_index = int(self.cap_edit.text())
-        except ValueError:
-            pyqt_w.QMessageBox.warning(self, "Error", "Capture index must be an integer")
-            return
+    def start_scripts(self) -> None:
+        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'running': True})
+    
+    def stop_scripts(self) -> None:
+        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'running': False})
 
-        if not port:
-            pyqt_w.QMessageBox.warning(self, "Error", "Port cannot be empty")
-            return
-
-        self.connect_requested.emit(port, cap_index)
 
     def on_screenshot_clicked(self) -> None:
         if self.latest_frame is None:

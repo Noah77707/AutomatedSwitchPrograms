@@ -37,15 +37,6 @@ def wait_for_roi_condition(
         sleep(0.01)
     return False
 
-
-def check_common_states(image: Image_Processing, state: str) -> str:
-    global state_timer
-    frame_bgr = image.original_image
-    if state == 'RESTART_GAME_0':
-        return('RESTART_GAME_1')
-    
-    return state
-
 def check_image_position_colors(image: Image_Processing, color: Tuple[int, int, int], positions: List[Tuple[int, int]]) -> bool:
     for position in positions:
         if not image.check_pixel_colors(position, color):
@@ -124,5 +115,15 @@ def SWSH_encounter_text(image: Image_Processing) -> bool:
             (854, 663),
             (366, 655),
             (1138, 670)
+        ]
+    )
+
+def BDSP_title_screen(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (0, 0, 0),
+        [
+            (0, 0),
+            (0, 0)
         ]
     )

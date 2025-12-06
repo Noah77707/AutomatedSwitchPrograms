@@ -24,9 +24,14 @@ from time import sleep, time, perf_counter
 ProgramFn = Callable[[object, Controller, str], str]
 
 PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
+    # Home
     ('HOME', 'Connect_Controller_Test'): Connect_Controller_Test,
     ('HOME', 'Return_Home_Test'): Return_Home_Test,
+    # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
+    # BDSP
+    ('BDSP', 'Egg_Hatcher_BDSP'):Egg_Hatcher_BDSP
+
 }
 
 def start_control_video(

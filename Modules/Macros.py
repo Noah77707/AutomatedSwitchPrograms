@@ -41,8 +41,8 @@ def home_screen_checker(ctrl: Controller, image: Image_Processing) -> str:
         return 'HOME_SCREEN'
     elif home_screen_visibile(image):
         if controller_already_connected(image):
+            ctrl.tap(BTN_A, 0.05, 1.20)
             ctrl.tap(BTN_A, 0.05, 0.95)
-            ctrl.tap(BTN_A)
             return 'START_SCREEN'
         else:
             ctrl.tap(BTN_A, 0.05, 0.95)
