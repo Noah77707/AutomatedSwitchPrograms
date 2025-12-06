@@ -5,6 +5,7 @@ from threading import Event, Thread
 from Modules.Controller import Controller
 from Modules.GUI import App, GUI
 from Modules.Control_System import start_control_video, controller_control, check_threads
+from Modules.Image_Processing import Image_Processing
 
 MODULE_NAME = 'SwitchConnector'
 if __name__ == "__main__":
@@ -16,6 +17,7 @@ if __name__ == "__main__":
         Switch_Controller = Controller('COM15', 115200)
         shutdown_event = Event()
         stop_event = Event()
+        image = Image_Processing()
 
         threads = []
         threads.append({
@@ -28,7 +30,7 @@ if __name__ == "__main__":
 
         threads.append({
             'function': 'controller_control',
-            'thread': Thread(target=lambda: controller_control(Switch_Controller, Image_queue, Command_queue, shutdown_event, stop_event),
+            'thread': Thread(target=lambda: controller_control(Switch_Controller, Image_queue, Command_queue, shutdown_event, stop_event, image),
                               daemon= True)
         })
 
@@ -43,7 +45,7 @@ if __name__ == "__main__":
             thread['thread'].start()
 
         GUI_App = App()
-        User_Interface = GUI(Image_queue, Command_queue, shutdown_event, stop_event)
+        GUI(Image_queue, Command_queue, shutdown_event, stop_event, image)
         GUI_App.exec()
 
         shutdown_event.set()

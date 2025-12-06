@@ -3,6 +3,8 @@ import sys
 import time
 import serial
 from .Controller import Controller
+from .Image_Processing import Image_Processing
+from .States import *
 
 # controller_buttons.py
 BTN_Y = 0
@@ -30,14 +32,20 @@ def connect_controller(ctrl: Controller):
     ctrl.tap(BTN_A)
 
 # Hard reset (Rip soft resets)
-def static_restart(ctrl: Controller):
-    ctrl.tap(BTN_HOME)
-    time.sleep(0.5)
-    ctrl.tap(BTN_Y)
-    time.sleep(0.5)
-    ctrl.tap(BTN_A)
-    time.sleep(2) #Make this an actual check to see if the game has closed. Also add a check to see if there is an update.
-    ctrl.tap(BTN_A)
-    time.sleep(0.5)
-    ctrl.tap(BTN_A)
+def home_screen_checker(ctrl: Controller, image: Image_Processing) -> str:
+    if pairing_screen_visible(image):
+        ctrl.tap(BTN_A)
+        ctrl.tap(BTN_A, 0.05, 0.45)
+        ctrl.tap(BTN_A, 0.05, 0.45)
+        ctrl.tap(BTN_HOME)
+        return 'HOME_SCREEN'
+    elif home_screen_visibile(image):
+        if controller_already_connected(image):
+            ctrl.tap(BTN_A, 0.05, 0.95)
+            ctrl.tap(BTN_A)
+            return 'START_SCREEN'
+        else:
+            ctrl.tap(BTN_A, 0.05, 0.95)
+            ctrl.tap(BTN_A, 0.05, 0.95)
+            return 'PAIRING'
 

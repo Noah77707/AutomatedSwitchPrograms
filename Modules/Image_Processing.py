@@ -13,7 +13,11 @@ class Image_Processing():
         self.original_image = None
         self.resized_image = None
         self.pyqt_image = None
-        self.shiny_detection_time = 0
+        self.debug_draw = True
+        self.debug_rois = []
+        self.debug_pixels = []
+        self.shiny_frames_checked = 0
+        self.shiny_hits = 0
 
         if isinstance(image, str):
             self.original_image = cv.imread(image, cv.IMREAD_UNCHANGED)
@@ -76,15 +80,37 @@ class Image_Processing():
         diffs = [abs(int(pixel[c]) - color[c]) for c in range(3)]
         return not any(d > threshold for d in diffs)
 
+    def is_name_visible(self,
+            frame: np.ndarray,
+            roi: Tuple[int, int, int, int]
+            ) -> str:
+        x, y, w, h = roi
+        h_img, w_img = frame.shape[:2]
+        if w <= 0 or h <= 0:
+            return False
+        if not (0 <= x < w_img or 0 <= y < h_img):
+            return False
+        
+        x2 = min(x + w, w_img)
+        y2 = min(y + h, h_img)
+        if x2 <= x or y2 <= y:
+            return False
+        
+        crop = frame[y:y2, x:x2]
+        custom_config = '-- oem 1 --psm 6'
+        text = pytesseract.image_to_string(crop, config=custom_config)
+        return text.strip()
+
     
     def is_sparkle_visible(
             self,
             frame: np.ndarray,
             roi: Tuple[int, int, int, int],
-            v_thres: int = 230,
-            s_max: int = 70,
-            min_bright_particles: int = 150,
+            v_thres: int,
+            s_max: int,
+            min_bright_particles: int,
             ) -> bool:
+        
         x, y, w, h = roi
         h_img, w_img = frame.shape[:2]
         if w <= 0 or h <= 0:
@@ -107,3 +133,41 @@ class Image_Processing():
         bright_pixels = cv.countNonZero(mask)
         return bright_pixels >= min_bright_particles
 
+    def clear_debug(self):
+        self.debug_rois.clear()
+        self.debug_pixels.clear()
+
+    def add_debug_roi(self, roi, color=(0, 0, 255)):
+        # roi: (x, y, w, h)
+        self.debug_rois.append((roi, color))
+
+    def add_debug_pixel(self, x, y, color=(255, 0, 0)):
+        self.debug_pixels.append((x, y, color))
+
+    def draw_debug(self, frame):
+        if not self.debug_draw:
+            return frame
+        
+        if not isinstance(frame, np.ndarray) or frame.size == 0:
+            return frame
+        
+        if not self.debug_draw:
+            return frame
+
+        debug_frame = frame
+
+        # draw ROIs
+        for (roi, color) in self.debug_rois:
+            x, y, w, h = roi
+            cv.rectangle(debug_frame, (x, y), (x + w, y + h), color, 2)
+
+        # draw pixel markers
+        for (x, y, color) in self.debug_pixels:
+            cv.rectangle(
+                debug_frame,
+                (x - 2, y - 2),
+                (x + 2, y + 2),
+                color,
+                1
+            )
+        return debug_frame

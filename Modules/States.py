@@ -46,51 +46,11 @@ def check_common_states(image: Image_Processing, state: str) -> str:
     
     return state
 
-def SWSH_state_step(image: Image_Processing, frame_bgr: np.ndarray, state: str) -> str:
-    return state
-
-def BDSP_state_step(image: Image_Processing, frame_bgr: np.ndarray, state: str) -> str:
-    return state
-
-def LA_state_step(image: Image_Processing, frame_bgr: np.ndarray, state: str) -> str:
-    return state
-
-def SV_state_step(image: Image_Processing, frame_bgr: np.ndarray, state: str) -> str:
-    return state
-
-def LZA_state_step(image: Image_Processing, frame_bgr: np.ndarray, state: str) -> str:
-    return state
-
-def check_image_position_colors(image: Image_Processing, color: Tuple[int, int, int], positions: List[Tuple[int, int]]):
+def check_image_position_colors(image: Image_Processing, color: Tuple[int, int, int], positions: List[Tuple[int, int]]) -> bool:
     for position in positions:
         if not image.check_pixel_colors(position, color):
             return False
         return True
-    
-def shiny_sparkles_visible(
-        image: Image_Processing,
-        roi: Tuple[int, int, int, int],
-        timeout: int,
-        min_frames: int,
-        state: str
-        ) -> str:
-
-        def predicate(frame, roi_local):
-            return image.is_sparkle_visible(frame, roi_local)
-        
-        seen = wait_for_roi_condition(
-            image= image,
-            roi= roi,
-            predicate= predicate,
-            timeout= timeout,
-            min_frames= min_frames,
-        )
-
-        if seen:
-            state = 'SHINY_FOUND'
-        else:
-            state = 'NOT_SHINY'
-        return state
 
 def pairing_screen_visible(image: Image_Processing) -> bool:
     return check_image_position_colors(
@@ -125,6 +85,15 @@ def black_screen(image: Image_Processing) -> bool:
         ]
     )
 
+def controller_already_connected(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (254, 255, 255),
+        [
+            (73, 694),
+            (108, 693)
+        ]
+    )
 
 def SWSH_title_screen(image: Image_Processing) -> bool:
     return check_image_position_colors(

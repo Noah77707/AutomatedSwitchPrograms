@@ -25,6 +25,7 @@ ProgramFn = Callable[[object, Controller, str], str]
 
 PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('HOME', 'Connect_Controller_Test'): Connect_Controller_Test,
+    ('HOME', 'Return_Home_Test'): Return_Home_Test,
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
 }
 
@@ -62,7 +63,8 @@ def controller_control(
     Image_queue: Queue,
     Command_queue: Queue,
     shutdown_event: Event,
-    stop_event: Event
+    stop_event: Event,
+    image: Image_Processing
 ) -> None:
     
     current_game = None
@@ -70,22 +72,9 @@ def controller_control(
     current_state = None
     running = False
 
-    image = Image_Processing()
     image.frame_id = 0
 
     while not shutdown_event.is_set():
-        frame = None
-        try:
-            while True:
-                frame = Image_queue.get_nowait()
-        except Empty:
-            pass
-
-        if frame is not None:
-            image.original_image = frame
-            # image.frame_id += 1
-            # if image.frame_id % 60 == 0:
-            #     print(f"[controller] frame_id=(image.frame_id)")
 
         try:
             msg = Command_queue.get_nowait()
@@ -132,3 +121,35 @@ def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
             if not thread['thread'].is_alive():
                 shutdown_event.set()
         sleep(5)
+
+# ChatGPT Debugger, will get rid of when not needed:
+def start_control_video_file(
+    video_path: str,
+    Image_Queue: Queue,
+    Shutdown_event: Event,
+    fps_limit: float = 30.0
+):
+    cap = cv.VideoCapture(video_path)
+    if not cap.isOpened():
+        print(f"[ERROR] Could not open video file: {video_path}")
+        return
+
+    frame_delay = 1.0 / fps_limit
+
+    while not Shutdown_event.is_set():
+        ok, frame = cap.read()
+        if not ok:
+            print("[VIDEO] End of file reached. Looping.")
+            cap.set(cv.CAP_PROP_POS_FRAMES, 0)
+            continue
+
+        # Replace capture card output:
+        try:
+            Image_Queue.get_nowait()
+        except Empty:
+            pass
+
+        Image_Queue.put(frame)
+        time.sleep(frame_delay)
+
+    cap.release()

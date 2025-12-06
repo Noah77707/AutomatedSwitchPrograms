@@ -8,9 +8,15 @@ TEXT_BOX = {
     'right_white': (int(MAIN_FRAME_SIZE[0] - MAIN_FRAME_SIZE[0] // 16 * 1.2), int(MAIN_FRAME_SIZE[1] // 16 * 1))
 }
 
-SPARLKE_ROI = {
-    "SWSH_Static": (706, 213, 500, 360)
+
+SWSH_CONSTANTS = {
+    'Pokemon_Name': (313, 395, 143, 31),
+    'Static_Roi': (699, 244, 481, 320),
+    'Static_V_Threshold': 230,
+    'Static_S_Max': 80,
+    'Static_Brightness_Threshold': 90000
 }
+
 COLOR_ON_SCREEN = {
     'top_left': (50, MAIN_FRAME_SIZE[1] - 50),
     'center_left': (50, MAIN_FRAME_SIZE[1] // 2 - 25),
