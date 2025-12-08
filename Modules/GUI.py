@@ -59,6 +59,7 @@ class GUI(pyqt_w.QWidget):
         self.game = str
         self.program = str
         self.state = str
+        self.numberinput = int
 
         self.setWindowTitle('Auto Switch Programs')
 
@@ -93,9 +94,10 @@ class GUI(pyqt_w.QWidget):
         Home_layout.addWidget(pyqt_w.QLabel('HOME programs'))
         CCT_HOME = pyqt_w.QPushButton('Controller Connection Test', self)
         CCT_HOME.clicked.connect(lambda checked, p='Connect_Controller_Test': self.update_script('HOME', p, checked))
-        Home_layout.addWidget(CCT_HOME)
         RHT_HOME = pyqt_w.QPushButton('Return Home Test', self)
         RHT_HOME.clicked.connect(lambda checked, p='Return_Home_Test': self.update_script('Home', p, checked))
+
+        Home_layout.addWidget(CCT_HOME)
         Home_layout.addWidget(RHT_HOME)
         self.items['tab_home'].setLayout(Home_layout)
 
@@ -104,15 +106,26 @@ class GUI(pyqt_w.QWidget):
         SWSH_layout.addWidget(pyqt_w.QLabel('SWSH programs'))
         STATIC_ENCOUNTER_SWSH = pyqt_w.QPushButton('Static Encounter', self)
         STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, p='Static_Encounter_SWSH': self.update_script('SWSH', p, checked))
+        EGG_HATCHER_SWSH = pyqt_w.QPushButton('Egg Hatcher WIP', self)
+        EGG_HATCHER_SWSH.clicked.connect(lambda checked, p='Egg_Hatcher_SWSH': self.update_script('SWSH', p, checked))
+
         SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
+        SWSH_layout.addWidget(EGG_HATCHER_SWSH)
         self.items['tab_swsh'].setLayout(SWSH_layout)
 
         # BDSP tab
         BDSP_layout = pyqt_w.QVBoxLayout()
         BDSP_layout.addWidget(pyqt_w.QLabel('BDSP programs'))
-        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher', self)
+        STATIC_ENCOUNTER_BDSP = pyqt_w.QPushButton('Static Encounter WIP', self)
+        STATIC_ENCOUNTER_BDSP.clicked.connect(lambda checked, p='Static_Encounter_BDSP': self.update_script('BDSP', p, checked))
+        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher WIP', self)
         EGG_HATCHER_BDSP.clicked.connect(lambda checked, p='Egg_Hatcher_BDSP': self.update_script('BDSP', p, checked))
+        RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser WIP', self)
+        RELEASER_BDSP.clicked.connect(lambda checked, p='Pokemon_Releaser_BDSP': self.update_script_textbox('BDSP', p, checked))
+
+        BDSP_layout.addWidget(STATIC_ENCOUNTER_BDSP)
         BDSP_layout.addWidget(EGG_HATCHER_BDSP)
+        BDSP_layout.addWidget(RELEASER_BDSP)
         self.items['tab_bdsp'].setLayout(BDSP_layout)
 
         self.tabs.addTab(self.items['tab_home'], 'HOME')
@@ -220,12 +233,20 @@ class GUI(pyqt_w.QWidget):
     def update_script(self, game: str, program: str, checked: bool = False) -> None:
         self.game = game
         self.program = program
+        self.numberinput = 0
+
+    def update_script_textbox(self, game: str, program: str, checked: bool = False) -> None:
+        text, ok = pyqt_w.QInputDialog.getText(self, 'How Many Boxes', 'Enter Box Amount (input 0 for all boxes):')
+        if ok and text:
+            self.numberinput = text
+        self.game = game
+        self.program = program
 
     def start_scripts(self) -> None:
-        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'running': True})
+        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': True})
     
     def stop_scripts(self) -> None:
-        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'running': False})
+        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': False})
 
 
     def on_screenshot_clicked(self) -> None:

@@ -14,7 +14,11 @@ SWSH_CONSTANTS = {
     'Static_Roi': (699, 244, 481, 320),
     'Static_V_Threshold': 230,
     'Static_S_Max': 80,
-    'Static_Brightness_Threshold': 90000
+    'Static_Brightness_Threshold': 80000
+}
+
+BDSP_CONSTANTS = {
+    
 }
 
 COLOR_ON_SCREEN = {

@@ -62,7 +62,7 @@ class Image_Processing():
             self,
             position: Tuple[int, int],
             color: Tuple[int, int, int],
-            threshold: int = 7,
+            threshold: int = 10,
             frame: Optional[np.ndarray] = None
     ) -> bool:
         
@@ -79,6 +79,20 @@ class Image_Processing():
         pixel = frame[y, x]
         diffs = [abs(int(pixel[c]) - color[c]) for c in range(3)]
         return not any(d > threshold for d in diffs)
+
+    def debug_pixel(image, pos, expected):
+        frame = image.original_image
+        if frame is None:
+            print("No frame")
+            return
+        x, y = pos
+        b, g, r = frame[y, x]
+        eb, eg, er = expected
+        print(
+            f"pos={pos} pixel=({b},{g},{r}) expected=({eb},{eg},{er}) "
+            f"diff=({b-eb},{g-eg},{r-er})"
+    )
+
 
     def is_name_visible(self,
             frame: np.ndarray,

@@ -29,8 +29,11 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('HOME', 'Return_Home_Test'): Return_Home_Test,
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
+    ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
     # BDSP
-    ('BDSP', 'Egg_Hatcher_BDSP'):Egg_Hatcher_BDSP
+    ('BDSP', 'Static_Encounter_BDSP'): Static_Encounter_BDSP,
+    ('BDSP', 'Egg_Hatcher_BDSP'): Egg_Hatcher_BDSP,
+    ('BDSP', 'Pokemon_Releaser_BDSP'): Pokemon_Releaser_BDSP,
 
 }
 
@@ -92,6 +95,7 @@ def controller_control(
             if cmd == 'SET_PROGRAM':
                 new_game = msg.get('game')
                 new_program = msg.get('program')
+                new_input = msg.get('number')
                 new_key = (new_game, new_program)
                 old_key = (current_game, current_program)
 
@@ -116,7 +120,7 @@ def controller_control(
             continue
         # print(f"[controller] calling {key} with frame_id={getattr(image, 'frame_id', None)}")
 
-        current_state = step_fn(image, ctrl, current_state)
+        current_state = step_fn(image, ctrl, current_state, new_input)
     ctrl.close()
         
 

@@ -41,7 +41,7 @@ def check_image_position_colors(image: Image_Processing, color: Tuple[int, int, 
     for position in positions:
         if not image.check_pixel_colors(position, color):
             return False
-        return True
+    return True
 
 def pairing_screen_visible(image: Image_Processing) -> bool:
     return check_image_position_colors(
@@ -118,12 +118,62 @@ def SWSH_encounter_text(image: Image_Processing) -> bool:
         ]
     )
 
+def BDSP_loading_title_screen(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (224, 225, 225),
+        [
+            (509, 432),
+            (830, 443)
+        ]
+    )
+
 def BDSP_title_screen(image: Image_Processing) -> bool:
     return check_image_position_colors(
         image,
-        (0, 0, 0),
+        (17, 210, 245),
         [
-            (0, 0),
-            (0, 0)
+            (364, 205),
+            (5442, 225),
+        ]
+    )
+
+def BDSP_box_check(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (238, 230, 158),
+        [
+            (837, 84),
+            (358, 87)
+        ]
+    )
+
+def BDSP_pokemon_in_box_check(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (182, 162, 100),
+        [
+            (983, 166),
+            (997, 195),
+        ]
+    )
+
+def BDSP_egg_in_box_check(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (234, 234, 234),
+        [
+            (986, 166),
+            (995, 166),
+        ]
+    )
+
+def BDSP_shiny_symbol(image: Image_Processing) -> bool:
+    return check_image_position_colors(
+        image,
+        (70, 53, 230),
+        [
+            (1258, 115),
+            (1248, 125)
         ]
     )
