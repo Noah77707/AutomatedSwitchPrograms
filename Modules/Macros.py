@@ -25,8 +25,7 @@ BTN_CAPTURE = 13
 
 def release_pokemon(ctrl: Controller, image: Image_Processing, Box_Amount: int) -> str:
     amount_released = 0
-    box = 1
-    for box in range(int(Box_Amount)): 
+    for box in range(int(Box_Amount) - 1): 
         for row in range(5):
             for column in range(6):
                 sleep(1)
@@ -69,7 +68,6 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing) -> str:
     if pairing_screen_visible(image):
         ctrl.tap(BTN_A)
         ctrl.tap(BTN_A, 0.05, 0.45)
-        ctrl.tap(BTN_A, 0.05, 0.45)
         ctrl.tap(BTN_HOME)
         return 'HOME_SCREEN'
     elif home_screen_visibile(image):
@@ -85,7 +83,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing) -> str:
         ctrl.tap(BTN_A, 0.05, 0.4)
         ctrl.tap(BTN_A, 0.05, 0.3)
         ctrl.tap(BTN_HOME, 0.1, 1.2)
-        ctrl.dpad(4, 0.1)
+        ctrl.dpad(4, 0.15)
         for _ in range(5):
            sleep(0.07)
            ctrl.dpad(2, 0.05)

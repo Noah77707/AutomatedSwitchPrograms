@@ -17,19 +17,19 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         state = home_screen_checker_macro(ctrl, image)
         return state
     
-    elif state == 'HOME_SCREEN' or state == 'START_SCREEN' or state == 'TITLE_SCREEN':
+    elif state == 'HOME_SCREEN' or state == 'START_SCREEN':
         state = bdsp_start_screens_macro(ctrl, image, state)
         return state
     
     elif state == 'IN_GAME':
-        if not black_screen(image):
-            sleep(2)
-            ctrl.tap(BTN_X, 0.05, 0.2)
-            ctrl.tap(BTN_A, 0.05, 0.7)
-            ctrl.tap(BTN_R, 0.05, 1.2)
-            return 'IN_BOX'
-            
-
+        ctrl.down(BTN_B)
+        for _ in range(10):
+            ctrl.dpad(2, 1.5)
+            ctrl.dpad(4, 2)
+            ctrl.dpad(6, 0.1)
+            ctrl.dpad(0, 2)
+            ctrl.dpad(6, 1.4)
+        ctrl.up(BTN_B)
     return state
 
 def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
