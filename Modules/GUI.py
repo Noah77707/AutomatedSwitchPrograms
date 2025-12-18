@@ -124,7 +124,7 @@ class GUI(pyqt_w.QWidget):
         STATIC_ENCOUNTER_BDSP.clicked.connect(lambda checked, p='Static_Encounter_BDSP': self.update_script('BDSP', p, checked))
         EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Collector', self)
         EGG_HATCHER_BDSP.clicked.connect(lambda checked, p='Egg_Collector_BDSP': self.update_script_textbox('BDSP', p, checked))
-        RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser WIP', self)
+        RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser', self)
         RELEASER_BDSP.clicked.connect(lambda checked, p='Pokemon_Releaser_BDSP': self.update_script_textbox('BDSP', p, checked))
 
         BDSP_layout.addWidget(STATIC_ENCOUNTER_BDSP)

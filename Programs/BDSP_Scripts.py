@@ -65,6 +65,10 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             for _ in range(4):
                 ctrl.dpad(2, 0.14)
             sleep(0.2)
+            image.egg_count += 1
+            if image.egg_count == input:
+                return 'PROGRAM_FINISHED'
+
             
         if image.egg_phase == 0:
             for _ in range(12):
