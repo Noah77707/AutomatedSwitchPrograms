@@ -44,6 +44,8 @@ class Controller:
         seq = self.seq
         timeout = 5.0
 
+        print(line)
+
         payload = f"{seq}:{line}\n"
         self.ser.write(payload.encode("ascii"))
 
@@ -86,6 +88,12 @@ class Controller:
         if duration_s > 0:
             time.sleep(duration_s)
             self.send("HAT 8")
+
+    def dpad_down(self, dir: int):
+        self.send(f"HAT HOLD {dir}")
+
+    def dpad_up(self):
+        self.send(f"HAT RELEASE")
 
     def close(self):
         self.ser.close()

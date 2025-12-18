@@ -4,12 +4,15 @@ import cv2 as cv
 import numpy as np
 import pytesseract
 import PyQt6.QtGui as pyqt_g
+from pytesseract import pytesseract as pt
 from typing import Tuple, Union, Dict, Optional, Sequence
+from time import time, sleep
 
 import Constants as const
 
 class Image_Processing():
     def __init__(self, image: Union[str, np.ndarray] = ''):
+        self.frame_id = 0
         self.original_image = None
         self.resized_image = None
         self.pyqt_image = None
@@ -18,6 +21,9 @@ class Image_Processing():
         self.debug_pixels = []
         self.shiny_frames_checked = 0
         self.shiny_hits = 0
+        self.egg_count = 0
+        self.egg_phase = 0
+        self.generic_count1 = 0
 
         if isinstance(image, str):
             self.original_image = cv.imread(image, cv.IMREAD_UNCHANGED)
@@ -93,29 +99,56 @@ class Image_Processing():
             f"diff=({b-eb},{g-eg},{r-er})"
     )
 
+    def is_name_visible(self, roi: Tuple[int, int, int, int]) -> str:
+        frame = getattr(self, "original_image", None)
+        if frame is None:
+            return ""
 
-    def is_name_visible(self,
-            frame: np.ndarray,
-            roi: Tuple[int, int, int, int]
-            ) -> str:
-        x, y, w, h = roi
-        h_img, w_img = frame.shape[:2]
-        if w <= 0 or h <= 0:
-            return False
-        if not (0 <= x < w_img or 0 <= y < h_img):
-            return False
-        
-        x2 = min(x + w, w_img)
-        y2 = min(y + h, h_img)
-        if x2 <= x or y2 <= y:
-            return False
-        
-        crop = frame[y:y2, x:x2]
-        custom_config = '-- oem 1 --psm 6'
-        text = pytesseract.image_to_string(crop, config=custom_config)
-        return text.strip()
+        try:
+            x, y, w, h = map(int, roi)
+            H, W = frame.shape[:2]
 
-    
+            x1 = max(0, x)
+            y1 = max(0, y)
+            x2 = min(W, x + w)
+            y2 = min(H, y + h)
+
+            if x2 <= x1 or y2 <= y1:
+                print(f"OCR: out of bounds roi={roi} frame={H}x{W}")
+                return ""
+
+            crop = frame[y1:y2, x1:x2]
+            if crop.size == 0:
+                print(f"OCR: empty crop roi={roi}")
+                return ""
+
+            gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+            gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
+            gray = cv.GaussianBlur(gray, (3, 3), 0)
+            gray = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+            gray = gray.copy()
+
+            print("OCR: running pytesseract")
+            try:
+                txt = pytesseract.image_to_string(gray, config="--psm 7", timeout=1)
+            except pt.TimeoutExpired:
+                print("OCR: tesseract timed out")
+                return ""
+
+            txt = " ".join(txt.split())
+            print("OCR raw:", repr(txt))
+            return txt
+
+        except cv.error as e:
+            print(f"OCR cv2 error: {e} roi={roi}")
+            return ""
+        except pytesseract.TesseractNotFoundError as e:
+            print(f"OCR tesseract missing: {e}")
+            return ""
+        except Exception as e:
+            print(f"OCR error: {type(e).__name__}: {e} roi={roi}")
+            return ""
+
     def is_sparkle_visible(
             self,
             frame: np.ndarray,
@@ -185,3 +218,4 @@ class Image_Processing():
                 1
             )
         return debug_frame
+    

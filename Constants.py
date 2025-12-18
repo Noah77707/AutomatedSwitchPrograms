@@ -8,16 +8,18 @@ TEXT_BOX = {
     'right_white': (int(MAIN_FRAME_SIZE[0] - MAIN_FRAME_SIZE[0] // 16 * 1.2), int(MAIN_FRAME_SIZE[1] // 16 * 1))
 }
 
-
 SWSH_CONSTANTS = {
-    'Pokemon_Name': (313, 395, 143, 31),
-    'Static_Roi': (699, 244, 481, 320),
-    'Static_V_Threshold': 230,
-    'Static_S_Max': 80,
-    'Static_Brightness_Threshold': 80000
+    'pokemon_name': (313, 395, 143, 31),
+    'static_roi': (699, 244, 481, 320),
+    'static_v_threshold': 230,
+    'static_s_max': 80,
+    'static_brightness_threshold': 80000
 }
 
 BDSP_CONSTANTS = {
+    'step_roi': (620, 393, 60, 7),
+    'hatchery_poke_center': (1012, 374, 268, 346),
+    'nursery_man': (165, 343, 40, 54)
     
 }
 

@@ -16,20 +16,13 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         state = home_screen_checker_macro(ctrl, image)
         return state
     
-    elif state == 'HOME_SCREEN':
-        if home_screen_visibile(image):
-            sleep(0.5)
-            ctrl.tap(BTN_A, 0.05, 0.95)
-            ctrl.tap(BTN_A)
-            return 'START_SCREEN'
-        
-    elif state == 'START_SCREEN':
-        if SWSH_title_screen(image):
+    if state == "START_SCREEN":
+        if check_state(image, 'SWSH', 'title_screen'):
             ctrl.tap(BTN_A)
             return 'IN_GAME'
-        
+
     elif state == 'IN_GAME':
-        if SWSH_in_game(image):
+        if check_state(image, 'SWSH', 'in_game'):
             ctrl.stick('l', 128, 255, 0.016, True)
             ctrl.tap(BTN_A, 0.05, 0.7)
             ctrl.tap(BTN_A, 0.05, 0.7)
@@ -38,12 +31,12 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             return 'IN_BATTLE'
         
     elif state == 'IN_BATTLE':
-        if SWSH_encounter_text(image):
+        if check_state(image, 'SWSH', 'encounter_text'):
             return 'CHECK_SHINY'
         return 'IN_BATTLE'
     
     elif state == 'CHECK_SHINY':
-        roi = const.SWSH_CONSTANTS['Static_Roi']
+        roi = const.SWSH_CONSTANTS['static_Roi']
 
         image.debug_draw = True
         image.clear_debug()
@@ -58,9 +51,9 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         shiny_check = image.is_sparkle_visible(
             frame,
             roi,
-            v_thres= const.SWSH_CONSTANTS['Static_V_Threshold'],
-            s_max = const.SWSH_CONSTANTS['Static_S_Max'],
-            min_bright_particles = const.SWSH_CONSTANTS['Static_Brightness_Threshold']
+            v_thres= const.SWSH_CONSTANTS['static_v_threshold'],
+            s_max = const.SWSH_CONSTANTS['static_s_max'],
+            min_bright_particles = const.SWSH_CONSTANTS['static_brightness_threshold']
         )
 
         image.shiny_frames_checked += 1
@@ -91,6 +84,29 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
 def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, input: int) -> str:
     return None
 
-def Pokemon_Releaser_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, input: int) -> str:
-    return None
+def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
+    if state == None:
+        state = 'PAIRING'
 
+    elif state == 'PAIRING':
+        state = home_screen_checker_macro(ctrl, image)
+        return state
+    
+    elif state == 'HOME_SCREEN' or state == 'START_SCREEN':
+        state = swsh_start_screens_macro(ctrl, image, state)
+        return state
+    
+    elif state == 'IN_GAME':
+        if not check_state(image, 'GENERIC', 'black_screen'):
+            sleep(2)
+            ctrl.tap(BTN_X, 0.05, 0.45)
+            ctrl.tap(BTN_A, 0.05, 1.2)
+            ctrl.tap(BTN_R, 0.05, 1.2)
+            return 'IN_BOX'
+        
+    elif state == 'IN_BOX':
+        if check_state(image, 'BDSP', 'box_open'):
+            release_pokemon(ctrl, image, 'BDSP', input)
+            state = "PROGRAM_FINISHED"
+            
+    return state

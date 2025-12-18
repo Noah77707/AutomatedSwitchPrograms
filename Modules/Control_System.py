@@ -30,9 +30,11 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
+    ('SWSH', 'Pokemon_Releaser_SWSH'): Pokemon_Releaser_SWSH,
+
     # BDSP
     ('BDSP', 'Static_Encounter_BDSP'): Static_Encounter_BDSP,
-    ('BDSP', 'Egg_Hatcher_BDSP'): Egg_Hatcher_BDSP,
+    ('BDSP', 'Egg_Collector_BDSP'): Egg_Collector_BDSP,
     ('BDSP', 'Pokemon_Releaser_BDSP'): Pokemon_Releaser_BDSP,
 
 }
@@ -68,7 +70,6 @@ def start_control_video(
     
 def controller_control(
     ctrl: Controller,
-    Image_queue: Queue,
     Command_queue: Queue,
     shutdown_event: Event,
     stop_event: Event,
@@ -79,11 +80,9 @@ def controller_control(
     current_program = None
     current_state = None
     running = False
-
-    image.frame_id = 0
+    new_input = None
 
     while not shutdown_event.is_set():
-
         try:
             msg = Command_queue.get_nowait()
         except Empty:
@@ -123,6 +122,21 @@ def controller_control(
         current_state = step_fn(image, ctrl, current_state, new_input)
     ctrl.close()
         
+# ChatGPT Debugger, will get rid of when not needed:
+def frame_pump(Image_queue, shutdown_event, image):
+    while not shutdown_event.is_set():
+        frame = None
+        try:
+            while True:
+                frame = Image_queue.get_nowait()
+        except Empty:
+            pass
+
+        if frame is not None:
+            image.original_image = frame
+            image.frame_id = getattr(image, "frame_id", 0) + 1
+        else:
+            sleep(0.001)
 
 def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
     while not shutdown_event.is_set():
@@ -130,35 +144,3 @@ def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
             if not thread['thread'].is_alive():
                 shutdown_event.set()
         sleep(5)
-
-# ChatGPT Debugger, will get rid of when not needed:
-def start_control_video_file(
-    video_path: str,
-    Image_Queue: Queue,
-    Shutdown_event: Event,
-    fps_limit: float = 30.0
-):
-    cap = cv.VideoCapture(video_path)
-    if not cap.isOpened():
-        print(f"[ERROR] Could not open video file: {video_path}")
-        return
-
-    frame_delay = 1.0 / fps_limit
-
-    while not Shutdown_event.is_set():
-        ok, frame = cap.read()
-        if not ok:
-            print("[VIDEO] End of file reached. Looping.")
-            cap.set(cv.CAP_PROP_POS_FRAMES, 0)
-            continue
-
-        # Replace capture card output:
-        try:
-            Image_Queue.get_nowait()
-        except Empty:
-            pass
-
-        Image_Queue.put(frame)
-        time.sleep(frame_delay)
-
-    cap.release()

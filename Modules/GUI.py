@@ -60,6 +60,7 @@ class GUI(pyqt_w.QWidget):
         self.program = str
         self.state = str
         self.numberinput = int
+        self.debug = False
 
         self.setWindowTitle('Auto Switch Programs')
 
@@ -108,9 +109,12 @@ class GUI(pyqt_w.QWidget):
         STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, p='Static_Encounter_SWSH': self.update_script('SWSH', p, checked))
         EGG_HATCHER_SWSH = pyqt_w.QPushButton('Egg Hatcher WIP', self)
         EGG_HATCHER_SWSH.clicked.connect(lambda checked, p='Egg_Hatcher_SWSH': self.update_script('SWSH', p, checked))
+        RELEASER_SWSH = pyqt_w.QPushButton('Pokemon Releaser WIP', self)
+        RELEASER_SWSH.clicked.connect(lambda checked, p='Pokemon_Releaser_SWSH': self.update_script_textbox('SWSH', p, checked))
 
         SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
         SWSH_layout.addWidget(EGG_HATCHER_SWSH)
+        SWSH_layout.addWidget(RELEASER_SWSH)
         self.items['tab_swsh'].setLayout(SWSH_layout)
 
         # BDSP tab
@@ -118,8 +122,8 @@ class GUI(pyqt_w.QWidget):
         BDSP_layout.addWidget(pyqt_w.QLabel('BDSP programs'))
         STATIC_ENCOUNTER_BDSP = pyqt_w.QPushButton('Static Encounter WIP', self)
         STATIC_ENCOUNTER_BDSP.clicked.connect(lambda checked, p='Static_Encounter_BDSP': self.update_script('BDSP', p, checked))
-        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher WIP', self)
-        EGG_HATCHER_BDSP.clicked.connect(lambda checked, p='Egg_Hatcher_BDSP': self.update_script('BDSP', p, checked))
+        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Collector', self)
+        EGG_HATCHER_BDSP.clicked.connect(lambda checked, p='Egg_Collector_BDSP': self.update_script_textbox('BDSP', p, checked))
         RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser WIP', self)
         RELEASER_BDSP.clicked.connect(lambda checked, p='Pokemon_Releaser_BDSP': self.update_script_textbox('BDSP', p, checked))
 
@@ -154,6 +158,9 @@ class GUI(pyqt_w.QWidget):
         info_row.addWidget(self.items['encounter_amount_label'])
         right_panel.addLayout(info_row)
 
+        self.debug_button = pyqt_w.QPushButton('Draw Debug', self)
+        self.debug_button.clicked.connect(self.update_debug)
+
         self.screenshot_button = pyqt_w.QPushButton('Save Screenshot', self)
         self.screenshot_button.clicked.connect(self.on_screenshot_clicked)
 
@@ -169,7 +176,7 @@ class GUI(pyqt_w.QWidget):
         self.items['start_stop_button'].setText("Start / Stop")
 
         button_row_debug = pyqt_w.QHBoxLayout()
-        button_row_debug.addWidget(self.items['start_stop_button'])
+        button_row_debug.addWidget(self.debug_button)
         button_row_debug.addWidget(self.screenshot_button)
         button_row_debug.addWidget(self.roi_button)
 
@@ -195,16 +202,16 @@ class GUI(pyqt_w.QWidget):
             self.close()
             return
 
-        try:
-            frame = self.Image_queue.get_nowait()
-        except Empty:
+        frame = getattr(self.image, 'original_image', None)
+        if frame is None:
             return
 
-        self.latest_frame = frame
-        self.image.original_image = frame
+        frame_to_show = frame
+        if getattr(self.image, 'draw_debug', False):
+            frame_to_show = self.image.draw_debug(frame.copy())
 
         # convert BGR -> RGB
-        frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        frame_rgb = cv.cvtColor(frame_to_show, cv.COLOR_BGR2RGB)
         h, w, ch = frame_rgb.shape
         bytes_per_line = ch * w
 
@@ -246,8 +253,13 @@ class GUI(pyqt_w.QWidget):
         self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': True})
     
     def stop_scripts(self) -> None:
-        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': False})
+        self.Command_queue.put({'cmd': 'STOP'})
 
+    def update_debug(self) -> None:
+        if self.debug == False:
+            self.debug = True
+        else:
+            self.debug = False
 
     def on_screenshot_clicked(self) -> None:
         if self.latest_frame is None:

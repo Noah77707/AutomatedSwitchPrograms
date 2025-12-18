@@ -4,7 +4,7 @@ from threading import Event, Thread
 
 from Modules.Controller import Controller
 from Modules.GUI import App, GUI
-from Modules.Control_System import start_control_video, controller_control, check_threads
+from Modules.Control_System import start_control_video, controller_control, frame_pump, check_threads
 from Modules.Image_Processing import Image_Processing
 
 MODULE_NAME = 'SwitchConnector'
@@ -30,9 +30,15 @@ if __name__ == "__main__":
 
         threads.append({
             'function': 'controller_control',
-            'thread': Thread(target=lambda: controller_control(Switch_Controller, Image_queue, Command_queue, shutdown_event, stop_event, image),
+            'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
                               daemon= True)
         })
+
+        threads.append({
+            "function": "frame_pump",
+            "thread": Thread(target=lambda: frame_pump(Image_queue, shutdown_event, image), daemon=True)
+        })
+
 
         threads.append({
             'function': 'check_threads',
@@ -50,4 +56,3 @@ if __name__ == "__main__":
 
         shutdown_event.set()
     main_menu()
-        

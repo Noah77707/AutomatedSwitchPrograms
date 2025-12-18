@@ -1,21 +1,9 @@
 README.txt
 
-Built using code from Dinones program called Nintendo-Switch-Pokemon-Shiny-Hunter, esp32beans program called switch_ESP32, along with some debuging code from github.
+Built using code from Dinones program called Nintendo-Switch-Pokemon-Shiny-Hunter, esp32beans program called switch_ESP32.
+Use of ChatGPT to update the switch_ESP32 code to allow a hold and unhold dpad commands. 
 
-Buttons:
-A = 0
-B = 1
-X = 2
-Y = 3
-LeftTrigger = 4
-RightTrigger = 5
-LeftThrottle = 6
-RightThrottle = 7
-Minus = 8
-Plus = 9
-LeftStick = 10
-RightStick = 11
-Home = 12
-Capture = 13
-Reservered1 = 14
-Reservered2 = 15
+librarys:
+    pytesseract
+    cv2
+    numpy
