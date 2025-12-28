@@ -1,52 +1,216 @@
 import os
 import sys
 import sqlite3
-from typing import Dict, Union, Tuple, List
+from typing import Dict, Union, Tuple, List, Optional
 
 import Constants as const
 
-DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname), '..', 'Media/Database.db')
+DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Media', 'Database.db'))
+
+NEW_INT_COLS = [
+    ("resets", 0),
+    ("pokemon_encountered", 0),
+    ("pokemon_caught", 0),
+    ("eggs_collected", 0),
+    ("eggs_hatched", 0),
+    ("pokemon_released", 0),
+]
+
+def _add_missing_columns(cur: sqlite3.Cursor, table: str) -> None:
+    cur.execute(f"PRAGMA table_info({table})")
+    existing = {row[1] for row in cur.fetchall()}  # column name
+
+    for col, default in NEW_INT_COLS:
+        if col not in existing:
+            cur.execute(
+                f"ALTER TABLE {table} ADD COLUMN {col} INTEGER NOT NULL DEFAULT {int(default)}"
+            )
 
 def initialize_database(db_file: str = DATABASE_PATH) -> None:
-    connection = sqlite3.connect(db_file)
-    cursor = connection.cursor()
+    with sqlite3.connect(db_file) as conn:
+        cur = conn.cursor()
+        cur.execute("PRAGMA journal_mode=WAL;")
+        cur.execute("PRAGMA synchronous=NORMAL;")
 
-    cursor.execute('''
-        CREATE TABLE General (
-            global_encounters Integer,
-            global_playtime REAL,
-            last_shiny_encounter INTEGER,
-            global_shinies_found INTEGER
-        )
-    ''')
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS program_stats (
+                game TEXT NOT NULL,
+                program TEXT NOT NULL,
 
-    cursor.execute('''
-        CREATE TABLE Pokemon (
-                   pokemon_name TEXT NOT NULL
-                   shiny_encounters INTEGER,
-                   encounters INTEGER
-        )        
-    ''')
+                runs INTEGER NOT NULL DEFAULT 0,
+                action INTEGER NOT NULL DEFAULT 0,
+                resets INTEGER NOT NULL DEFAULT 0,
+                pokemon_encountered INTEGER NOT NULL DEFAULT 0,
+                pokemon_caught INTEGER NOT NULL DEFAULT 0,
+                eggs_collected INTEGER NOT NULL DEFAULT 0,
+                eggs_hatched INTEGER NOT NULL DEFAULT 0,
+                pokemon_released INTEGER NOT NULL DEFAULT 0,
 
-    cursor.execute("SELECT COUNT(*) FROM General")
-    if cursor.fetchone()[0] == 0:
-        cursor.execute('''
-            INSERT INTO General (
-                global_encounters, global_playtime, last_shiny_encounter, global_shinies_found
-            ) VALUES (?, ?, ?, ?)
-            ''', (0, 0.0, 0, 0))
-        
-    connection.commit()
-    connection.close
+                shinies INTEGER NOT NULL DEFAULT 0,
+                playtime_seconds INTEGER NOT NULL DEFAULT 0,
 
-def add_or_update_encounter(
-        pokemon_data: Dict[str, Union[str, bool]],
-        local_playtime: float,
-        db_files: str = DATABASE_PATH
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+
+                PRIMARY KEY (game, program)
+            )
+        """)
+        _add_missing_columns(cur, "program_stats")
+
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_program_stats_game ON program_stats(game)")
+        conn.commit()
+
+def add_deltas(
+    game: str,
+    program: str,
+    *,
+    action_delta: int = 0,
+    resets_delta: int = 0,
+    pokemon_encountered_delta: int = 0,
+    pokemon_caught_delta: int = 0,
+    eggs_collected_delta: int = 0,
+    eggs_hatched_delta: int = 0,
+    pokemon_released_delta: int = 0,
+    shinies_delta: int = 0,
+
+    playtime_seconds_delta: int = 0,
+    db_file: str = DATABASE_PATH,
 ) -> None:
-    
-    connection = sqlite3.connect(db_files)
-    cursor = connection.cursor()
+    if not game or not program:
+        raise ValueError("game and program are required")
+    if min(action_delta, shinies_delta, playtime_seconds_delta) < 0:
+        raise ValueError("deltas must be >= 0")
 
-    cursor.execute("SELECT global_encounters, last_shiny_encounter FROM General")
-    global_encounters, last_shiny_encounter = cursor.fetchone()
+    if action_delta == 0 and shinies_delta == 0 and playtime_seconds_delta == 0:
+        return
+
+    with sqlite3.connect(db_file, timeout=5) as conn:
+        cur = conn.cursor()
+        # ensure row exists
+        cur.execute("""
+            INSERT INTO program_stats (game, program)
+            VALUES (?, ?)
+            ON CONFLICT(game, program) DO NOTHING
+        """, (game, program))
+
+        cur.execute("""
+            UPDATE program_stats
+            SET
+                action = action + ?,
+                resets = resets + ?,
+                pokemon_encountered = pokemon_encountered + ?,
+                pokemon_caught = pokemon_caught + ?,
+                eggs_collected = eggs_collected + ?,
+                eggs_hatched = eggs_hatched + ?,
+                pokemon_released = pokemon_released + ?,
+                shinies = shinies + ?,
+                playtime_seconds = playtime_seconds + ?,
+                updated_at = datetime('now')
+            WHERE game = ? AND program = ?
+        """, (
+            int(action_delta),
+            int(resets_delta),
+            int(pokemon_encountered_delta),
+            int(pokemon_caught_delta),
+            int(eggs_collected_delta),
+            int(eggs_hatched_delta),
+            int(pokemon_released_delta),
+            int(shinies_delta),
+            int(playtime_seconds_delta),
+            game, program
+        ))
+        conn.commit()
+
+def finish_run(
+    game: str,
+    program: str,
+    *,
+    action_delta: int = 0,
+    resets_delta: int = 0,
+    pokemon_encountered_delta: int = 0,
+    pokemon_caught_delta: int = 0,
+    eggs_collected_delta: int = 0,
+    eggs_hatched_delta: int = 0,
+    pokemon_released_delta: int = 0,
+    shinies_delta: int = 0,
+    playtime_seconds_delta: int = 0,
+    db_file: str = DATABASE_PATH,
+) -> None:
+    if not game or not program:
+        raise ValueError("game and program are required")
+
+    deltas = [
+        action_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
+        eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
+        shinies_delta, playtime_seconds_delta
+    ]
+    if any(d < 0 for d in deltas):
+        raise ValueError("deltas must be >= 0")
+
+    with sqlite3.connect(db_file, timeout=5) as conn:
+        cur = conn.cursor()
+
+        # Ensure columns exist if you are doing migration
+        _add_missing_columns(cur, "program_stats")
+
+        cur.execute("""
+            INSERT INTO program_stats (
+                game, program,
+                runs,
+                action, resets, pokemon_encountered, pokemon_caught,
+                eggs_collected, eggs_hatched, pokemon_released,
+                shinies, playtime_seconds
+            )
+            VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(game, program) DO UPDATE SET
+                runs = runs + 1,
+                action = action + excluded.action,
+                resets = resets + excluded.resets,
+                pokemon_encountered = pokemon_encountered + excluded.pokemon_encountered,
+                pokemon_caught = pokemon_caught + excluded.pokemon_caught,
+                eggs_collected = eggs_collected + excluded.eggs_collected,
+                eggs_hatched = eggs_hatched + excluded.eggs_hatched,
+                pokemon_released = pokemon_released + excluded.pokemon_released,
+                shinies = shinies + excluded.shinies,
+                playtime_seconds = playtime_seconds + excluded.playtime_seconds,
+                updated_at = datetime('now')
+        """, (
+            game, program,
+            int(action_delta),
+            int(resets_delta),
+            int(pokemon_encountered_delta),
+            int(pokemon_caught_delta),
+            int(eggs_collected_delta),
+            int(eggs_hatched_delta),
+            int(pokemon_released_delta),
+            int(shinies_delta),
+            int(playtime_seconds_delta),
+        ))
+
+        conn.commit()
+
+def get_stats(game: str, program: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
+    with sqlite3.connect(db_file) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                game, program, runs,
+                action, resets,
+                pokemon_encountered, pokemon_caught,
+                eggs_collected, eggs_hatched,
+                pokemon_released,
+                shinies, playtime_seconds,
+                created_at, updated_at
+            FROM program_stats
+            WHERE game = ? AND program = ?
+
+        """, (game, program))
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+def format_hms(seconds: int) -> str:
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    return f"{h:02d}:{m:02d}:{s:02d}"

@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime
 from threading import Thread, Timer
-from time import sleep, time, perf_counter
+from time import sleep, time, perf_counter, monotonic
 from typing import Any, Optional, Literal, TYPE_CHECKING, Callable
 from queue import Queue
 from threading import Event
@@ -11,6 +11,7 @@ from .Macros import *
 from .Window_Capture import WindowCapture
 from .Image_Processing import Image_Processing
 from .Controller import Controller
+from .Database import *
 from Programs.HOME_Scripts import *
 from Programs.SWSH_Scripts import *
 from Programs.BDSP_Scripts import *
@@ -19,7 +20,6 @@ from Programs.SV_Scripts import *
 from Programs.LZA_Scripts import *
 
 from queue import Queue, Empty
-from time import sleep, time, perf_counter
 
 ProgramFn = Callable[[object, Controller, str], str]
 
@@ -27,6 +27,7 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # Home
     ('HOME', 'Connect_Controller_Test'): Connect_Controller_Test,
     ('HOME', 'Return_Home_Test'): Return_Home_Test,
+
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
@@ -35,6 +36,8 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # BDSP
     ('BDSP', 'Static_Encounter_BDSP'): Static_Encounter_BDSP,
     ('BDSP', 'Egg_Collector_BDSP'): Egg_Collector_BDSP,
+    ('BDSP', 'Egg_Hatcher_BDSP'): Egg_Hatcher_BDSP,
+    ('BDSP', 'Automated_Egg_BDSP'): Automated_Egg_BDSP,
     ('BDSP', 'Pokemon_Releaser_BDSP'): Pokemon_Releaser_BDSP,
 
 }
@@ -76,11 +79,36 @@ def controller_control(
     image: Image_Processing
 ) -> None:
     
-    current_game = None
-    current_program = None
-    current_state = None
+    initialize_database()
+    ensure_stats(image)
+    
+    game = None
+    program = None
+    state = None
+    input = None
     running = False
-    new_input = None
+    paused = False
+
+    def finish_and_reset():
+        nonlocal game, program
+        if not game or not program:
+            return
+        d: RunStats = getattr(image, "database_component", RunStats())
+
+        finish_run(
+            game, program,
+            action_delta=d.action,
+            resets_delta=d.resets,
+            pokemon_encountered_delta=d.pokemon_encountered,
+            pokemon_caught_delta=d.pokemon_caught,
+            eggs_collected_delta=d.eggs_collected,
+            eggs_hatched_delta=d.eggs_hatched,
+            pokemon_released_delta=d.pokemon_released,
+            shinies_delta=d.shinies,
+            playtime_seconds_delta=d.playtime_seconds,
+        )
+        image.database_component = RunStats()
+
 
     while not shutdown_event.is_set():
         try:
@@ -92,37 +120,50 @@ def controller_control(
             cmd = msg.get('cmd')
             print(msg)
             if cmd == 'SET_PROGRAM':
-                new_game = msg.get('game')
-                new_program = msg.get('program')
-                new_input = msg.get('number')
-                new_key = (new_game, new_program)
-                old_key = (current_game, current_program)
-
-                current_game = new_game
-                current_program = new_program
-                current_state = None
+                game = msg.get('game')
+                program = msg.get('program')
+                input = msg.get('number')
+                state = None
                 running = True
+                paused = False
 
-            elif cmd == 'STOP':
+                image.database_component = RunStats()
+
+            elif cmd == 'STOP' or state == 'PROGRAM FINISHED':
+                if running and game and program:
+                    finish_and_reset()
                 running = False
+                paused = False
+                state = False
+
+            elif cmd == 'PAUSE':
+                paused = True
+
+            elif cmd == 'RESUME':
+                if running:
+                   paused = False
                 
         if stop_event.is_set():
             running = False
 
-        if not running or current_game is None or current_program is None:
+        if not running or game is None or program is None:
+            sleep(0.01)
             continue
 
-        key = (current_game, current_program)
+        if paused:
+            sleep(0.01)
+            continue
+
+        key = (game, program)
         step_fn = PROGRAM_TABLE.get(key)
+        
         if step_fn is None:
             sleep(0.01)
             continue
-        # print(f"[controller] calling {key} with frame_id={getattr(image, 'frame_id', None)}")
 
-        current_state = step_fn(image, ctrl, current_state, new_input)
+        state = step_fn(image, ctrl,state, input)
     ctrl.close()
         
-# ChatGPT Debugger, will get rid of when not needed:
 def frame_pump(Image_queue, shutdown_event, image):
     while not shutdown_event.is_set():
         frame = None
@@ -137,10 +178,11 @@ def frame_pump(Image_queue, shutdown_event, image):
             image.frame_id = getattr(image, "frame_id", 0) + 1
         else:
             sleep(0.001)
-
+    
 def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
     while not shutdown_event.is_set():
         for thread in threads:
             if not thread['thread'].is_alive():
                 shutdown_event.set()
         sleep(5)
+

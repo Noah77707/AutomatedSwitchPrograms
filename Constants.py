@@ -19,7 +19,8 @@ SWSH_CONSTANTS = {
 BDSP_CONSTANTS = {
     'step_roi': (620, 393, 60, 7),
     'hatchery_poke_center': (1012, 374, 268, 346),
-    'nursery_man': (165, 343, 40, 54)
+    'nursery_man': (165, 343, 40, 54),
+    'text_box_roi': (268, 591, 757, 107)
     
 }
 

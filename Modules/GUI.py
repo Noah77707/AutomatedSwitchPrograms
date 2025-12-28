@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 from queue import Queue, Empty
-from time import sleep
+from time import sleep, monotonic
 from typing import TYPE_CHECKING
 from threading import Event
 import Constants as const
@@ -14,6 +14,7 @@ import PyQt6.QtCore as pyqt_c
 import PyQt6.QtGui as pyqt_g
 
 from .Image_Processing import Image_Processing
+from .Database import get_stats, format_hms
 from Programs.HOME_Scripts import *
 from Programs.SWSH_Scripts import *
 from Programs.BDSP_Scripts import *
@@ -33,12 +34,10 @@ text_style = ''
 clock_style = ''
 stop_button_style = ''
 
-
 class App(pyqt_w.QApplication):
     def __init__(self):
         super().__init__([])
         self.setStyleSheet('QWidget { background-color: #333; }')
-
 
 class GUI(pyqt_w.QWidget):
     def __init__(
@@ -50,8 +49,6 @@ class GUI(pyqt_w.QWidget):
             image: Image_Processing) -> None:
         super().__init__()
 
-        self.game_rois = {}  # e.g. {'SWSH': (x, y, w, h), 'BDSP': (...)}
-
         self.Image_queue = Image_queue
         self.Command_queue = Command_queue
         self.image = image
@@ -59,8 +56,17 @@ class GUI(pyqt_w.QWidget):
         self.game = str
         self.program = str
         self.state = str
+        self.tracks = []
         self.numberinput = int
         self.debug = False
+        self.running = False
+        self.paused = False
+        self.run_seconds = 0.0
+        self.run_last_t = None
+
+        self.stats_timer = pyqt_c.QTimer(self)
+        self.stats_timer.timeout.connect(self.stat_timer)
+        self.stats_timer.start(1000)
 
         self.setWindowTitle('Auto Switch Programs')
 
@@ -70,11 +76,10 @@ class GUI(pyqt_w.QWidget):
         self.region_radius = 5
 
         self.items = {
-            'game_selector': pyqt_w.QMenu(self),
             'switch_capture_label': pyqt_w.QLabel(self),
             'start_stop_button': pyqt_w.QPushButton(self),
-            'current_state_label': pyqt_w.QLabel(self),
-            'encounter_amount_label': pyqt_w.QLabel(self),
+            'current_state_label': pyqt_w.QLabel(self                                                  ),
+            'stats_label': pyqt_w.QLabel(self),
             'tab_home': pyqt_w.QWidget(self),
             'tab_swsh': pyqt_w.QWidget(self),
             'tab_bdsp': pyqt_w.QWidget(self),
@@ -105,30 +110,35 @@ class GUI(pyqt_w.QWidget):
         # SWSH tab
         SWSH_layout = pyqt_w.QVBoxLayout()
         SWSH_layout.addWidget(pyqt_w.QLabel('SWSH programs'))
-        STATIC_ENCOUNTER_SWSH = pyqt_w.QPushButton('Static Encounter', self)
-        STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, p='Static_Encounter_SWSH': self.update_script('SWSH', p, checked))
-        EGG_HATCHER_SWSH = pyqt_w.QPushButton('Egg Hatcher WIP', self)
-        EGG_HATCHER_SWSH.clicked.connect(lambda checked, p='Egg_Hatcher_SWSH': self.update_script('SWSH', p, checked))
-        RELEASER_SWSH = pyqt_w.QPushButton('Pokemon Releaser WIP', self)
-        RELEASER_SWSH.clicked.connect(lambda checked, p='Pokemon_Releaser_SWSH': self.update_script_textbox('SWSH', p, checked))
-
-        SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
-        SWSH_layout.addWidget(EGG_HATCHER_SWSH)
-        SWSH_layout.addWidget(RELEASER_SWSH)
         self.items['tab_swsh'].setLayout(SWSH_layout)
 
         # BDSP tab
         BDSP_layout = pyqt_w.QVBoxLayout()
         BDSP_layout.addWidget(pyqt_w.QLabel('BDSP programs'))
+
         STATIC_ENCOUNTER_BDSP = pyqt_w.QPushButton('Static Encounter WIP', self)
         STATIC_ENCOUNTER_BDSP.clicked.connect(lambda checked, p='Static_Encounter_BDSP': self.update_script('BDSP', p, checked))
-        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Collector', self)
-        EGG_HATCHER_BDSP.clicked.connect(lambda checked, p='Egg_Collector_BDSP': self.update_script_textbox('BDSP', p, checked))
+        
+        EGG_COLLECTOR_BDSP = pyqt_w.QPushButton('Egg Collector', self)
+        EGG_COLLECTOR_BDSP.setProperty('tracks', ['eggs_collected', 'shinies', 'playtime_seconds'])
+        EGG_COLLECTOR_BDSP.clicked.connect(lambda checked, btn= EGG_COLLECTOR_BDSP: self.update_script_textbox('BDSP', btn, 'Egg_Collector_BDSP', checked))
+        
+        EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher', self)
+        EGG_HATCHER_BDSP.setProperty('tracks', ['eggs_hatched', 'shinies', 'playtime_seconds'])
+        EGG_HATCHER_BDSP.clicked.connect(lambda checked, btn= EGG_HATCHER_BDSP: self.update_script_textbox('BDSP', btn, 'Egg_Hatcher_BDSP', checked))
+        
+        AUTOMATED_EGG_BDSP = pyqt_w.QPushButton('Automated Egg Collector/Hatcher/Releaser')
+        AUTOMATED_EGG_BDSP.setProperty('tracks', ['eggs_collected', 'eggs_hatched', 'pokemon_released', 'shinies', 'playtime_seconds'])
+        AUTOMATED_EGG_BDSP.clicked.connect(lambda checked, btn= AUTOMATED_EGG_BDSP: self.update_script_textbox('BDSP', btn, 'Automated_Egg_BDSP', checked))
+        
         RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser', self)
-        RELEASER_BDSP.clicked.connect(lambda checked, p='Pokemon_Releaser_BDSP': self.update_script_textbox('BDSP', p, checked))
+        RELEASER_BDSP.setProperty('tracks', ['pokemon_released', 'pokemon_skipped', 'playtime_seconds'])
+        RELEASER_BDSP.clicked.connect(lambda checked, btn= RELEASER_BDSP: self.update_script_textbox('BDSP', btn, 'Pokemon_Releaser_BDSP', checked))
 
         BDSP_layout.addWidget(STATIC_ENCOUNTER_BDSP)
+        BDSP_layout.addWidget(EGG_COLLECTOR_BDSP)
         BDSP_layout.addWidget(EGG_HATCHER_BDSP)
+        BDSP_layout.addWidget(AUTOMATED_EGG_BDSP)
         BDSP_layout.addWidget(RELEASER_BDSP)
         self.items['tab_bdsp'].setLayout(BDSP_layout)
 
@@ -154,9 +164,9 @@ class GUI(pyqt_w.QWidget):
         right_panel.addWidget(self.items['switch_capture_label'])
 
         info_row = pyqt_w.QHBoxLayout()
-        info_row.addWidget(self.items['current_state_label'])
-        info_row.addWidget(self.items['encounter_amount_label'])
-        right_panel.addLayout(info_row)
+        info_row.addWidget(self.items['stats_label'])
+        self.items['stats_label'].setText(self.update_stats())
+        self.items['stats_label'].setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
 
         self.debug_button = pyqt_w.QPushButton('Draw Debug', self)
         self.debug_button.clicked.connect(self.update_debug)
@@ -164,11 +174,11 @@ class GUI(pyqt_w.QWidget):
         self.screenshot_button = pyqt_w.QPushButton('Save Screenshot', self)
         self.screenshot_button.clicked.connect(self.on_screenshot_clicked)
 
-        self.roi_button = pyqt_w.QPushButton('Select ROI from image', self)
-        self.roi_button.clicked.connect(self.on_select_roi_clicked)
-
         self.start_button = pyqt_w.QPushButton('Start Program', self)
         self.start_button.clicked.connect(self.start_scripts)
+
+        self.pause_button = pyqt_w.QPushButton('Pause Program', self)
+        self.pause_button.clicked.connect(self.pause_scripts)
 
         self.stop_button = pyqt_w.QPushButton('Stop Program', self)
         self.stop_button.clicked.connect(self.stop_scripts)
@@ -178,12 +188,13 @@ class GUI(pyqt_w.QWidget):
         button_row_debug = pyqt_w.QHBoxLayout()
         button_row_debug.addWidget(self.debug_button)
         button_row_debug.addWidget(self.screenshot_button)
-        button_row_debug.addWidget(self.roi_button)
 
         button_row_program = pyqt_w.QHBoxLayout()
         button_row_program.addWidget(self.start_button)
+        button_row_program.addWidget(self.pause_button)
         button_row_program.addWidget(self.stop_button)
 
+        right_panel.addLayout(info_row)
         right_panel.addLayout(button_row_debug)
         right_panel.addLayout(button_row_program)
         right_panel.addStretch(1)
@@ -194,13 +205,16 @@ class GUI(pyqt_w.QWidget):
 
         self.timer = pyqt_c.QTimer(self)
         self.timer.timeout.connect(lambda: self.update_GUI(shutdown_event))
-        self.timer.start(1)
+        self.timer.start(16)
+
         self.show()
 
     def update_GUI(self, shutdown_event: Event) -> None:
         if shutdown_event.is_set():
             self.close()
             return
+        
+        self.items['stats_label'].setText(self.update_stats())
 
         frame = getattr(self.image, 'original_image', None)
         if frame is None:
@@ -230,6 +244,40 @@ class GUI(pyqt_w.QWidget):
             )
         self.items['switch_capture_label'].setPixmap(pix)
 
+    def update_stats(self):
+        s = getattr(self.image, 'database_component', None)
+        if not s:
+            return ''
+        
+        parts = []
+        for key in self.tracks:
+            val = getattr(s, key, 0)
+            if key == 'playtime_seconds':
+                parts.append(f'time: {format_hms(int(val))}')
+            else:
+                parts.append(f'{key}: {val}')
+        parts.append(f'state: {getattr(self.image, 'state', None)}')
+        return ' | '.join(parts)
+
+    def stat_timer(self):
+        if self.running and not self.paused:
+            now = monotonic()
+            if self.run_last_t is None:
+                self.run_last_t = now
+            else:
+                dt = (now - self.run_last_t)
+                self.run_last_t = now
+                if dt > 0:
+                    self.run_seconds += dt
+                    whole = int(self.run_seconds)
+                    if whole > 0:
+                        self.run_seconds -= whole
+                        database = getattr(self.image, 'database_component', None)
+                        if database is not None:
+                            database.playtime_seconds += whole
+        
+        self.items['stats_label'].setText(self.update_stats())
+
     def on_tab_changed(self, index: int) -> None:
         self.current_program_name = self.tabs.tabText(index)
         self.Command_queue.put({
@@ -237,39 +285,56 @@ class GUI(pyqt_w.QWidget):
             'game': self.current_program_name
         })
 
-    def update_script(self, game: str, program: str, checked: bool = False) -> None:
+    def update_script(self, game: str, btn: pyqt_w.QPushButton, program: str, checked: bool = False) -> None:
         self.game = game
         self.program = program
+        self.tracks = btn.property('tracks') or []
         self.numberinput = 0
 
-    def update_script_textbox(self, game: str, program: str, checked: bool = False) -> None:
+    def update_script_textbox(self, game: str, btn: pyqt_w.QPushButton, program: str, checked: bool = False) -> None:
         text, ok = pyqt_w.QInputDialog.getText(self, 'How Many Boxes', 'Enter Box Amount (input 0 for all boxes):')
         if ok and text:
             self.numberinput = text
         self.game = game
         self.program = program
+        self.tracks = btn.property('tracks') or []
 
     def start_scripts(self) -> None:
         self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': True})
-    
+        self.running = True
+        self.paused = False
+        self.run_last_t = monotonic()
+        self.run_seconds = 0.0
+
+    def pause_scripts(self) -> None:
+        if not self.running:
+            return
+        
+        if not self.paused:
+            self.Command_queue.put({'cmd': 'PAUSE'})
+            self.paused = True
+            self.run_last_t = None
+            self.pause_button.setText('Resume Program')
+        else:
+            self.Command_queue.put({'cmd': 'RESUME'})
+            self.paused = False
+            self.run_last_t = monotonic()
+            self.pause_button.setText('Pause Program')
+
     def stop_scripts(self) -> None:
         self.Command_queue.put({'cmd': 'STOP'})
+        self.running = False
+        self.paused = False
+        self.run_last_t = None
+        self.run_seconds = 0.0
 
     def update_debug(self) -> None:
-        if self.debug == False:
-            self.debug = True
+        if self.image.debug_draw == False:
+            self.image.debug_draw = True
         else:
-            self.debug = False
+            self.image.debug_draw = False
 
     def on_screenshot_clicked(self) -> None:
-        if self.latest_frame is None:
-            msg = pyqt_w.QMessageBox(self)
-            msg.setIcon(pyqt_w.QMessageBox.Icon.Warning)
-            msg.setWindowTitle('No Frame')
-            msg.setText('No video frame available to save.')
-            msg.exec()
-            return
-
         filename, _ = pyqt_w.QFileDialog.getSaveFileName(
             self,
             'Save Screenshot',
@@ -279,7 +344,7 @@ class GUI(pyqt_w.QWidget):
         if not filename:
             return  # user cancelled
 
-        cv.imwrite(filename, self.latest_frame)
+        cv.imwrite(filename, self.image.original_image)
 
     def on_select_roi_clicked(self) -> None:
         # Which game is active from the tab
@@ -322,71 +387,3 @@ class GUI(pyqt_w.QWidget):
         msg.exec()
 
         print(f'[ROI] {game}: x={x}, y={y}, w={w}, h={h}')
-
-    # New: handle clicks on the live image
-    def on_image_clicked(self, x: int, y: int) -> None:
-        if self.latest_frame is None:
-            return
-        pix = self.items['switch_capture_label'].pixmap()
-        if pix is None:
-            return
-
-        frame = self.latest_frame
-        h, w, _ = frame.shape
-
-        label_w = self.items['switch_capture_label'].width()
-        label_h = self.items['switch_capture_label'].height()
-
-        # map label coords to frame coords
-        # assume pixmap is scaled with aspect ratio into label
-        pix_w = pix.width()
-        pix_h = pix.height()
-
-        # compensate for potential letterboxing
-        # compute scale and offset
-        scale = min(label_w / pix_w, label_h / pix_h)
-        disp_w = int(pix_w * scale)
-        disp_h = int(pix_h * scale)
-        offset_x = (label_w - disp_w) // 2
-        offset_y = (label_h - disp_h) // 2
-
-        # if click outside displayed image, ignore
-        if not (offset_x <= x < offset_x + disp_w and offset_y <= y < offset_y + disp_h):
-            return
-
-        rel_x = x - offset_x
-        rel_y = y - offset_y
-
-        img_x = int(rel_x * pix_w / disp_w)
-        img_y = int(rel_y * pix_h / disp_h)
-
-        # clamp
-        img_x = max(0, min(w - 1, img_x))
-        img_y = max(0, min(h - 1, img_y))
-
-        b, g, r = map(int, frame[img_y, img_x])
-        hex_pixel = '#{:02X}{:02X}{:02X}'.format(r, g, b)
-
-        # region around the pixel
-        rrad = self.region_radius
-        x0 = max(img_x - rrad, 0)
-        x1 = min(img_x + rrad + 1, w)
-        y0 = max(img_y - rrad, 0)
-        y1 = min(img_y + rrad + 1, h)
-
-        region = frame[y0:y1, x0:x1]
-        area = region.shape[0] * region.shape[1]
-
-        mean_bgr = region.mean(axis=(0, 1))
-        mb, mg, mr = mean_bgr.tolist()
-        hex_mean = '#{:02X}{:02X}{:02X}'.format(int(mr), int(mg), int(mb))
-
-        self.pixel_info_label.setText(
-            f'Pixel ({img_x}, {img_y})  BGR=({b}, {g}, {r})  RGB=({r}, {g}, {b})  HEX={hex_pixel}'
-        )
-        self.area_info_label.setText(
-            f'Area {(2*rrad+1)}x{(2*rrad+1)} -> actual {area} px, '
-            f'bounds x={x0}..{x1-1}, y={y0}..{y1-1}, '
-            f'mean BGR=({mb:.1f}, {mg:.1f}, {mr:.1f})  '
-            f'mean RGB=({mr:.1f}, {mg:.1f}, {mb:.1f})  HEX={hex_mean}'
-        )

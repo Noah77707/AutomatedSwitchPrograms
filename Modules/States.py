@@ -52,6 +52,14 @@ STATE_CHECKS = {
                 (93, 677)
             ]
         },
+        'white_screen': {
+            'color': (255, 255, 255),
+            'positions': [
+                (263, 401),
+                (1076, 258),
+                (93, 677)
+            ]
+        },
         'change_user': {
             'color': (243, 200, 42),
             'positions': {
@@ -116,7 +124,6 @@ STATE_CHECKS = {
             ],
         },
     },
-
     'BDSP': {
         'loading_title': {
             'color': (224, 225, 225),
@@ -138,6 +145,13 @@ STATE_CHECKS = {
                 (837, 84),
                 (358, 87),
             ],
+        },
+        'multi_select':{
+            'color': (80, 164, 76),
+            'positions': [
+                (258, 8),
+                (257, 59)
+            ]
         },
         'pokemon_in_box': {
             'color': (182, 162, 100),
@@ -175,6 +189,22 @@ STATE_CHECKS = {
                 (1108, 580),
                 (1251, 600),
                 (1253, 638)
+            ]
+        },
+        'egg_acquired': {
+            'color': (101, 234, 243),
+            'positions': [
+                (943, 141),
+                (941, 253),
+                (339, 270),
+                (338, 142)
+            ]
+        },
+        'poketch': {
+            'color': (48, 0, 144),
+            'positions': [
+                (1257, 190),
+                (1257, 129)
             ]
         }
     },
@@ -218,6 +248,17 @@ def check_state(image: Image_Processing, game: str, name: str) -> bool:
     positions = cfg['positions']
     return check_image_position_colors(image, color, positions)
 
+def split_state(s: str | None) -> tuple[str, str | None]:
+    if not s:
+        return (None, None)
+    if "|" not in s:
+        return (s, None)
+    phase, sub = s.split("|", 1)
+    return (phase, sub if sub != "None" else None)
+
+def join_state(phase: str, sub: str | None) -> str:
+    return f"{phase}|{sub if sub is not None else 'None'}"
+
 def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[int, int, int, int], threshold: float = 0.90) -> float:
     frame = getattr(image, 'original_image', None)
     if frame is None:
@@ -242,7 +283,6 @@ def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[
     print(maxv)
     return float(maxv)
 
-
 def detect_template(frame_bgr: np.ndarray, lm: TemplateLandmark) -> float:
     x,y,w,h = lm.roi
     crop = frame_bgr[y:y+h, x:x+w]
@@ -255,30 +295,145 @@ def detect_template(frame_bgr: np.ndarray, lm: TemplateLandmark) -> float:
     _, maxv, _, _ = cv.minMaxLoc(res)
     return float(maxv)
 
-def walk_until_landmark_dpad(ctrl, image, dpad_dir: int, lm: TemplateLandmark,
-                             timeout=5.0, poll_s=0.01) -> bool:
-    # press and hold
-    ctrl.dpad_down(dpad_dir)
+def _clahe_gray(img: np.ndarray) -> np.ndarray:
+    if img is None:
+        raise ValueError("Image is None")
 
-    hits = 0
-    t0 = time()
+    # Ensure uint8 for CLAHE
+    if img.dtype != np.uint8:
+        img = img.astype(np.uint8)
 
-    while time() - t0 < timeout:
-        frame = image.original_image
-        if frame is None:
-            sleep(poll_s)
-            continue
+    # Handle channel count safely
+    if img.ndim == 2:
+        gray = img
+    elif img.ndim == 3 and img.shape[2] == 1:
+        gray = img[:, :, 0]
+    elif img.ndim == 3 and img.shape[2] == 3:
+        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    elif img.ndim == 3 and img.shape[2] == 4:
+        gray = cv.cvtColor(img, cv.COLOR_BGRA2GRAY)
+    else:
+        raise ValueError(f"Unsupported image shape: {img.shape}")
 
-        score = detect_template(frame, lm)
-        if score >= lm.thresh:
-            hits += 1
-            if hits >= lm.hits_required:
-                ctrl.dpad_up()
-                return True
-        else:
-            hits = 0
+    clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    return clahe.apply(gray)
 
-        sleep(poll_s)
+def _crop_roi(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
+    x, y, w, h = roi
+    return frame[y:y+h, x:x+w]
 
-    ctrl.dpad_up()
+def prep_text(img_bgr_or_gray: np.ndarray) -> np.ndarray:
+    if img_bgr_or_gray.ndim == 3:
+        gray = cv.cvtColor(img_bgr_or_gray, cv.COLOR_BGR2GRAY)
+    else:
+        gray = img_bgr_or_gray
+
+    gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
+    gray = cv.GaussianBlur(gray, (3,3), 0)
+
+    # Invert so text becomes white blobs (usually text is dark)
+    bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1]
+    return bw
+
+def has_enough_text(bw: np.ndarray, min_ratio: float = 0.01, max_ratio: float = 0.25) -> bool:
+    # ratio of "ink" pixels (white in inverted binary)
+    ink = float(np.count_nonzero(bw)) / bw.size
+    return (ink >= min_ratio) and (ink <= max_ratio)
+
+def match_text_fragment(
+    image: Image_Processing,
+    template_bgr_or_gray: np.ndarray,
+    roi: Tuple[int,int,int,int],
+    sqdiff_max: float = 0.20,
+) -> tuple[bool, float]:
+    
+    frame = image.original_image
+    if frame is None:
+        sleep(0.001)
+
+    crop = _crop_roi(frame, roi)
+    if crop.size == 0:
+        return False, 0.0
+    x,y,w,h = roi
+    crop = frame[y:y+h, x:x+w]
+    if crop.size == 0:
+        return False, 1.0
+
+    crop_bw = prep_text(crop)
+    if not has_enough_text(crop_bw):
+        return False, 1.0
+
+    tmpl_bw = prep_text(template_bgr_or_gray)
+
+    res = cv.matchTemplate(crop_bw, tmpl_bw, cv.TM_SQDIFF_NORMED)
+    minv, _, _, _ = cv.minMaxLoc(res)  # for SQDIFF, min is best
+    return (minv <= sqdiff_max), float(minv)
+
+def walk_until_landmark_dpad(
+    ctrl,
+    image,
+    lm: TemplateLandmark,   # expects: lm.template_gray (np.ndarray), lm.roi, lm.threshold, lm.method
+    dpad_dir: int,
+    game: str = None,
+    state: str = None,
+    hold_s: float = 0.10,
+    pause_s: float = 0.05,
+    max_steps: int = 500,
+    template_cache: Optional[dict[int, np.ndarray]] = None,  # key: id(lm)
+) -> bool:
+    """
+    Uses CLAHE-normalized grayscale template matching to reduce time-of-day sensitivity.
+    Returns True if found, False if max_steps reached.
+    """
+
+    cache_key = id(lm)
+
+    # Load + preprocess template once (optionally cached)
+    if template_cache is not None and cache_key in template_cache:
+        tmpl_p = template_cache[cache_key]
+    else:
+        tmpl = getattr(lm, "template_gray", None)
+        if not isinstance(tmpl, np.ndarray):
+            raise TypeError("lm.template_gray must be a numpy array (already-loaded template image).")
+        tmpl_p = _clahe_gray(tmpl)  # safe for 2D gray or 3D bgr
+        if template_cache is not None:
+            template_cache[cache_key] = tmpl_p
+
+    for _ in range(max_steps):
+        frame = getattr(image, "original_image", None)
+        if frame is not None:
+            crop = _crop_roi(frame, lm.roi)
+            if crop.size:
+                crop_p = _clahe_gray(crop)
+                res = cv.matchTemplate(crop_p, tmpl_p, lm.method)
+                _, maxv, _, _ = cv.minMaxLoc(res)
+                if maxv >= lm.threshold:
+                    return True
+
+        ctrl.dpad(dpad_dir, hold_s)
+        if pause_s:
+            sleep(pause_s)
+
     return False
+
+def is_background(image: Image_Processing,
+                    roi: Tuple[int, int, int, int],
+                    color_min: Tuple[int, int, int],
+                    color_max: Tuple[int, int, int],
+                    min_ratio: float = 0.45) -> bool:
+    frame = image.original_image
+
+    x, y, w, h = roi
+    crop = frame[y:y+h, x:x+w]
+    if crop.size == 0:
+        return False
+    
+    hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV)
+
+    lower = np.array(color_min, dtype=np.uint8)
+    upper = np.array(color_max, dtype=np.uint8)
+
+    mask = cv.inRange(hsv, lower, upper)
+
+    ratio = float(np.count_nonzero(mask)) / mask.size
+    return ratio >= min_ratio

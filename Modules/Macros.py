@@ -22,10 +22,13 @@ BTN_RSTICK = 11
 BTN_HOME = 12
 BTN_CAPTURE = 13
 
+def return_state(image: Image_Processing, state: str) -> str:
+    if image.state != state:
+        image.state = state
+    return state
 
-def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, Box_Amount: int) -> str:
-    amount_released = 0
-    for box in range(int(Box_Amount)): 
+def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
+    for box in range(int(box_amount)): 
         for row in range(5):
             for column in range(6):
                 sleep(1)
@@ -38,7 +41,9 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, Box_Am
                     ctrl.dpad(0, 0.1)
                     ctrl.tap(BTN_A, 0.05, 0.7)
                     ctrl.tap(BTN_A, 0.05, 0.2)
-                    amount_released += 1
+                    image.database_component.pokemon_released += 1
+                else:
+                    image.database_component.pokemon_skipped += 1
                 if column < 5:
                     ctrl.dpad(2, 0.05)
             if row < 4:
@@ -58,7 +63,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, Box_Am
         sleep(0.15)
         ctrl.tap(BTN_R, 0.10, 0.15)
     return "PROGRAM_FINISHED"
-
+    
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing) -> str:
     if check_state(image, 'GENERIC', 'pairing_screen'):
         ctrl.tap(BTN_L)
@@ -109,8 +114,7 @@ def swsh_start_screens_macro(ctrl: Controller, image: Image_Processing, state = 
 def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
     if state == 'HOME_SCREEN':
         if check_state(image, 'GENERIC', 'home_screen'):
-            ctrl.tap(BTN_A, 0.05, 1.20)
-            ctrl.tap(BTN_A, 0.05, 0.20)
+            mash_a_while_textbox(ctrl, image, 'BDSP')
             return 'START_SCREEN'
 
     elif state == 'START_SCREEN':
@@ -124,13 +128,23 @@ def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = 
         
     return state
 
-def mash_a_while_textbox(ctrl, image, game= str, max_seconds=15.0, press_interval=0.20, gone_confirm=30):
-
+def mash_a_while_textbox(
+        ctrl,
+        image,
+        game= str,
+        max_seconds=15.0,
+        press_interval=0.20,
+        gone_confirm=30,
+        watch_state: str | None = None
+):
     t0 = time()
     last_press = 0.0
     gone_streak = 0
 
     while time() - t0 < max_seconds:
+        if watch_state and check_state(image, game, watch_state):
+            saw_watch = True
+        
         visible = check_state(image, game, "text_box")
 
         if visible:
@@ -144,6 +158,54 @@ def mash_a_while_textbox(ctrl, image, game= str, max_seconds=15.0, press_interva
             gone_streak += 1
             if gone_streak >= gone_confirm:
                 return True
-            sleep(0.05)
+            sleep(0.1)
 
-    return False
+    return saw_watch
+
+def box_grid(ctrl, row: int, col:int) -> None:
+    if col < 5:
+        ctrl.dpad(2, 0.05)
+    else:
+        if row < 4:
+            ctrl.dpad(4, 0.05)
+            for _ in range(5):
+                sleep(0.17)
+                ctrl.dpad(6, 0.05)
+
+def next_box(ctrl) -> None:
+    for _ in range(4):
+        ctrl.dpad(0, 0.05); sleep(0.17)
+    for _ in range(5):
+        ctrl.dpad(6, 0.05); sleep(0.17)
+    sleep(0.17)
+    ctrl.tap(BTN_R)
+
+def grab_egg(ctrl, image, game: str) -> None:
+    for _ in range(image.egg_phase):
+        ctrl.dpad(2, 0.05); sleep(0.17)
+    ctrl.tap(BTN_A, 0.05, 0.17)
+    for _ in range(5):
+        ctrl.dpad(4, 0.05); sleep(0.17)
+    ctrl.tap(BTN_A, 0.05, 0.17)
+    for _ in range(image.egg_phase+1):
+        ctrl.dpad(6, 0.05); sleep(0.17)
+    ctrl.dpad(4, 0.05); sleep(0.17)
+    ctrl.tap(BTN_A)
+
+def put_egg(ctrl, image, game: str) -> None:
+    ctrl.dpad(6, 0.05); sleep(0.17)
+    ctrl.dpad(4, 0.05); sleep(0.17)
+    ctrl.tap(BTN_A, 0.05, 0.17)
+    for _ in range(5):
+        if check_state(image, game, 'shiny_symbol'):
+            image.shiny += 1
+        ctrl.dpad(4, 0.05); sleep(0.17)
+    ctrl.tap(BTN_A, 0.05, 0.17)
+    ctrl.dpad(0, 0.05); sleep(0.17)
+    for _ in range(image.egg_phase):
+        ctrl.dpad(2, 0.05); sleep(0.17)
+    ctrl.tap(BTN_A, 0.05, 0.17)
+    for _ in range(image.egg_phase - 1):
+        ctrl.dpad(6, 0.05); sleep(0.17)
+    
+    

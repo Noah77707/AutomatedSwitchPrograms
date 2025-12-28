@@ -18,7 +18,7 @@ if __name__ == "__main__":
         shutdown_event = Event()
         stop_event = Event()
         image = Image_Processing()
-
+        
         threads = []
         threads.append({
             'function': 'control_system',

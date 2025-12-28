@@ -29,7 +29,6 @@ class Controller:
 
                         if line.startswith("ACK:"):
                             ack_seq = int(line[4:])
-                            print("[RX ACK]", ack_seq)
 
                             with self.ack_lock:
                                 self.last_ack = ack_seq
@@ -44,7 +43,6 @@ class Controller:
         seq = self.seq
         timeout = 5.0
 
-        print(line)
 
         payload = f"{seq}:{line}\n"
         self.ser.write(payload.encode("ascii"))
@@ -61,7 +59,7 @@ class Controller:
 
             time.sleep(0.001)
 
-    def tap(self, idx: int, press_s: float = 0.05, gap_s: float = 0.05):
+    def tap(self, idx: int, press_s: float = 0.05, gap_s: float = 0.2):
         self.send(f"BTN {idx} TAP")
         time.sleep(press_s + gap_s)
 

@@ -9,6 +9,7 @@ from typing import Tuple, Union, Dict, Optional, Sequence
 from time import time, sleep
 
 import Constants as const
+from .Dataclasses import *
 
 class Image_Processing():
     def __init__(self, image: Union[str, np.ndarray] = ''):
@@ -16,14 +17,22 @@ class Image_Processing():
         self.original_image = None
         self.resized_image = None
         self.pyqt_image = None
+        self.state = None
+
         self.debug_draw = True
         self.debug_rois = []
         self.debug_pixels = []
+
         self.shiny_frames_checked = 0
         self.shiny_hits = 0
         self.egg_count = 0
         self.egg_phase = 0
-        self.generic_count1 = 0
+        self.shiny = 0
+        
+        self.generic_state = None
+        self.generic_count = 0
+        self.generic_count2 = 0
+        self.generic_bool = False
 
         if isinstance(image, str):
             self.original_image = cv.imread(image, cv.IMREAD_UNCHANGED)
@@ -99,7 +108,7 @@ class Image_Processing():
             f"diff=({b-eb},{g-eg},{r-er})"
     )
 
-    def is_name_visible(self, roi: Tuple[int, int, int, int]) -> str:
+    def is_text_visible(self, roi: Tuple[int, int, int, int]) -> bool:
         frame = getattr(self, "original_image", None)
         if frame is None:
             return ""
@@ -179,7 +188,7 @@ class Image_Processing():
         mask = cv.inRange(hsv, lower, upper)
         bright_pixels = cv.countNonZero(mask)
         return bright_pixels >= min_bright_particles
-
+    
     def clear_debug(self):
         self.debug_rois.clear()
         self.debug_pixels.clear()
