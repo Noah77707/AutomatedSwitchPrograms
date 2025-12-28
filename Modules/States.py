@@ -12,6 +12,10 @@ from .Image_Processing import Image_Processing
 
 state_timer = 0
 
+# state checks are where the checked states are stored.
+# checked states are states that contain information to colors and pixels for a wanted state
+# the porgram willl uses these to check if the pixels specified are withing 7 unit so color to the specified color
+# I.E. if the color is 56, 56, 56. then 59, 50, 54 will pass, and 67, 12, 255 will fail
 STATE_CHECKS = {
     'GENERIC': {
         'pairing_screen': {
@@ -235,19 +239,19 @@ def wait_for_roi_condition(
             good = 0
         sleep(0.01)
     return False
-
+# trhe function that checks the colors
 def check_image_position_colors(image: Image_Processing, color: Tuple[int, int, int], positions: List[Tuple[int, int]]) -> bool:
     for position in positions:
         if not image.check_pixel_colors(position, color):
             return False
     return True
-
+# this passes everything to the check_iamge_position_colors. It mainly makes everything more readable
 def check_state(image: Image_Processing, game: str, name: str) -> bool:
     cfg = STATE_CHECKS[game][name]
     color = cfg['color']
     positions = cfg['positions']
     return check_image_position_colors(image, color, positions)
-
+# The player can split states. This is mainly used to programs that run othjer programs. I.E. automated_egg for BDSP
 def split_state(s: str | None) -> tuple[str, str | None]:
     if not s:
         return (None, None)
@@ -258,7 +262,7 @@ def split_state(s: str | None) -> tuple[str, str | None]:
 
 def join_state(phase: str, sub: str | None) -> str:
     return f"{phase}|{sub if sub is not None else 'None'}"
-
+# checks if a landmark/template is in a specified roi. This is used to make reliable macros due to the inprecise microcontroller 
 def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[int, int, int, int], threshold: float = 0.90) -> float:
     frame = getattr(image, 'original_image', None)
     if frame is None:
@@ -321,7 +325,7 @@ def _clahe_gray(img: np.ndarray) -> np.ndarray:
 def _crop_roi(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
     x, y, w, h = roi
     return frame[y:y+h, x:x+w]
-
+# these functinos make a text fragment more visible to the clahe program
 def prep_text(img_bgr_or_gray: np.ndarray) -> np.ndarray:
     if img_bgr_or_gray.ndim == 3:
         gray = cv.cvtColor(img_bgr_or_gray, cv.COLOR_BGR2GRAY)
@@ -339,7 +343,7 @@ def has_enough_text(bw: np.ndarray, min_ratio: float = 0.01, max_ratio: float = 
     # ratio of "ink" pixels (white in inverted binary)
     ink = float(np.count_nonzero(bw)) / bw.size
     return (ink >= min_ratio) and (ink <= max_ratio)
-
+# this uses those text fragments to see if they are similar. 
 def match_text_fragment(
     image: Image_Processing,
     template_bgr_or_gray: np.ndarray,
@@ -368,7 +372,7 @@ def match_text_fragment(
     res = cv.matchTemplate(crop_bw, tmpl_bw, cv.TM_SQDIFF_NORMED)
     minv, _, _, _ = cv.minMaxLoc(res)  # for SQDIFF, min is best
     return (minv <= sqdiff_max), float(minv)
-
+# this has the player move until a specified landmark is in sight
 def walk_until_landmark_dpad(
     ctrl,
     image,
@@ -415,25 +419,3 @@ def walk_until_landmark_dpad(
             sleep(pause_s)
 
     return False
-
-def is_background(image: Image_Processing,
-                    roi: Tuple[int, int, int, int],
-                    color_min: Tuple[int, int, int],
-                    color_max: Tuple[int, int, int],
-                    min_ratio: float = 0.45) -> bool:
-    frame = image.original_image
-
-    x, y, w, h = roi
-    crop = frame[y:y+h, x:x+w]
-    if crop.size == 0:
-        return False
-    
-    hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV)
-
-    lower = np.array(color_min, dtype=np.uint8)
-    upper = np.array(color_max, dtype=np.uint8)
-
-    mask = cv.inRange(hsv, lower, upper)
-
-    ratio = float(np.count_nonzero(mask)) / mask.size
-    return ratio >= min_ratio

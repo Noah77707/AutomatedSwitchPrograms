@@ -6,20 +6,26 @@ from Modules.Controller import Controller
 from Modules.Macros import *
 from Modules.States import *
 
+def Start_SWSH(image: Image_Processing, ctrl: Controller, state: str | None) -> str:
+    if state in None:
+        state = 'PAIRING'
+
+    elif state == 'PAIRING':
+        return home_screen_checker_macro(ctrl, image)
+    
+    elif state  == 'START_SCREEN':
+        return swsh_start_screens_macro(ctrl, image, state)
+
+    return return_state(image, state)
+
 #Tested with registeel. Haven't encountered a shiny yet
 def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
-    image.debug_draw = False
-    if state == None:
-        state = "PAIRING"
-
-    if state == "PAIRING":
-        state = home_screen_checker_macro(ctrl, image)
-        return state
+    if not hasattr(image, "debug_rois_collector"):
+        image.add_debug_roi(const.SWSH_CONSTANTS['static_roi'], (0,255,0))
+        image.debug_rois_collector = True
     
-    if state == "START_SCREEN":
-        if check_state(image, 'SWSH', 'title_screen'):
-            ctrl.tap(BTN_A)
-            return 'IN_GAME'
+    if state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
+        state = Start_SWSH(image, ctrl, state)
 
     elif state == 'IN_GAME':
         if check_state(image, 'SWSH', 'in_game'):
@@ -38,15 +44,9 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
     elif state == 'CHECK_SHINY':
         roi = const.SWSH_CONSTANTS['static_Roi']
 
-        image.debug_draw = True
-        image.clear_debug()
-        image.add_debug_roi(roi, (0, 255, 0))
-
         frame = image.original_image
         if frame is None:
             return 'CHECK_SHINY'
-
-        frame = image.draw_debug(frame)
             
         shiny_check = image.is_sparkle_visible(
             frame,
@@ -105,8 +105,8 @@ def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             return 'IN_BOX'
         
     elif state == 'IN_BOX':
-        if check_state(image, 'BDSP', 'box_open'):
-            release_pokemon(ctrl, image, 'BDSP', input)
+        if check_state(image, 'SWSH', 'box_open'):
+            release_pokemon(ctrl, image, 'SWSH', input)
             state = "PROGRAM_FINISHED"
             
     return state

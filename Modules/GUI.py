@@ -49,6 +49,8 @@ class GUI(pyqt_w.QWidget):
             image: Image_Processing) -> None:
         super().__init__()
 
+        # tracks information that is important that every part of the gui can access
+
         self.Image_queue = Image_queue
         self.Command_queue = Command_queue
         self.image = image
@@ -87,7 +89,7 @@ class GUI(pyqt_w.QWidget):
             'tab_sv':   pyqt_w.QWidget(self),
             'tab_lza':  pyqt_w.QWidget(self),
         }
-
+        # sets up the switch capture label so that the program outputs the screen
         self.items['switch_capture_label'].setFixedSize(*const.MAIN_FRAME_SIZE)
         self.items['switch_capture_label'].setStyleSheet(image_label_style)
 
@@ -159,7 +161,6 @@ class GUI(pyqt_w.QWidget):
         left_panel.addWidget(self.tabs)
 
         # ---------- RIGHT PANEL: capture + labels + buttons ----------
-
         right_panel = pyqt_w.QVBoxLayout()
         right_panel.addWidget(self.items['switch_capture_label'])
 
@@ -209,6 +210,7 @@ class GUI(pyqt_w.QWidget):
 
         self.show()
 
+    # updates the GUI's capture screen so the current frame from the switch is being shown
     def update_GUI(self, shutdown_event: Event) -> None:
         if shutdown_event.is_set():
             self.close()
@@ -243,7 +245,7 @@ class GUI(pyqt_w.QWidget):
                 pyqt_c.Qt.TransformationMode.SmoothTransformation
             )
         self.items['switch_capture_label'].setPixmap(pix)
-
+    # updates the stats that are shown to the player
     def update_stats(self):
         s = getattr(self.image, 'database_component', None)
         if not s:
@@ -258,7 +260,7 @@ class GUI(pyqt_w.QWidget):
                 parts.append(f'{key}: {val}')
         parts.append(f'state: {getattr(self.image, 'state', None)}')
         return ' | '.join(parts)
-
+    # creates the timer that is used to see how long the program ran
     def stat_timer(self):
         if self.running and not self.paused:
             now = monotonic()
@@ -277,20 +279,20 @@ class GUI(pyqt_w.QWidget):
                             database.playtime_seconds += whole
         
         self.items['stats_label'].setText(self.update_stats())
-
+    # changes the programs you can see per tab
     def on_tab_changed(self, index: int) -> None:
         self.current_program_name = self.tabs.tabText(index)
         self.Command_queue.put({
             'type': 'SET_GAME',
             'game': self.current_program_name
         })
-
+    # updates the program to be the one that runs when you start the script
     def update_script(self, game: str, btn: pyqt_w.QPushButton, program: str, checked: bool = False) -> None:
         self.game = game
         self.program = program
         self.tracks = btn.property('tracks') or []
         self.numberinput = 0
-
+    # updates the program to be the one that runs when you start the script, along with adding an input for the player
     def update_script_textbox(self, game: str, btn: pyqt_w.QPushButton, program: str, checked: bool = False) -> None:
         text, ok = pyqt_w.QInputDialog.getText(self, 'How Many Boxes', 'Enter Box Amount (input 0 for all boxes):')
         if ok and text:
@@ -298,14 +300,14 @@ class GUI(pyqt_w.QWidget):
         self.game = game
         self.program = program
         self.tracks = btn.property('tracks') or []
-
+    # starts the script/program
     def start_scripts(self) -> None:
         self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': True})
         self.running = True
         self.paused = False
         self.run_last_t = monotonic()
         self.run_seconds = 0.0
-
+    # pauses the script/program
     def pause_scripts(self) -> None:
         if not self.running:
             return
@@ -320,20 +322,20 @@ class GUI(pyqt_w.QWidget):
             self.paused = False
             self.run_last_t = monotonic()
             self.pause_button.setText('Pause Program')
-
+    # ends the scripts/program, sends command to update the database
     def stop_scripts(self) -> None:
         self.Command_queue.put({'cmd': 'STOP'})
         self.running = False
         self.paused = False
         self.run_last_t = None
         self.run_seconds = 0.0
-
+    # allows the player to put the debug information (rois only currently) onto the screen
     def update_debug(self) -> None:
         if self.image.debug_draw == False:
             self.image.debug_draw = True
         else:
             self.image.debug_draw = False
-
+    # Allows the player to take a screenshot
     def on_screenshot_clicked(self) -> None:
         filename, _ = pyqt_w.QFileDialog.getSaveFileName(
             self,
@@ -345,45 +347,3 @@ class GUI(pyqt_w.QWidget):
             return  # user cancelled
 
         cv.imwrite(filename, self.image.original_image)
-
-    def on_select_roi_clicked(self) -> None:
-        # Which game is active from the tab
-        game = self.current_program_name  # e.g. 'SWSH', 'BDSP'
-        game_dir = os.path.join(MEDIA_DIR, game)
-
-        # Let user pick an image starting in media/<game>
-        filename, _ = pyqt_w.QFileDialog.getOpenFileName(
-            self,
-            f'Select image for ROI ({game})',
-            game_dir,
-            'Images (*.png *.jpg *.jpeg *.bmp);;All Files (*)'
-        )
-        if not filename:
-            return  # user cancelled
-
-        img = cv.imread(filename)
-        if img is None:
-            msg = pyqt_w.QMessageBox(self)
-            msg.setIcon(pyqt_w.QMessageBox.Icon.Warning)
-            msg.setWindowTitle('Error')
-            msg.setText(f'Could not load image:\n{filename}')
-            msg.exec()
-            return
-
-        cv.namedWindow('Select ROI', cv.WINDOW_NORMAL)
-        cv.imshow('Select ROI', img)
-        x, y, w, h = cv.selectROI('Select ROI', img, showCrosshair=True, fromCenter=False)
-        cv.destroyWindow('Select ROI')
-
-        if w == 0 or h == 0:
-            return
-
-        self.game_rois[game] = (int(x), int(y), int(w), int(h))
-
-        msg = pyqt_w.QMessageBox(self)
-        msg.setIcon(pyqt_w.QMessageBox.Icon.Information)
-        msg.setWindowTitle('ROI Selected')
-        msg.setText(f'{game} ROI: x={x}, y={y}, w={w}, h={h}')
-        msg.exec()
-
-        print(f'[ROI] {game}: x={x}, y={y}, w={w}, h={h}')
