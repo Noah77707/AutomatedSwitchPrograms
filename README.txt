@@ -7,3 +7,4 @@ librarys:
     pytesseract
     cv2
     numpy
+
