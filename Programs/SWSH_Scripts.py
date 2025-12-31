@@ -7,16 +7,22 @@ from Modules.Macros import *
 from Modules.States import *
 
 def Start_SWSH(image: Image_Processing, ctrl: Controller, state: str | None) -> str:
-    if state in None:
+    if state == None:
         state = 'PAIRING'
 
-    elif state == 'PAIRING':
-        return home_screen_checker_macro(ctrl, image)
+    elif state  == 'PAIRING':
+        state = home_screen_checker_macro(ctrl, image, state)
+        return state
     
     elif state  == 'START_SCREEN':
-        return swsh_start_screens_macro(ctrl, image, state)
+        state = swsh_start_screens_macro(ctrl, image, state)
+        return state
+    
+    # No matter what, always returns PAIRING for no reason
+    return_state(image, state)
+    image.playing_checked = False
 
-    return return_state(image, state)
+    return state
 
 #Tested with registeel. Haven't encountered a shiny yet
 def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
@@ -42,18 +48,18 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         return 'IN_BATTLE'
     
     elif state == 'CHECK_SHINY':
-        roi = const.SWSH_CONSTANTS['static_Roi']
-
-        frame = image.original_image
-        if frame is None:
-            return 'CHECK_SHINY'
+        fid = getattr(image, 'frame_id', 0)
+        last = getattr(image, 'last_frame_id', -1)
+        if fid == last:
+            return state
+        image.last_frame_id = fid
+        roi = const.SWSH_CONSTANTS['static_roi']
             
         shiny_check = image.is_sparkle_visible(
-            frame,
             roi,
             v_thres= const.SWSH_CONSTANTS['static_v_threshold'],
             s_max = const.SWSH_CONSTANTS['static_s_max'],
-            min_bright_particles = const.SWSH_CONSTANTS['static_brightness_threshold']
+            min_bright_ratio = const.SWSH_CONSTANTS['static_brightness_ratio']
         )
 
         image.shiny_frames_checked += 1
@@ -61,24 +67,34 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             image.shiny_hits += 1
 
         if image.shiny_hits >= 3: # How many rames are shiny
+            image.database_component.pokemon_encountered += 1
+            image.database_component.shinies += 1
             return 'FOUND_SHINY'
             
-        if image.shiny_frames_checked >= 360:
+        if image.shiny_frames_checked >= 240:
             image.shiny_frames_checked = 0
+            image.database_component.pokemon_encountered += 1
             return 'NOT_SHINY'
-        print(image.shiny_frames_checked)
-        sleep(0.01)
-        return 'CHECK_SHINY'
+        return state
     
     elif state == 'FOUND_SHINY':
         state == "SHINY"
 
     elif state == 'NOT_SHINY':
+        image.database_component.resets += 1
         print("Not Shiny")
         ctrl.tap(BTN_HOME, 0.05, 0.45)
         ctrl.tap(BTN_X, 0.05, 0.25)
         ctrl.tap(BTN_A, 0.05, 02.95)
+        import time
+        now = time.monotonic()
+        if now - getattr(image, "_perf_t0", 0) > 5:
+            image._perf_t0 = now
+            print("debug_rois:", len(getattr(image, "debug_rois", [])))
+            print("frame_id:", getattr(image, "frame_id", 0))
+
         return 'PAIRING'
+    return_state(image, state)
     return state
 
 def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, input: int) -> str:

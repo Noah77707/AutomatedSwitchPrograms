@@ -4,6 +4,8 @@ from time import time, monotonic, sleep
 from typing import TYPE_CHECKING, Tuple, List, Any, Dict
 import Constants as const
 import numpy as np
+import re
+from pytesseract import pytesseract as pt
 
 from .Dataclasses import *
 from .Window_Capture import *
@@ -11,208 +13,8 @@ from .Window_Capture import *
 from .Image_Processing import Image_Processing
 
 state_timer = 0
+LM_CACHE: dict[tuple[str, str], TemplateLandmark] = {}
 
-# state checks are where the checked states are stored.
-# checked states are states that contain information to colors and pixels for a wanted state
-# the porgram willl uses these to check if the pixels specified are withing 7 unit so color to the specified color
-# I.E. if the color is 56, 56, 56. then 59, 50, 54 will pass, and 67, 12, 255 will fail
-STATE_CHECKS = {
-    'GENERIC': {
-        'pairing_screen': {
-            'color': (209, 209, 209),
-            'positions': [
-                (64, 485),
-                (1213, 485)
-            ]
-        },
-        'home_screen': {
-            'color': (45, 45, 45),
-            'positions': [
-                (41, 562),
-                (1233, 626),
-                (665, 164)
-            ]
-        },
-        'controller_screen': {
-            'color': (69, 69, 69),
-            'positions': [
-                (142, 303),
-                (722, 206),
-                (694, 502)
-            ]
-        },
-        'controller_connected': {
-            'color': (254, 254, 254),
-            'positions': [
-                (73, 694),
-                (108, 693)
-            ]
-        },
-        'black_screen': {
-            'color': (0, 0, 0),
-            'positions': [
-                (263, 401),
-                (1076, 258),
-                (93, 677)
-            ]
-        },
-        'white_screen': {
-            'color': (255, 255, 255),
-            'positions': [
-                (263, 401),
-                (1076, 258),
-                (93, 677)
-            ]
-        },
-        'change_user': {
-            'color': (243, 200, 42),
-            'positions': {
-                (163, 484),
-                (173, 484)
-            }
-        }
-
-    },
-    'SWSH': {
-        'title_screen': {
-            'color': (255, 255, 254),
-            'positions': [
-                (717, 78),
-                (557, 79),
-            ],
-
-        },
-        'in_game': {
-            'color': (254, 254, 254),
-            'positions': [
-                (54, 690),
-                (8, 690),
-            ],
-        },
-        'in_box': {
-            'color': (249, 254, 233),
-            'positions': [
-                (802, 87),
-                (868, 665)
-            ]
-        },
-        'pokemon_in_box': {
-            'color': (217, 218, 219),
-            'positions': [
-                (979, 158),
-                (972, 345),
-                (904, 386)
-            ]
-        },
-        'egg_in_box': {
-            'color': (251, 255, 242),
-            'positions': [
-                (979, 158),
-                (972, 345),
-                (904, 386)
-            ]
-        },
-        'shiny_symbol': {
-            'color': (102, 102, 102),
-            'positions': [
-                (1253, 122),
-                (1263, 113)
-            ]
-        },
-        'encounter_text': {
-            'color': (51, 51, 51),
-            'positions': [
-                (854, 663),
-                (366, 655),
-                (1138, 670),
-            ],
-        },
-    },
-    'BDSP': {
-        'loading_title': {
-            'color': (224, 225, 225),
-            'positions': [
-                (509, 432),
-                (830, 443),
-            ],
-        },
-        'title_screen': {
-            'color': (17, 210, 245),
-            'positions': [
-                (364, 205),
-                (542, 225)
-            ],
-        },
-        'box_open': {
-            'color': (238, 230, 158),
-            'positions': [
-                (837, 84),
-                (358, 87),
-            ],
-        },
-        'multi_select':{
-            'color': (80, 164, 76),
-            'positions': [
-                (258, 8),
-                (257, 59)
-            ]
-        },
-        'pokemon_in_box': {
-            'color': (182, 162, 100),
-            'positions': [
-                (983, 166),
-                (997, 195),
-            ],
-        },
-        'egg_in_box': {
-            'color': (234, 234, 234),
-            'positions': [
-                (986, 166),
-                (995, 166),
-            ],
-        },
-        'shiny_symbol': {
-            'color': (70, 53, 230),
-            'positions': [
-                (1258, 115),
-                (1248, 125),
-            ],
-        },
-        'text_box': {
-            'color': (250, 251, 251),
-            'positions': [
-                (781, 595),
-                (273, 611),
-                (1019, 593),
-                (1021, 695),
-            ],
-        },
-        'hatchery_pokecenter': {
-            'color': (255, 255, 254),
-            'positions': [
-                (1108, 580),
-                (1251, 600),
-                (1253, 638)
-            ]
-        },
-        'egg_acquired': {
-            'color': (101, 234, 243),
-            'positions': [
-                (943, 141),
-                (941, 253),
-                (339, 270),
-                (338, 142)
-            ]
-        },
-        'poketch': {
-            'color': (48, 0, 144),
-            'positions': [
-                (1257, 190),
-                (1257, 129)
-            ]
-        }
-    },
-}
 
 def wait_for_roi_condition(
         image: Image_Processing,
@@ -240,17 +42,56 @@ def wait_for_roi_condition(
         sleep(0.01)
     return False
 # trhe function that checks the colors
-def check_image_position_colors(image: Image_Processing, color: Tuple[int, int, int], positions: List[Tuple[int, int]]) -> bool:
-    for position in positions:
-        if not image.check_pixel_colors(position, color):
+def check_image_position_colors(
+    image,
+    color: Tuple[int,int,int],
+    positions: List[Tuple[int,int]],
+    tol: int = 10,
+) -> bool:
+    frame = getattr(image, "original_image", None)
+    if frame is None:
+        return False
+
+    h, w = frame.shape[:2]
+    for (x, y) in positions:
+        if x < 0 or y < 0 or x >= w or y >= h:
+            return False
+
+        # get pixel BGR
+        b, g, r = frame[y, x]  # OpenCV is row=y, col=x
+        if not _color_close((int(b), int(g), int(r)), color, tol):
             return False
     return True
 # this passes everything to the check_iamge_position_colors. It mainly makes everything more readable
-def check_state(image: Image_Processing, game: str, name: str) -> bool:
-    cfg = STATE_CHECKS[game][name]
-    color = cfg['color']
-    positions = cfg['positions']
-    return check_image_position_colors(image, color, positions)
+def _color_close(bgr: Tuple[int,int,int], target: Tuple[int,int,int], tol: int) -> bool:
+    return (abs(bgr[0] - target[0]) <= tol and
+            abs(bgr[1] - target[1]) <= tol and
+            abs(bgr[2] - target[2]) <= tol)
+
+def check_state(image, game: str, name: str) -> bool:
+    frame = getattr(image, "original_image", None)
+    if frame is None:
+        return False
+
+    states = const.GAME_STATES.get(game)
+    if not states:
+        return False
+    cfg = states.get(name)
+    if not cfg:
+        return False
+
+    color = cfg["color"]
+    positions = cfg["positions"]
+    tol = int(cfg.get("tol", 10))
+
+    h, w = frame.shape[:2]
+    for (x, y) in positions:
+        if x < 0 or y < 0 or x >= w or y >= h:
+            return False
+        b, g, r = frame[y, x]
+        if not _color_close((int(b), int(g), int(r)), color, tol):
+            return False
+    return True
 # The player can split states. This is mainly used to programs that run othjer programs. I.E. automated_egg for BDSP
 def split_state(s: str | None) -> tuple[str, str | None]:
     if not s:
@@ -288,16 +129,48 @@ def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[
     return float(maxv)
 
 def detect_template(frame_bgr: np.ndarray, lm: TemplateLandmark) -> float:
-    x,y,w,h = lm.roi
+    x, y, w, h = lm.roi
     crop = frame_bgr[y:y+h, x:x+w]
-    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-
-    if gray.shape[0] < lm.template_gray.shape[0] or gray.shape[1] < lm.template_gray.shape[1]:
+    if crop.size == 0:
         return 0.0
 
-    res = cv.matchTemplate(gray, lm.template_gray, lm.method)
-    _, maxv, _, _ = cv.minMaxLoc(res)
-    return float(maxv)
+    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY) if crop.ndim == 3 else crop
+    tmpl = lm.template_gray
+    tmpl = cv.cvtColor(tmpl, cv.COLOR_BGR2GRAY) if tmpl.ndim == 3 else tmpl
+
+    if gray.shape[0] < tmpl.shape[0] or gray.shape[1] < tmpl.shape[1]:
+        return 0.0
+
+    res = cv.matchTemplate(gray, tmpl, lm.method)
+    minv, maxv, _, _ = cv.minMaxLoc(res)
+
+    if lm.method in (cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED):
+        return float(1.0 - minv)   # minv: 0 best -> score: 1 best
+    else:
+        return float(maxv)         # maxv: 1 best for *_NORMED
+
+def get_landmark(game: str, name: str, threshold:int = 0.80) -> TemplateLandmark:
+    key = (game, name)
+    if key in LM_CACHE:
+        return LM_CACHE[key]
+
+    cfg = const.GAME_STATES[game][name]
+    if "path" not in cfg:
+        raise KeyError(f"{game}.{name} is not a template entry (missing 'path')")
+
+    tpl = cv.imread(cfg["path"], cv.IMREAD_GRAYSCALE)
+    if tpl is None:
+        raise FileNotFoundError(cfg["path"])
+
+    lm = TemplateLandmark(
+        template_gray=tpl,
+        roi=tuple(cfg["roi"]),
+        threshold=float(cfg.get("threshold", threshold)),
+        hits_required=int(cfg.get("hits_required", 3)),
+        method=int(cfg.get("method", cv.TM_CCOEFF_NORMED)),
+    )
+    LM_CACHE[key] = lm
+    return lm
 
 def _clahe_gray(img: np.ndarray) -> np.ndarray:
     if img is None:
@@ -353,11 +226,8 @@ def match_text_fragment(
     
     frame = image.original_image
     if frame is None:
-        sleep(0.001)
+        return False, 1.0
 
-    crop = _crop_roi(frame, roi)
-    if crop.size == 0:
-        return False, 0.0
     x,y,w,h = roi
     crop = frame[y:y+h, x:x+w]
     if crop.size == 0:
@@ -419,3 +289,59 @@ def walk_until_landmark_dpad(
             sleep(pause_s)
 
     return False
+
+def ocr_roi_line(frame_bgr, roi, *, invert: bool = False, psm: int = 7) -> str:
+    x, y, w, h = map(int, roi)
+    crop = frame_bgr[y:y+h, x:x+w]
+    if crop.size == 0:
+        return ""
+
+    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+    gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
+    gray = cv.GaussianBlur(gray, (3, 3), 0)
+
+    thr_flag = cv.THRESH_BINARY_INV if invert else cv.THRESH_BINARY
+    bw = cv.threshold(gray, 0, 255, thr_flag + cv.THRESH_OTSU)[1]
+
+    cfg = (
+        f"--psm {psm} "
+        "-c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:+().- "
+    )
+    txt = pt.image_to_string(bw, config=cfg)
+    txt = re.sub(r"\s+", " ", txt).strip().lower()
+    return txt
+
+def ocr_rois_cached(
+    image,
+    rois,
+    *,
+    cache_key: str,
+    min_interval_s: float = 0.25,
+    invert: bool = False,
+    psm: int = 7,
+) -> list[str]:
+    now = time.monotonic()
+
+    last_t_key = f"_ocr_last_t_{cache_key}"
+    last_txt_key = f"_ocr_last_txt_{cache_key}"
+
+    last_t = getattr(image, last_t_key, 0.0)
+    if now - last_t < min_interval_s:
+        return getattr(image, last_txt_key, [""] * len(rois))
+
+    frame = getattr(image, "original_image", None)
+    if frame is None:
+        return [""] * len(rois)
+
+    rows = [ocr_roi_line(frame, r, invert=invert, psm=psm) for r in rois]
+
+    setattr(image, last_t_key, now)
+    setattr(image, last_txt_key, rows)
+    return rows
+
+def find_keywords_in_texts(
+    texts: list[str],
+    keywords: list[str],
+) -> dict[str, bool]:
+    joined = " | ".join(texts)
+    return {k: (k.lower() in joined) for k in keywords}

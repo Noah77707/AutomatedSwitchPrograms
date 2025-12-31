@@ -112,6 +112,12 @@ class GUI(pyqt_w.QWidget):
         # SWSH tab
         SWSH_layout = pyqt_w.QVBoxLayout()
         SWSH_layout.addWidget(pyqt_w.QLabel('SWSH programs'))
+
+        STATIC_ENCOUNTER_SWSH = pyqt_w.QPushButton('Static Encounter', self)
+        STATIC_ENCOUNTER_SWSH.setProperty('tracks', ['pokemon_encountered', 'resets', 'shinies', 'playtime_seconds'])
+        STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, btn= STATIC_ENCOUNTER_SWSH: self.update_script('SWSH', btn, 'Static_Encounter_SWSH', checked))
+        
+        SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
         self.items['tab_swsh'].setLayout(SWSH_layout)
 
         # BDSP tab
@@ -143,6 +149,25 @@ class GUI(pyqt_w.QWidget):
         BDSP_layout.addWidget(AUTOMATED_EGG_BDSP)
         BDSP_layout.addWidget(RELEASER_BDSP)
         self.items['tab_bdsp'].setLayout(BDSP_layout)
+
+        # LA tab
+        LA_layout = pyqt_w.QVBoxLayout()
+        LA_layout.addWidget(pyqt_w.QLabel('LA programs'))
+
+        # SV tab
+        SV_layout = pyqt_w.QVBoxLayout()
+        SV_layout.addWidget(pyqt_w.QLabel('SV programs'))
+
+        # LZA tab
+        LZA_layout = pyqt_w.QVBoxLayout()
+        LZA_layout.addWidget(pyqt_w.QLabel('LZA programs'))
+
+        DONUT_MAKER = pyqt_w.QPushButton('Donut Maker WIP', self)
+        DONUT_MAKER.setProperty('tracks', ['actions', 'resets', 'playtime_seconds'])
+        DONUT_MAKER.clicked.connect(lambda checked, btn = DONUT_MAKER: self.update_script_textbox('LZA', btn, 'Donut_Checker', checked))
+
+        LZA_layout.addWidget(DONUT_MAKER)
+        self.items['tab_lza'].setLayout(LZA_layout)
 
         self.tabs.addTab(self.items['tab_home'], 'HOME')
         self.tabs.addTab(self.items['tab_swsh'], 'SWSH')

@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from time import monotonic
 import serial
 from .Controller import Controller
 from .Image_Processing import Image_Processing
@@ -64,52 +65,112 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
         ctrl.tap(BTN_R, 0.10, 0.15)
     return "PROGRAM_FINISHED"
     
-def home_screen_checker_macro(ctrl: Controller, image: Image_Processing) -> str:
+def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
+    if not hasattr(image, "debug_rois_collector"):
+        image.add_debug_roi(const.GENERIC_STATES['playing']['roi'], (0,255,0))
+        image.debug_rois_collector = True
+
+    if not hasattr(image, "_playing_lm"):
+        image._playing_lm = get_landmark("GENERIC", "playing", 0.7)
+    lm = image._playing_lm
+
+
     if check_state(image, 'GENERIC', 'pairing_screen'):
         ctrl.tap(BTN_L)
         ctrl.tap(BTN_R)
-        ctrl.tap(BTN_A, 0.05, 0.45)
-        ctrl.tap(BTN_HOME)
-        return 'HOME_SCREEN'
-    elif check_state(image, 'GENERIC', 'home_screen'):
-        if check_state(image, 'GENERIC', 'controller_connected'):
-            ctrl.tap(BTN_A, 0.10, 1.20)
-            ctrl.tap(BTN_A, 0.10, 0.95)
-            return 'START_SCREEN'
+        sleep(1)
+        ctrl.tap(BTN_A, 0.1, 1.5)
+        ctrl.tap(BTN_HOME, 0.05, 0.5)
+        state= 'PAIRING'
+
+    elif check_state(image, 'GENERIC', 'controller_screen') and check_state(image, 'GENERIC', 'player_1'):
+        ctrl.tap(BTN_A, 0.05, 1.5)
+        state= 'PAIRING'
+
+    elif check_state(image, 'GENERIC', 'local_communication'):
+        ctrl.tap(BTN_A, 0.05, 1.5)
+        state= 'PAIRING'
+
+    elif check_state(image, 'GENERIC', 'home_screen') and check_state(image, 'GENERIC', 'controller_connected'):
+        if not hasattr(image, "playing_last_check_t"):
+            image.playing_last_check_t = 0.0
+        if not hasattr(image, "playing_last_score"):
+            image.playing_last_score = 0.0
+
+        now = monotonic()
+        if now - image.playing_last_check_t >= 0.15:
+            image.playing_last_check_t = now
+            image.playing_last_score = detect_template(image.original_image, lm)
+
+        score = image.playing_last_score
+        print('template score:', score)
+        if score >= lm.threshold:
+            print(score)
+            ctrl.tap(BTN_A)
+            state= 'IN_GAME'
         else:
-            ctrl.tap(BTN_B, 0.05, 0.95)
-            ctrl.tap(BTN_B, 0.05, 1.05)
-            return 'PAIRING'
-                
-    elif not check_state(image, 'GENERIC', 'pairing_screen') and not check_state(image, 'GENERIC', 'home_screen'):
-        ctrl.tap(BTN_B, 0.05, 0.4)
-        ctrl.tap(BTN_B, 0.05, 0.3)
-        ctrl.tap(BTN_HOME, 0.1, 1.2)
+            ctrl.tap(BTN_A, 0.05, 0.75)
+            ctrl.tap(BTN_A, 0.05, 0.75)
+            state= 'START_SCREEN'
+        return state
+
+    elif check_state(image, 'GENERIC', 'home_screen') and not check_state(image, 'GENERIC', 'controller_connected'):
+        ctrl.tap(BTN_B)
+        ctrl.tap(BTN_B)
+        state= 'PAIRING'
+
+    elif state == 'PAIRING' and not check_state(image, 'GENERIC', 'home_screen') and not check_state(image, 'GENERIC', 'pairing_screen'):
+        ctrl.tap(BTN_B)
+        ctrl.tap(BTN_B)
+        ctrl.tap(BTN_HOME, 0.05, 0.4)
         ctrl.dpad(4, 0.2)
         for _ in range(5):
            sleep(0.07)
            ctrl.dpad(2, 0.05)
         ctrl.tap(BTN_A, 0.05, 1)
-        sleep(1)
-        if not check_state(image, 'GENERIC', 'controller_screen'):
-            ctrl.tap(BTN_HOME)
-            ctrl.tap(BTN_HOME)
-            return 'PAIRING'
-        else:
-            ctrl.tap(BTN_A, 0.05, 0.7)
-            ctrl.tap(BTN_L)
-            ctrl.tap(BTN_R)
-            ctrl.tap(BTN_A, 0.05, 0.7)
-            sleep(0.07)
-            ctrl.tap(BTN_HOME, 0.05, 1.25)
-            ctrl.tap(BTN_HOME)
-            return 'IN_GAME'
+        state= 'PAIRING'
+    
+    else:
+        if hasattr(image, "playing_checked"):
+            image.playing_checked = False
+
+
+    print(state)
+    return state
+
+        # ctrl.tap(BTN_B, 0.05, 0.3)
+        # ctrl.tap(BTN_HOME, 0.1, 1.2)
+        # ctrl.dpad(4, 0.2)
+        # for _ in range(5):
+        #    sleep(0.07)
+        #    ctrl.dpad(2, 0.05)
+        # ctrl.tap(BTN_A, 0.05, 1)
+        # sleep(1)
+        # if not check_state(image, 'GENERIC', 'controller_screen'):
+        #     ctrl.tap(BTN_HOME)
+        #     ctrl.tap(BTN_HOME)
+        #     return 'PAIRING'
+        # else:
+        #     if check_state(image, 'GENERIC', 'local_communication'):
+        #         ctrl.tap(BTN_A)
+            
+        #     ctrl.tap(BTN_A, 0.05, 0.7)
+        #     ctrl.tap(BTN_L)
+        #     ctrl.tap(BTN_R, 0.05, 1)
+        #     ctrl.tap(BTN_A, 0.1, 1)
+        #     sleep(1)
+        #     if check_state(image, 'GENERIC', 'player_1'):
+        #         ctrl.tap(BTN_HOME, 0.1, 1.75)
+        #         ctrl.tap(BTN_HOME)
+        #     return 'IN_GAME'
     
 def swsh_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
     if state == 'START_SCREEN':
         if check_state(image, 'SWSH', 'title_screen'):
-            ctrl.btn(BTN_A, 0.1, 0.2)
+            ctrl.tap(BTN_A, 0.1, 0.2)
             return 'IN_GAME'
+        return "START_SCREEN"
+    return state
 
 def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
     if state == 'HOME_SCREEN':
@@ -196,16 +257,35 @@ def put_egg(ctrl, image, game: str) -> None:
     ctrl.dpad(6, 0.05); sleep(0.17)
     ctrl.dpad(4, 0.05); sleep(0.17)
     ctrl.tap(BTN_A, 0.05, 0.17)
+
     for _ in range(5):
-        if check_state(image, game, 'shiny_symbol'):
-            image.shiny += 1
+        sleep(0.10)  # let highlight + symbol render
+
+        if check_state(image, game, "pokemon_in_box"):  # gate: only if something is there
+            # confirm shiny over a few frames so one bad frame doesn't miss
+            shiny = wait_for_state(image, game, "shiny_symbol", timeout=0.25, min_frames=2)
+            if shiny:
+                image.shiny += 1
+
         ctrl.dpad(4, 0.05); sleep(0.17)
+
     ctrl.tap(BTN_A, 0.05, 0.17)
     ctrl.dpad(0, 0.05); sleep(0.17)
     for _ in range(image.egg_phase):
         ctrl.dpad(2, 0.05); sleep(0.17)
     ctrl.tap(BTN_A, 0.05, 0.17)
-    for _ in range(image.egg_phase - 1):
+    for _ in range(max(0, image.egg_phase - 1)):
         ctrl.dpad(6, 0.05); sleep(0.17)
-    
-    
+
+def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_frames: int = 2) -> bool:
+    t0 = monotonic()
+    streak = 0
+    while monotonic() - t0 < timeout:
+        if check_state(image, game, name):
+            streak += 1
+            if streak >= min_frames:
+                return True
+        else:
+            streak = 0
+        sleep(0.02)
+    return False

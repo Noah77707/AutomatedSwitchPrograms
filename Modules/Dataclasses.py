@@ -9,10 +9,11 @@ ROI = Tuple[int, int, int, int]
 class TemplateLandmark:
     template_gray: np.ndarray
     roi: ROI
-    threshold: float = 0.85
+    threshold: float = 0.75
     hits_required: int = 3
     method: int = cv.TM_CCOEFF_NORMED
 
+@dataclass
 class RunStats:
     runs: int = 0
     resets: int = 0

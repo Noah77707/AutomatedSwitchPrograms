@@ -34,6 +34,14 @@ class Image_Processing():
         self.generic_count2 = 0
         self.generic_bool = False
 
+        self.last_check_t = 0.0
+        self.last_score = 0.0
+        self.last_frame_id = 0
+
+        self.ocr_last_t = 0.0
+        self.ocr_last_roi = (0, 0, 0, 0)
+        self.ocr_last_txt = None
+
         if isinstance(image, str):
             self.original_image = cv.imread(image, cv.IMREAD_UNCHANGED)
         else:
@@ -108,87 +116,78 @@ class Image_Processing():
             f"diff=({b-eb},{g-eg},{r-er})"
     )
 
-    def is_text_visible(self, roi: Tuple[int, int, int, int]) -> bool:
+    def ocr_text(self, roi: tuple[int,int,int,int], *, psm: int = 6, timeout_s: int = 1) -> str:
         frame = getattr(self, "original_image", None)
         if frame is None:
             return ""
 
+        x, y, w, h = map(int, roi)
+        H, W = frame.shape[:2]
+
+        x1 = max(0, x); y1 = max(0, y)
+        x2 = min(W, x + w); y2 = min(H, y + h)
+        if x2 <= x1 or y2 <= y1:
+            return ""
+
+        crop = frame[y1:y2, x1:x2]
+        if crop.size == 0:
+            return ""
+
+        gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+        gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
+        gray = cv.GaussianBlur(gray, (3, 3), 0)
+        bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+
         try:
-            x, y, w, h = map(int, roi)
-            H, W = frame.shape[:2]
-
-            x1 = max(0, x)
-            y1 = max(0, y)
-            x2 = min(W, x + w)
-            y2 = min(H, y + h)
-
-            if x2 <= x1 or y2 <= y1:
-                print(f"OCR: out of bounds roi={roi} frame={H}x{W}")
-                return ""
-
-            crop = frame[y1:y2, x1:x2]
-            if crop.size == 0:
-                print(f"OCR: empty crop roi={roi}")
-                return ""
-
-            gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-            gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
-            gray = cv.GaussianBlur(gray, (3, 3), 0)
-            gray = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
-            gray = gray.copy()
-
-            print("OCR: running pytesseract")
-            try:
-                txt = pytesseract.image_to_string(gray, config="--psm 7", timeout=1)
-            except pt.TimeoutExpired:
-                print("OCR: tesseract timed out")
-                return ""
-
-            txt = " ".join(txt.split())
-            print("OCR raw:", repr(txt))
-            return txt
-
-        except cv.error as e:
-            print(f"OCR cv2 error: {e} roi={roi}")
+            txt = pytesseract.image_to_string(bw, config=f"--psm {psm}", timeout=timeout_s)
+        except pt.TimeoutExpired:
             return ""
-        except pytesseract.TesseractNotFoundError as e:
-            print(f"OCR tesseract missing: {e}")
+        except pytesseract.TesseractNotFoundError:
             return ""
-        except Exception as e:
-            print(f"OCR error: {type(e).__name__}: {e} roi={roi}")
+        except Exception:
             return ""
 
-    def is_sparkle_visible(
-            self,
-            frame: np.ndarray,
-            roi: Tuple[int, int, int, int],
-            v_thres: int,
-            s_max: int,
-            min_bright_particles: int,
-            ) -> bool:
-        
+        return " ".join(txt.split()).lower()
+
+    def ocr_text_throttled(self, roi: tuple[int,int,int,int], *, min_interval_s: float = 0.25) -> str:
+        now = time.monotonic()
+        last_t = getattr(self, "ocr_last_t", 0.0)
+        last_roi = getattr(self, "ocr_last_roi", None)
+
+        # cache per ROI
+        if last_roi == roi and (now - last_t) < min_interval_s:
+            return getattr(self, "ocr_last_txt", "")
+
+        txt = self.ocr_text(roi)
+        self.ocr_last_t = now
+        self.ocr_last_roi = roi
+        self.ocr_last_txt = txt
+        return txt
+
+    def is_sparkle_visible(self, roi, v_thres, s_max, min_bright_ratio: float) -> bool:
+        frame = getattr(self, 'original_image', None)
         x, y, w, h = roi
         h_img, w_img = frame.shape[:2]
         if w <= 0 or h <= 0:
             return False
-        if not (0 <= x < w_img or 0 <= y < h_img):
+        if not (0 <= x < w_img and 0 <= y < h_img):
             return False
-        
+
         x2 = min(x + w, w_img)
         y2 = min(y + h, h_img)
         if x2 <= x or y2 <= y:
             return False
-        
-        crop = frame[y:y2, x:x2]
 
+        crop = frame[y:y2, x:x2]
         hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV)
 
-        lower = (0, 0, v_thres)
-        upper = (180, s_max, 255)
-        mask = cv.inRange(hsv, lower, upper)
-        bright_pixels = cv.countNonZero(mask)
-        return bright_pixels >= min_bright_particles
-    
+        mask = cv.inRange(hsv, (0, 0, v_thres), (180, s_max, 255))
+
+        bright = cv.countNonZero(mask)
+        ratio = bright / mask.size
+        print(f"sparkle ratio: {ratio:.4f}")
+        return ratio >= min_bright_ratio
+
     def clear_debug(self):
         self.debug_rois.clear()
         self.debug_pixels.clear()

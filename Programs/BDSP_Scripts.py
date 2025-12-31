@@ -13,13 +13,16 @@ def Start_BDSP(image: Image_Processing, ctrl: Controller, state: str | None):
     if state is None:
         state = 'PAIRING'
 
-    elif state == 'PAIRING':
-        return home_screen_checker_macro(ctrl, image)
+    elif state in ('PAIRING'):
+        return home_screen_checker_macro(ctrl, image, state)
     
     elif state in ('HOME_SCREEN', 'START_SCREEN'):
         return bdsp_start_screens_macro(ctrl, image, state)
     
-    return return_state(image, state)
+    return_state(image, state)
+    image.playing_checked = False
+
+    return state
 
 def Static_Encounter_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
     return None
@@ -36,16 +39,22 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         threshold= 0.65,
         hits_required= 3
     )
+    try:
+        boxes = int(input)
+    except (TypeError, ValueError):
+        boxes = 0
+
+    amount = boxes * 30
 
     if not hasattr(image, "debug_rois_collector"):
-        image.add_debug_roi(const.BDSP_CONSTANTS["nursery_man"], (0,255,0))
+        image.add_debug_roi(const.BDSP_STATES["nursery_man"]["roi"], (0,255,0))
         image.add_debug_roi((240,160,180,180), (0,0,255))
         image.debug_rois_collector = True
 
-    amount = input * 30
     # Start of the state program
     if state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
         state = Start_BDSP(image, ctrl, state)
+        return state
             
     elif state == 'PROGRAM':
         if not check_state(image, 'GENERIC', 'black_screen'):
@@ -58,7 +67,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             return 'IN_BOX'
     
     elif state == 'IN_BOX':
-        if check_state(image, 'BDSP', 'box_open'):
+        if check_state(image, 'BDSP', 'box_screen'):
             ctrl.tap(BTN_Y, 0.1, 0.1)
             ctrl.tap(BTN_Y, 0.1, 0.1)
             if image.generic_bool == False:
@@ -126,7 +135,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         sleep(1.5)
 
         ctrl.down(BTN_B)
-        if is_in_area(image, 'Media/BDSP_Images/Egg_Man_Arms.png', roi = roi, threshold= 0.65) > 0.67 and image.egg_phase == 0:
+        if is_in_area(image, 'Media/BDSP_Images/Egg_Man_Arms.png', roi = roi, threshold= 0.65) > 0.67 or is_in_area(image, 'Media/BDSP_Images/Egg_Man_Arms2.png', roi = roi, threshold= 0.65) > 0.67 and image.egg_phase == 0:
             for _ in range(4):
                 ctrl.dpad(6, 0.14)
             sleep(0.2)
@@ -197,10 +206,11 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             return 'IN_BOX'
     
     elif state == 'IN_BOX':
-        if check_state(image, 'BDSP', 'box_open'):
+        if check_state(image, 'BDSP', 'box_screen'):
             ctrl.tap(BTN_Y, 0.1, 0.1)
             ctrl.tap(BTN_Y, 0.1, 0.1)
             return 'IN_BOX1'
+        
     # the generic count counts if you already hatched eggs. if zero, it doesnt have any party pokemon to put in the box
     # if its not zero, it will return the hatched eggs to their correct spot
     elif state == 'IN_BOX1':
@@ -209,6 +219,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             put_egg(ctrl, image, 'BDSP')
         image.generic_count = 0
         return 'IN_BOX2'
+    
     # changes to the next box if all eggs have been hatched
     elif state == 'IN_BOX2':
         if image.egg_phase == 6:
@@ -216,19 +227,22 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             image.egg_phase = 0
         sleep(0.25)
         return 'IN_BOX3'
+    
     # grabs the eggs, then increments the counter for how many egg columns have been grabbed
     elif state == 'IN_BOX3':
         grab_egg(ctrl, image, 'BDSP')
         image.egg_phase += 1
         sleep(0.75)
         return 'IN_BOX4'
+    
     # returns to overworld
     elif state == 'IN_BOX4':
         if not check_state(image, 'BDSP', 'poketch'):
             ctrl.tap(BTN_B)
             return 'IN_BOX4'
-        return 'WALKING'
-    # Walks down, and checks to see if there is a textbox for if the egg is hatching
+        return 'WALKING1'
+    
+    # walks down, and checks to see if there is a textbox for if the egg is hatching
     elif state == 'WALKING':
         ctrl.down(BTN_B)
         for _ in range(20):
@@ -237,13 +251,15 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             else:
                 ctrl.dpad(4, 0.13)
         return 'WALKING1'
-    # Walks up to a specific landmark, and checks to see if there is a textbox for if the egg is hatching
+    
+    # walks up to a specific landmark, and checks to see if there is a textbox for if the egg is hatching
     elif state == 'WALKING1':
         if check_state(image, 'BDSP', 'text_box'):
             return 'HATCHING'
         back_to_start = walk_until_landmark_dpad(ctrl, image, landmark, dpad_dir=0, max_steps=1)
         if back_to_start:
             return 'WALKING'
+        
     # if the textbox pops up, it starts the egg hatching state
     elif state == 'HATCHING':
         if not hasattr(image, 'generic_bool'):
@@ -300,13 +316,13 @@ def Automated_Egg_BDSP(image: Image_Processing, ctrl: Controller, phase: str | N
         if sub == 'HATCHING_FINISHED':
             phase, sub = 'RELEASE', 'PROGRAM'
     
-    elif phase == 'HATCHING_FINISHED':
+    elif phase == 'RELEASE':
         sub = Pokemon_Releaser_BDSP(image, ctrl, sub, input)
         if sub == 'RELEASER_FINISHED':
             phase, sub = 'FINISHED', 'PROGRAM'
 
-    return_state(image, sub)
     image.generic_state = join_state(phase, sub)
+    return_state(image, image.generic_state)
     return image.generic_state
 
 def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:

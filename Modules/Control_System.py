@@ -40,6 +40,13 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('BDSP', 'Automated_Egg_BDSP'): Automated_Egg_BDSP,
     ('BDSP', 'Pokemon_Releaser_BDSP'): Pokemon_Releaser_BDSP,
 
+    # LA
+
+    # SV
+
+    # LZA
+    ('LZA', 'Donut_Checker'): Donut_Checker
+
 }
 
 def start_control_video(

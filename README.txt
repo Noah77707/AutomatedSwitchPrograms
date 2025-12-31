@@ -7,3 +7,5 @@ librarys:
     pytesseract
     cv2
     numpy
+
+Example video of SWSH static reset: https://www.youtube.com/embed/QfPVdxs_eMA?si=iG7HxNl2K50Hxqiy
