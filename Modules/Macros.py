@@ -74,22 +74,21 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
         image._playing_lm = get_landmark("GENERIC", "playing", 0.7)
     lm = image._playing_lm
 
-
     if check_state(image, 'GENERIC', 'pairing_screen'):
         ctrl.tap(BTN_L)
         ctrl.tap(BTN_R)
         sleep(1)
         ctrl.tap(BTN_A, 0.1, 1.5)
         ctrl.tap(BTN_HOME, 0.05, 0.5)
-        state= 'PAIRING'
+        image.state= 'PAIRING'
 
     elif check_state(image, 'GENERIC', 'controller_screen') and check_state(image, 'GENERIC', 'player_1'):
         ctrl.tap(BTN_A, 0.05, 1.5)
-        state= 'PAIRING'
+        image.state= 'PAIRING'
 
     elif check_state(image, 'GENERIC', 'local_communication'):
         ctrl.tap(BTN_A, 0.05, 1.5)
-        state= 'PAIRING'
+        image.state= 'PAIRING'
 
     elif check_state(image, 'GENERIC', 'home_screen') and check_state(image, 'GENERIC', 'controller_connected'):
         if not hasattr(image, "playing_last_check_t"):
@@ -107,19 +106,24 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
         if score >= lm.threshold:
             print(score)
             ctrl.tap(BTN_A)
-            state= 'IN_GAME'
+            image.playing = True
+            image.state= 'IN_GAME'
         else:
             ctrl.tap(BTN_A, 0.05, 0.75)
+            if image.profile_set == False:
+                for _ in range(image.profile - 1):
+                    ctrl.dpad(2, 0.05); sleep(0.3)
+                image.profile_set = True
             ctrl.tap(BTN_A, 0.05, 0.75)
-            state= 'START_SCREEN'
-        return state
+            image.state= 'START_SCREEN'
+        return image.state
 
     elif check_state(image, 'GENERIC', 'home_screen') and not check_state(image, 'GENERIC', 'controller_connected'):
         ctrl.tap(BTN_B)
         ctrl.tap(BTN_B)
-        state= 'PAIRING'
+        image.state= 'PAIRING'
 
-    elif state == 'PAIRING' and not check_state(image, 'GENERIC', 'home_screen') and not check_state(image, 'GENERIC', 'pairing_screen'):
+    elif image.state == 'PAIRING' and not check_state(image, 'GENERIC', 'home_screen') and not check_state(image, 'GENERIC', 'pairing_screen'):
         ctrl.tap(BTN_B)
         ctrl.tap(BTN_B)
         ctrl.tap(BTN_HOME, 0.05, 0.4)
@@ -128,15 +132,14 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
            sleep(0.07)
            ctrl.dpad(2, 0.05)
         ctrl.tap(BTN_A, 0.05, 1)
-        state= 'PAIRING'
+        image.state= 'PAIRING'
     
     else:
         if hasattr(image, "playing_checked"):
             image.playing_checked = False
 
 
-    print(state)
-    return state
+    return image.state
 
         # ctrl.tap(BTN_B, 0.05, 0.3)
         # ctrl.tap(BTN_HOME, 0.1, 1.2)
@@ -165,20 +168,20 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
         #     return 'IN_GAME'
     
 def swsh_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
-    if state == 'START_SCREEN':
+    if image.state == 'START_SCREEN':
         if check_state(image, 'SWSH', 'title_screen'):
             ctrl.tap(BTN_A, 0.1, 0.2)
             return 'IN_GAME'
         return "START_SCREEN"
-    return state
+    return image.state
 
 def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
-    if state == 'HOME_SCREEN':
+    if image.state == 'HOME_SCREEN':
         if check_state(image, 'GENERIC', 'home_screen'):
             mash_a_while_textbox(ctrl, image, 'BDSP')
             return 'START_SCREEN'
 
-    elif state == 'START_SCREEN':
+    elif image.state == 'START_SCREEN':
         if not check_state(image, 'GENERIC', 'black_screen') and not check_state(image, 'BDSP', 'title_screen'):
             ctrl.tap(BTN_A, 0.05, 0.95)
             return 'START_SCREEN'
@@ -187,7 +190,7 @@ def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = 
             ctrl.tap(BTN_A)
             return 'IN_GAME'
         
-    return state
+    return image.state
 
 def mash_a_while_textbox(
         ctrl,

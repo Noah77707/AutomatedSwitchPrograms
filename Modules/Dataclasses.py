@@ -18,12 +18,13 @@ class RunStats:
     runs: int = 0
     resets: int = 0
     encounters: int = 0
-    action: int = 0
+    actions: int = 0
     
     eggs_collected: int = 0
     eggs_hatched: int = 0
 
     shinies: int = 0
+    action_hits: int = 0
 
     pokemon_encountered: int = 0
     pokemon_caught:int = 0

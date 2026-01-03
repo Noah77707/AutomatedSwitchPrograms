@@ -7,133 +7,240 @@ from Modules.Macros import *
 
 def Start_LZA(image: Image_Processing, ctrl: Controller, state: str | None):
     ensure_stats(image)
-    if state is None:
-        state = 'PAIRING'
-        return state
+    if image.state is None:
+        image.state = 'PAIRING'
+        return image.state
 
-    elif state in ('PAIRING'):
-        state = home_screen_checker_macro(ctrl, image, state)
-        return state
+    elif image.state in ('PAIRING'):
+        image.state = home_screen_checker_macro(ctrl, image, image.state)
+        return image.state
     
-    elif state in ('HOME_SCREEN', 'START_SCREEN'):
+    elif image.state in ('HOME_SCREEN', 'START_SCREEN'):
         if check_state(image, "LZA", "title_screen"):
-            ctrl.tap(BTN_A)
-            state = 'IN_GAME'
-            return state
-    
-    return_state(image, state)
-    image.playing_checked = False
+            sleep(1)
+            if image.generic_bool == True:
+                ctrl.down(BTN_B)
+                ctrl.down(BTN_X)
+                sleep(0.17); ctrl.dpad(0, 0.5)
+                image.state = 'BACKUP_SCREEN'
+                return image.state
+            else:
+                ctrl.tap(BTN_A, 0.1, 1)
+                image.state = 'IN_GAME'
+                return image.state
 
+    elif image.state == 'BACKUP_SCREEN':
+        image.generic_bool = False
+        ctrl.up(BTN_B)
+        ctrl.up(BTN_X)
+        if check_state(image, 'LZA', 'backup_screen') and not check_state(image, 'LZA', 'loading_screen'):
+            ctrl.tap(BTN_A)
+        elif check_state(image, 'LZA', 'loading_screen'):
+            image.state = 'IN_GAME'
+            return image.state
+        return image.state
+        
     return state
 
-def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, input: int | None):
-    if state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
-        state = Start_LZA(image, ctrl, state)
-        return state
+def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, number: int | None):
+    hotel_tpl      = get_tpl(image, "Media/LZA_Images/Hotel_Z.png")
 
-    elif state == "IN_GAME":
-        if not check_state(image, 'LZA', 'loading_screen'):
-            sleep(2)
-            state = 'IN_GAME1'
-            return state
+    roseli_tpl = get_tpl(image, "Media/LZA_Images/Roseli.png")
+    haban_tpl  = get_tpl(image, "Media/LZA_Images/Haban.png")
+    tanga_tpl  = get_tpl(image, "Media/LZA_Images/Tanga.png")
+    kasib_tpl  = get_tpl(image, "Media/LZA_Images/Kasib.png")
+
+    berries_tpl    = get_tpl(image, "Media/LZA_Images/Berries.png")
+    big_haul_tpl = get_tpl(image, "Media/LZA_Images/Big_Haul.png")
+
+    shining_tpl  = get_tpl(image, "Media/LZA_Images/AllTypes.png")
+    alpha_tpl    = get_tpl(image, "Media/LZA_Images/Alpha.png")
+
+    if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN', 'BACKUP_SCREEN'):
+        image.state = Start_LZA(image, ctrl, image.state)
+        return image.state
+
+    elif image.state == "IN_GAME":
+        if check_state(image, 'LZA', 'loading_screen') and image.playing == False:
+            image.playing = True
+        elif not check_state(image, 'LZA', 'loading_screen') and image.playing == True:
+            image.state = 'IN_GAME1'
+            return image.state
     
-    elif state == 'IN_GAME1':
+    elif image.state == 'IN_GAME1':
+        sleep(3)
         ctrl.tap(BTN_PLUS)
-        state = 'IN_MAP'
-        return state
+        image.state = 'IN_MAP'
+        return image.state
 
-    elif state == 'IN_MAP':
+    elif image.state == 'IN_MAP':
         if check_state(image, 'LZA', 'map_screen'):
             ctrl.tap(BTN_Y)
-            for _ in range(4):
-                sleep(0.17); ctrl.dpad(4, 0.05)
-            sleep(0.17)
-            ctrl.tap(BTN_A)
-            state = 'TRAVELING'
-            return state
+            image.state = 'MAP_SELECTION'
+            return image.state
     
-    elif state == 'TRAVELING':
-        if not check_state(image, 'LZA', 'loading_screen'):
-            ctrl.stick('L', 128, 255, 2)
-            ctrl.tap(BTN_A)
-            state = 'IN_HOTEL'
-            return state
+    elif image.state == 'MAP_SELECTION':
+        row = None
+        for i, roi in enumerate(const.LZA_STATES['map_screen_rois']):
+            if is_row_selected(image, roi):
+                row = i
+                break
 
-    elif state == 'IN_HOTEL':
-        if not check_state(image, 'LZA', 'loading_screen'):
-            ctrl.stick('L', 128, 255, 4.25)
-            ctrl.stick('L', 256, 128, 0.1)
-            ctrl.tap(BTN_A)
-            state = 'DONUT_SCREEN'
-            return state
-    
-    elif state == 'DOUNT_SCREEN':
-        ctrl.tap(BTN_A)
-        if check_state(image, 'LZA', 'donut_screen'):
-            if input == 1:
-                ctrl.dpad(0, 0.1); sleep(0.17)
-                for _ in range(4):
-                    ctrl.tap(BTN_A)
-                for _ in range(5):
-                    sleep(0.4); ctrl.dpad(0, 0.1)
-                sleep(0.17)
-                for _ in range(4):
-                    ctrl.tap(BTN_A)
-                ctrl.tap(BTN_PLUS)
-            elif input == 2:
-                for _ in range(5):
-                    sleep(0.4); ctrl.dpad(0, 0.1)
-                sleep(0.17)
-                for _ in range(4):
-                    ctrl.tap(BTN_A)
-                for _ in range(3):
-                    sleep(0.4); ctrl.dpad(0, 0.1)
-                sleep(0.17)
-                for _ in range(4):
-                    ctrl.tap(BTN_A)
-                ctrl.tap(BTN_PLUS)
-            state = 'DONUT_MAKING'
-            return state
-    
-    elif state == 'DONUT_MAKING':
-        if not check_state(image, 'LZA', 'donut_results'):
-            ctrl.tap(BTN_A)
-        else:
-            state = 'DONUT_FINISHED'
-            return state
-    
-    elif state == 'DOUNT_FINISHED':
-        if not check_state(image, "LZA", "donut_result"):
-            image.generic_bool = False
-            return state
+        if row is None:
+            return image.state
 
-        if not hasattr(image, "generic_bool"):
-            image.generic_bool = False
+        roi = const.LZA_STATES['map_screen_rois'][row]
 
-        texts = ocr_rois_cached(
-            image,
-            const.LZA_STATES['donut_powers_rois'],
-            cache_key="lza_donut_powers"
-        )
+        if match_label(image.original_image, roi, hotel_tpl):
+            image.state = 'TRAVELING'
+            return image.state
         
-        if input == 1:
-            keywords = ['Berries', 'Big Haul']
-        elif input == 2:
-            keywords = ['Types', 'Shining', 'Alpha']
-        
-        hits = find_keywords_in_texts(texts, keywords)
-        has_all = all(hits.values())
+        ctrl.dpad(4, 0.05); sleep(0.5)
+        return image.state
+    
+    elif image.state == 'TRAVELING':
+        if not check_state(image, 'LZA', 'loading_screen'):
+            ctrl.tap(BTN_A)
+            return image.state
+        image.state = 'TRAVELING1'
+        return image.state
 
-        if has_all and not image.generic_bool:
+    elif image.state == 'TRAVELING1':
+        if check_state(image, 'LZA', 'loading_screen'):
             image.generic_bool = True
-            image.database_component.action + 1
-            state = "DOUNT_OK"
-            return state
-        
-        if not has_all:
+        elif not check_state(image, 'LZA', 'loading_screen') and image.generic_bool == True:
             image.generic_bool = False
+            ctrl.stick('L', 128, 0, 3)
+            ctrl.tap(BTN_A)
+            image.state = 'IN_HOTEL'
+            return image.state
 
-        return state
+    elif image.state == 'IN_HOTEL':
+        if check_state(image, 'LZA', 'loading_screen'):
+            image.generic_bool = True
+        elif not check_state(image, 'LZA', 'loading_screen') and image.generic_bool == True:
+            image.generic_bool = False
+            ctrl.stick('L', 128, 0, 3)
+            ctrl.stick('L', 0, 128, 1)
+            ctrl.tap(BTN_A, 0.05, 1)
+            image.state = 'DONUT_SCREEN'
+            return image.state
+    
+    elif image.state == 'DONUT_SCREEN':
+        if check_state(image, 'LZA', 'text_box'):
+            ctrl.tap(BTN_A)
+            return image.state
+        elif check_state(image, 'LZA', 'donut_screen'):
+            image.state = 'FIRST_BERRY'
+            return image.state
+        
+    elif image.state == 'FIRST_BERRY':
+        row = None
+        if number == 1:
+            tpl = roseli_tpl
+        elif number == 2:
+            tpl = haban_tpl
+        for i, roi in enumerate(const.LZA_STATES['berry_select_rois']):
+            if is_row_selected(image, roi):
+                row = i
+                break
 
-    return_state(image, state)
-    return state
+        if row is None:
+            return image.state
+
+        roi = const.LZA_STATES['berry_select_rois'][row]
+
+        if match_label(image.original_image, roi, tpl):
+            for _ in range(4):
+                ctrl.tap(BTN_A)
+            image.state = 'SECOND_BERRY'
+            return image.state
+        
+        ctrl.dpad(0, 0.05); sleep(0.25)
+        return image.state
+
+    elif image.state == 'SECOND_BERRY':
+        row = None
+        if number == 1:
+            tpl = kasib_tpl
+        elif number == 2:
+            tpl = tanga_tpl
+        for i, roi in enumerate(const.LZA_STATES['berry_select_rois']):
+            if is_row_selected(image, roi):
+                row = i
+                break
+
+        if row is None:
+            return image.state
+
+        roi = const.LZA_STATES['berry_select_rois'][row]
+
+        if match_label(image.original_image, roi, tpl):
+            for _ in range(4):
+                ctrl.tap(BTN_A)
+            ctrl.tap(BTN_PLUS)
+            image.state = 'DONUT_MAKING'
+            return image.state
+        
+        ctrl.dpad(0, 0.05); sleep(0.25)
+        return image.state
+    
+    elif image.state == 'DONUT_MAKING':
+        if not check_state(image, 'LZA', 'donut_results'):
+            ctrl.tap(BTN_A, 0.05, 0.5)
+        else:
+            sleep(2)
+            image.state = 'DONUT_FINISHED'
+            return image.state
+    
+    elif image.state == 'DONUT_FINISHED':
+        visible = check_state(image, "LZA", "donut_results")
+        print(visible)
+        was_visible = getattr(image, "generic_bool", False)
+        image.generic_bool = visible
+
+        if not visible:
+            return image.state
+        if was_visible:
+            return image.state  # same results screen, already processed
+
+        rois = const.LZA_STATES['donut_powers_rois']
+
+        if number == 1:
+            print('debug')
+            has_berries = match_any_slot(image.original_image, rois, berries_tpl, 0.8)
+            has_big_haul = match_any_slot(image.original_image, rois, big_haul_tpl, 0.8)
+            has_all = has_berries and has_big_haul
+        elif number == 2:
+            print('shiny')
+            has_alltypes = match_any_slot(image.original_image, rois, shining_tpl, 0.8)
+            has_alpha = match_any_slot(image.original_image, rois, alpha_tpl, 0.8)
+            has_all = has_alltypes and has_alpha
+
+        image.database_component.actions += 1
+        if has_all:
+            image.database_component.action_hits += 1
+            image.state = 'DONUT_OK'
+            return image.state
+        image.state = 'DONUT_BAD'
+        return image.state
+        
+    elif image.state == 'DONUT_BAD':
+        ctrl.tap(BTN_HOME, 0.05, 0.45)
+        ctrl.tap(BTN_X, 0.05, 0.25)
+        ctrl.tap(BTN_A, 0.05, 02.95)
+        image.database_component.resets += 1
+        image.generic_bool = True
+        image.state = 'PAIRING'
+        return image.state
+    
+    elif image.state == 'DONUT_OK':
+        ctrl.tap(BTN_A, 0.05, 2)
+        ctrl.tap(BTN_B, 0.05, 1)
+        if image.database_component.action_hits == image.run:
+            image.state = "PROGRAM_FINISHED"
+            return image.state
+        image.state = 'IN_GAME1'
+        return image.state
+    
+    return image.state

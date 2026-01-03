@@ -60,6 +60,7 @@ class GUI(pyqt_w.QWidget):
         self.state = str
         self.tracks = []
         self.numberinput = int
+        self.userprofile = int
         self.debug = False
         self.running = False
         self.paused = False
@@ -129,19 +130,19 @@ class GUI(pyqt_w.QWidget):
         
         EGG_COLLECTOR_BDSP = pyqt_w.QPushButton('Egg Collector', self)
         EGG_COLLECTOR_BDSP.setProperty('tracks', ['eggs_collected', 'shinies', 'playtime_seconds'])
-        EGG_COLLECTOR_BDSP.clicked.connect(lambda checked, btn= EGG_COLLECTOR_BDSP: self.update_script_textbox('BDSP', btn, 'Egg_Collector_BDSP', checked))
+        EGG_COLLECTOR_BDSP.clicked.connect(lambda checked, btn= EGG_COLLECTOR_BDSP: self.update_script('BDSP', btn, 'Egg_Collector_BDSP', checked))
         
         EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher', self)
         EGG_HATCHER_BDSP.setProperty('tracks', ['eggs_hatched', 'shinies', 'playtime_seconds'])
-        EGG_HATCHER_BDSP.clicked.connect(lambda checked, btn= EGG_HATCHER_BDSP: self.update_script_textbox('BDSP', btn, 'Egg_Hatcher_BDSP', checked))
+        EGG_HATCHER_BDSP.clicked.connect(lambda checked, btn= EGG_HATCHER_BDSP: self.update_script('BDSP', btn, 'Egg_Hatcher_BDSP', checked))
         
         AUTOMATED_EGG_BDSP = pyqt_w.QPushButton('Automated Egg Collector/Hatcher/Releaser')
         AUTOMATED_EGG_BDSP.setProperty('tracks', ['eggs_collected', 'eggs_hatched', 'pokemon_released', 'shinies', 'playtime_seconds'])
-        AUTOMATED_EGG_BDSP.clicked.connect(lambda checked, btn= AUTOMATED_EGG_BDSP: self.update_script_textbox('BDSP', btn, 'Automated_Egg_BDSP', checked))
+        AUTOMATED_EGG_BDSP.clicked.connect(lambda checked, btn= AUTOMATED_EGG_BDSP: self.update_script('BDSP', btn, 'Automated_Egg_BDSP', checked))
         
         RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser', self)
         RELEASER_BDSP.setProperty('tracks', ['pokemon_released', 'pokemon_skipped', 'playtime_seconds'])
-        RELEASER_BDSP.clicked.connect(lambda checked, btn= RELEASER_BDSP: self.update_script_textbox('BDSP', btn, 'Pokemon_Releaser_BDSP', checked))
+        RELEASER_BDSP.clicked.connect(lambda checked, btn= RELEASER_BDSP: self.update_script('BDSP', btn, 'Pokemon_Releaser_BDSP', checked))
 
         BDSP_layout.addWidget(STATIC_ENCOUNTER_BDSP)
         BDSP_layout.addWidget(EGG_COLLECTOR_BDSP)
@@ -162,11 +163,16 @@ class GUI(pyqt_w.QWidget):
         LZA_layout = pyqt_w.QVBoxLayout()
         LZA_layout.addWidget(pyqt_w.QLabel('LZA programs'))
 
-        DONUT_MAKER = pyqt_w.QPushButton('Donut Maker WIP', self)
-        DONUT_MAKER.setProperty('tracks', ['actions', 'resets', 'playtime_seconds'])
-        DONUT_MAKER.clicked.connect(lambda checked, btn = DONUT_MAKER: self.update_script_textbox('LZA', btn, 'Donut_Checker', checked))
+        DONUT_MAKER_BERRY = pyqt_w.QPushButton('Donut Maker Berry WIP', self)
+        DONUT_MAKER_BERRY.setProperty('tracks', ['actions', 'action_hits', 'resets', 'playtime_seconds'])
+        DONUT_MAKER_BERRY.clicked.connect(lambda checked, btn = DONUT_MAKER_BERRY: self.update_script('LZA', btn, 'Donut_Checker_Berry', 1, checked))
 
-        LZA_layout.addWidget(DONUT_MAKER)
+        DONUT_MAKER_SHINY = pyqt_w.QPushButton('Donut Maker Shiny WIP', self)
+        DONUT_MAKER_SHINY.setProperty('tracks', ['actions', 'action_hits', 'resets', 'playtime_seconds'])
+        DONUT_MAKER_SHINY.clicked.connect(lambda checked, btn = DONUT_MAKER_SHINY: self.update_script('LZA', btn, 'Donut_Checker_Shiny', 2, checked))
+
+        LZA_layout.addWidget(DONUT_MAKER_BERRY)
+        LZA_layout.addWidget(DONUT_MAKER_SHINY)
         self.items['tab_lza'].setLayout(LZA_layout)
 
         self.tabs.addTab(self.items['tab_home'], 'HOME')
@@ -209,7 +215,13 @@ class GUI(pyqt_w.QWidget):
         self.stop_button = pyqt_w.QPushButton('Stop Program', self)
         self.stop_button.clicked.connect(self.stop_scripts)
 
-        self.items['start_stop_button'].setText("Start / Stop")
+        self.run_spin = pyqt_w.QSpinBox(self)
+        self.run_spin.setRange(1, 999999)
+        self.run_spin.setValue(1)
+
+        self.profile_spin = pyqt_w.QSpinBox(self)
+        self.profile_spin.setRange(1, 999999)
+        self.profile_spin.setValue(1)
 
         button_row_debug = pyqt_w.QHBoxLayout()
         button_row_debug.addWidget(self.debug_button)
@@ -220,9 +232,16 @@ class GUI(pyqt_w.QWidget):
         button_row_program.addWidget(self.pause_button)
         button_row_program.addWidget(self.stop_button)
 
+        input_row_inputs = pyqt_w.QHBoxLayout()
+        input_row_inputs.addWidget(pyqt_w.QLabel('Runs:', self))
+        input_row_inputs.addWidget(self.run_spin)
+        input_row_inputs.addWidget(pyqt_w.QLabel('Profile #:', self))
+        input_row_inputs.addWidget(self.profile_spin)
+
         right_panel.addLayout(info_row)
-        right_panel.addLayout(button_row_debug)
+        right_panel.addLayout(input_row_inputs)
         right_panel.addLayout(button_row_program)
+        right_panel.addLayout(button_row_debug)
         right_panel.addStretch(1)
 
         # ---------- attach to main ----------
@@ -277,12 +296,14 @@ class GUI(pyqt_w.QWidget):
             return ''
         
         parts = []
+        parts.append(f'program: {self.program}')
         for key in self.tracks:
             val = getattr(s, key, 0)
             if key == 'playtime_seconds':
                 parts.append(f'time: {format_hms(int(val))}')
             else:
                 parts.append(f'{key}: {val}')
+        parts.append(f'total: {getattr(self.image, 'run', None)}')
         parts.append(f'state: {getattr(self.image, 'state', None)}')
         return ' | '.join(parts)
     # creates the timer that is used to see how long the program ran
@@ -312,22 +333,24 @@ class GUI(pyqt_w.QWidget):
             'game': self.current_program_name
         })
     # updates the program to be the one that runs when you start the script
-    def update_script(self, game: str, btn: pyqt_w.QPushButton, program: str, checked: bool = False) -> None:
+    def update_script(self, game: str, btn: pyqt_w.QPushButton, program: str, number: int = 0, checked: bool = False) -> None:
         self.game = game
         self.program = program
         self.tracks = btn.property('tracks') or []
-        self.numberinput = 0
-    # updates the program to be the one that runs when you start the script, along with adding an input for the player
-    def update_script_textbox(self, game: str, btn: pyqt_w.QPushButton, program: str, checked: bool = False) -> None:
-        text, ok = pyqt_w.QInputDialog.getText(self, 'How Many Boxes', 'Enter Box Amount (input 0 for all boxes):')
-        if ok and text:
-            self.numberinput = text
-        self.game = game
-        self.program = program
-        self.tracks = btn.property('tracks') or []
+        self.numberinput = int(number)
     # starts the script/program
     def start_scripts(self) -> None:
-        self.Command_queue.put({'cmd': 'SET_PROGRAM', 'game': self.game, 'program': self.program, 'number': self.numberinput, 'running': True})
+        runs = int(self.run_spin.value())
+        profile = int(self.profile_spin.value())
+
+        self.Command_queue.put(
+            {'cmd': 'SET_PROGRAM',
+            'game': self.game,
+            'program': self.program,
+            'number': self.numberinput,
+            'running': True,
+            'runs': runs,
+            'profile': profile})
         self.running = True
         self.paused = False
         self.run_last_t = monotonic()

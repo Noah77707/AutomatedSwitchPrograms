@@ -45,7 +45,9 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # SV
 
     # LZA
-    ('LZA', 'Donut_Checker'): Donut_Checker
+    ('LZA', 'Donut_Checker_Berry'): Donut_Checker,
+    ('LZA', 'Donut_Checker_Shiny'): Donut_Checker,
+
 
 }
 
@@ -104,7 +106,7 @@ def controller_control(
 
         finish_run(
             game, program,
-            action_delta=d.action,
+            action_delta=d.actions,
             resets_delta=d.resets,
             pokemon_encountered_delta=d.pokemon_encountered,
             pokemon_caught_delta=d.pokemon_caught,
@@ -112,6 +114,7 @@ def controller_control(
             eggs_hatched_delta=d.eggs_hatched,
             pokemon_released_delta=d.pokemon_released,
             shinies_delta=d.shinies,
+            action_hit_delta=d.action_hits,
             playtime_seconds_delta=d.playtime_seconds,
         )
         image.database_component = RunStats()
@@ -130,6 +133,11 @@ def controller_control(
                 game = msg.get('game')
                 program = msg.get('program')
                 input = msg.get('number')
+                
+
+                image.run = int(msg.get('runs', 1))
+                image.profile = int(msg.get('profile', 1))
+
                 state = None
                 running = True
                 paused = False
@@ -168,7 +176,7 @@ def controller_control(
             sleep(0.01)
             continue
 
-        state = step_fn(image, ctrl,state, input)
+        state = step_fn(image, ctrl, state, input)
     ctrl.close()
         
 def frame_pump(Image_queue, shutdown_event, image):

@@ -290,58 +290,59 @@ def walk_until_landmark_dpad(
 
     return False
 
-def ocr_roi_line(frame_bgr, roi, *, invert: bool = False, psm: int = 7) -> str:
-    x, y, w, h = map(int, roi)
-    crop = frame_bgr[y:y+h, x:x+w]
-    if crop.size == 0:
-        return ""
-
-    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-    gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
-    gray = cv.GaussianBlur(gray, (3, 3), 0)
-
-    thr_flag = cv.THRESH_BINARY_INV if invert else cv.THRESH_BINARY
-    bw = cv.threshold(gray, 0, 255, thr_flag + cv.THRESH_OTSU)[1]
-
-    cfg = (
-        f"--psm {psm} "
-        "-c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:+().- "
-    )
-    txt = pt.image_to_string(bw, config=cfg)
-    txt = re.sub(r"\s+", " ", txt).strip().lower()
-    return txt
-
-def ocr_rois_cached(
-    image,
-    rois,
-    *,
-    cache_key: str,
-    min_interval_s: float = 0.25,
-    invert: bool = False,
-    psm: int = 7,
-) -> list[str]:
-    now = time.monotonic()
-
-    last_t_key = f"_ocr_last_t_{cache_key}"
-    last_txt_key = f"_ocr_last_txt_{cache_key}"
-
-    last_t = getattr(image, last_t_key, 0.0)
-    if now - last_t < min_interval_s:
-        return getattr(image, last_txt_key, [""] * len(rois))
-
-    frame = getattr(image, "original_image", None)
-    if frame is None:
-        return [""] * len(rois)
-
-    rows = [ocr_roi_line(frame, r, invert=invert, psm=psm) for r in rois]
-
-    setattr(image, last_t_key, now)
-    setattr(image, last_txt_key, rows)
-    return rows
-
 def find_keywords_in_texts(
     texts: list[str],
     keywords: list[str],
 ) -> dict[str, bool]:
     joined = " | ".join(texts)
     return {k: (k.lower() in joined) for k in keywords}
+
+def is_row_selected(image: Image_Processing, roi, white_thres=240, ratio= 0.35):
+    frame  = image.original_image
+    x, y, w, h = roi
+    crop = frame[y:y+h, x:x+w]
+    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+
+    white_pixels = np.count_nonzero(gray > white_thres)
+    return (white_pixels / gray.size) > ratio
+
+def match_label(frame_bgr, roi, template_gray, thresh=0.85) -> bool:
+    x, y, w, h = map(int, roi)
+    crop = frame_bgr[y:y+h, x:x+w]
+    if crop.size == 0:
+        return False
+
+    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY) if crop.ndim == 3 else crop
+
+    tmpl = template_gray
+    if tmpl is None:
+        return False
+    if tmpl.ndim == 3:
+        tmpl = cv.cvtColor(tmpl, cv.COLOR_BGR2GRAY)
+
+    if gray.shape[0] < tmpl.shape[0] or gray.shape[1] < tmpl.shape[1]:
+        return False
+
+    res = cv.matchTemplate(gray, tmpl, cv.TM_CCOEFF_NORMED)
+    _, maxv, _, _ = cv.minMaxLoc(res)
+    return float(maxv) >= float(thresh)
+
+def match_any_slot(frame_bgr, rois, tpl_gray, threshold=0.78) -> tuple[bool, float]:
+    for roi in rois:
+        if match_label(frame_bgr, roi, tpl_gray, threshold):
+            return True
+    return False
+
+
+def get_tpl(image, path: str, flags=cv.IMREAD_GRAYSCALE):
+    if not hasattr(image, "tpl_cache"):
+        image.tpl_cache = {}
+
+    key = (path, flags)
+    if key not in image.tpl_cache:
+        tpl = cv.imread(path, flags)
+        if tpl is None:
+            raise FileNotFoundError(f"Template not found: {path}")
+        image.tpl_cache[key] = tpl
+
+    return image.tpl_cache[key]

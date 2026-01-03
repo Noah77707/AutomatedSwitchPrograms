@@ -14,6 +14,7 @@ NEW_INT_COLS = [
     ("eggs_collected", 0),
     ("eggs_hatched", 0),
     ("pokemon_released", 0),
+    ("action_hit", 0)
 ]
 
 def _add_missing_columns(cur: sqlite3.Cursor, table: str) -> None:
@@ -47,6 +48,7 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 pokemon_released INTEGER NOT NULL DEFAULT 0,
 
                 shinies INTEGER NOT NULL DEFAULT 0,
+                action_hit INTEGER NOT NULL DEFAULT 0,
                 playtime_seconds INTEGER NOT NULL DEFAULT 0,
 
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -72,6 +74,7 @@ def add_deltas(
     eggs_hatched_delta: int = 0,
     pokemon_released_delta: int = 0,
     shinies_delta: int = 0,
+    action_hit_delta: int = 0,
 
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
@@ -81,8 +84,13 @@ def add_deltas(
     if min(action_delta, shinies_delta, playtime_seconds_delta) < 0:
         raise ValueError("deltas must be >= 0")
 
-    if action_delta == 0 and shinies_delta == 0 and playtime_seconds_delta == 0:
+    if all(d == 0 for d in (
+        action_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
+        eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
+        shinies_delta, action_hit_delta, playtime_seconds_delta
+    )):
         return
+
 
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
@@ -104,6 +112,7 @@ def add_deltas(
                 eggs_hatched = eggs_hatched + ?,
                 pokemon_released = pokemon_released + ?,
                 shinies = shinies + ?,
+                action_hit = action_hit + ?,
                 playtime_seconds = playtime_seconds + ?,
                 updated_at = datetime('now')
             WHERE game = ? AND program = ?
@@ -116,6 +125,7 @@ def add_deltas(
             int(eggs_hatched_delta),
             int(pokemon_released_delta),
             int(shinies_delta),
+            int(action_hit_delta),
             int(playtime_seconds_delta),
             game, program
         ))
@@ -133,6 +143,7 @@ def finish_run(
     eggs_hatched_delta: int = 0,
     pokemon_released_delta: int = 0,
     shinies_delta: int = 0,
+    action_hit_delta: int = 0,
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
@@ -142,7 +153,7 @@ def finish_run(
     deltas = [
         action_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
         eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
-        shinies_delta, playtime_seconds_delta
+        shinies_delta, action_hit_delta, playtime_seconds_delta
     ]
     if any(d < 0 for d in deltas):
         raise ValueError("deltas must be >= 0")
@@ -159,9 +170,9 @@ def finish_run(
                 runs,
                 action, resets, pokemon_encountered, pokemon_caught,
                 eggs_collected, eggs_hatched, pokemon_released,
-                shinies, playtime_seconds
+                shinies, action_hit, playtime_seconds
             )
-            VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(game, program) DO UPDATE SET
                 runs = runs + 1,
                 action = action + excluded.action,
@@ -172,6 +183,7 @@ def finish_run(
                 eggs_hatched = eggs_hatched + excluded.eggs_hatched,
                 pokemon_released = pokemon_released + excluded.pokemon_released,
                 shinies = shinies + excluded.shinies,
+                action_hit = action_hit + excluded.action_hit,
                 playtime_seconds = playtime_seconds + excluded.playtime_seconds,
                 updated_at = datetime('now')
         """, (
@@ -184,6 +196,7 @@ def finish_run(
             int(eggs_hatched_delta),
             int(pokemon_released_delta),
             int(shinies_delta),
+            int(action_hit_delta),
             int(playtime_seconds_delta),
         ))
 
@@ -199,8 +212,8 @@ def get_stats(game: str, program: str, db_file: str = DATABASE_PATH) -> Optional
                 action, resets,
                 pokemon_encountered, pokemon_caught,
                 eggs_collected, eggs_hatched,
-                pokemon_released,
-                shinies, playtime_seconds,
+                pokemon_released, shinies, 
+                action_hit, playtime_seconds,
                 created_at, updated_at
             FROM program_stats
             WHERE game = ? AND program = ?

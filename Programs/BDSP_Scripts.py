@@ -40,7 +40,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         hits_required= 3
     )
     try:
-        boxes = int(input)
+        boxes = int(image.run)
     except (TypeError, ValueError):
         boxes = 0
 
@@ -189,7 +189,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
     image.clear_debug()
     image.add_debug_roi((200, 120, 200, 200), (0, 0, 255))
     image.add_debug_roi(const.BDSP_CONSTANTS['text_box_roi'], (255, 0, 0))
-    count = input * 30
+    count = image.run * 30
     # Start of the state program
     if state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
         state = Start_BDSP(image, ctrl, state)
@@ -307,17 +307,17 @@ def Automated_Egg_BDSP(image: Image_Processing, ctrl: Controller, phase: str | N
             phase, sub = 'COLLECT', 'PROGRAM'
     
     elif phase == 'COLLECT':
-        sub = Egg_Collector_BDSP(image, ctrl, sub, input)
+        sub = Egg_Collector_BDSP(image, ctrl, sub)
         if sub == 'COLLECTOR_FINISHED':
             phase, sub = 'HATCH', 'PROGRAM'
 
     elif phase == 'HATCH':
-        sub = Egg_Hatcher_BDSP(image, ctrl, sub, input)
+        sub = Egg_Hatcher_BDSP(image, ctrl, sub)
         if sub == 'HATCHING_FINISHED':
             phase, sub = 'RELEASE', 'PROGRAM'
     
     elif phase == 'RELEASE':
-        sub = Pokemon_Releaser_BDSP(image, ctrl, sub, input)
+        sub = Pokemon_Releaser_BDSP(image, ctrl, sub)
         if sub == 'RELEASER_FINISHED':
             phase, sub = 'FINISHED', 'PROGRAM'
 
@@ -340,7 +340,7 @@ def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str 
         
     elif state == 'IN_BOX':
         if check_state(image, 'BDSP', 'box_open'):
-            release_pokemon(ctrl, image, 'BDSP', input)
+            release_pokemon(ctrl, image, 'BDSP', image.run)
             state = "PROGRAM_FINISHED"
             
     return return_state(image, state)

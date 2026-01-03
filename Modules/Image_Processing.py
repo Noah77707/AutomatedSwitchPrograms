@@ -18,6 +18,10 @@ class Image_Processing():
         self.resized_image = None
         self.pyqt_image = None
         self.state = None
+        self.playing = False
+        self.run = 0
+        self.profile = 0
+        self.profile_set = False
 
         self.debug_draw = True
         self.debug_rois = []
