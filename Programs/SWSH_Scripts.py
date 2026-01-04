@@ -7,31 +7,26 @@ from Modules.Macros import *
 from Modules.States import *
 
 def Start_SWSH(image: Image_Processing, ctrl: Controller, state: str | None) -> str:
-    if state == None:
-        state = 'PAIRING'
+    if image.state == None:
+        image.state = 'PAIRING'
 
-    elif state  == 'PAIRING':
-        state = home_screen_checker_macro(ctrl, image, state)
-        return state
+    elif image.state  == 'PAIRING':
+        image.state = home_screen_checker_macro(ctrl, image, image.state)
+        return image.state
     
-    elif state  == 'START_SCREEN':
-        state = swsh_start_screens_macro(ctrl, image, state)
-        return state
+    elif image.state  == 'START_SCREEN':
+        image.state = swsh_start_screens_macro(ctrl, image, image.state)
+        return image.state
     
-    # No matter what, always returns PAIRING for no reason
-    return_state(image, state)
-    image.playing_checked = False
+    return image.state
 
-    return state
-
-#Tested with registeel. Haven't encountered a shiny yet
 def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
     if not hasattr(image, "debug_rois_collector"):
         image.add_debug_roi(const.SWSH_CONSTANTS['static_roi'], (0,255,0))
         image.debug_rois_collector = True
     
-    if state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
-        state = Start_SWSH(image, ctrl, state)
+    if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
+        image.state = Start_SWSH(image, ctrl, image.state)
 
     elif state == 'IN_GAME':
         if check_state(image, 'SWSH', 'in_game'):
@@ -42,12 +37,12 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             ctrl.tap(BTN_A)
             return 'IN_BATTLE'
         
-    elif state == 'IN_BATTLE':
+    elif image.state == 'IN_BATTLE':
         if check_state(image, 'SWSH', 'encounter_text'):
             return 'CHECK_SHINY'
         return 'IN_BATTLE'
     
-    elif state == 'CHECK_SHINY':
+    elif image.state == 'CHECK_SHINY':
         fid = getattr(image, 'frame_id', 0)
         last = getattr(image, 'last_frame_id', -1)
         if fid == last:
@@ -75,12 +70,12 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             image.shiny_frames_checked = 0
             image.database_component.pokemon_encountered += 1
             return 'NOT_SHINY'
-        return state
+        return image.state
     
-    elif state == 'FOUND_SHINY':
-        state == "SHINY"
+    elif image.state == 'FOUND_SHINY':
+        image.state == "SHINY"
 
-    elif state == 'NOT_SHINY':
+    elif image.state == 'NOT_SHINY':
         image.database_component.resets += 1
         print("Not Shiny")
         ctrl.tap(BTN_HOME, 0.05, 0.45)
@@ -94,25 +89,24 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             print("frame_id:", getattr(image, "frame_id", 0))
 
         return 'PAIRING'
-    return_state(image, state)
-    return state
+    return image.state
 
 def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, input: int) -> str:
     return None
 
 def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
-    if state == None:
-        state = 'PAIRING'
+    if image.state == None:
+        image.state = 'PAIRING'
 
-    elif state == 'PAIRING':
-        state = home_screen_checker_macro(ctrl, image)
-        return state
+    elif image.state == 'PAIRING':
+        image.state = home_screen_checker_macro(ctrl, image)
+        return image.state
     
-    elif state == 'HOME_SCREEN' or state == 'START_SCREEN':
-        state = swsh_start_screens_macro(ctrl, image, state)
-        return state
+    elif image.state == 'HOME_SCREEN' or image.state == 'START_SCREEN':
+        image.state = swsh_start_screens_macro(ctrl, image, image.state)
+        return image.state
     
-    elif state == 'IN_GAME':
+    elif image.state == 'IN_GAME':
         if not check_state(image, 'GENERIC', 'black_screen'):
             sleep(2)
             ctrl.tap(BTN_X, 0.05, 0.45)
@@ -120,9 +114,9 @@ def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             ctrl.tap(BTN_R, 0.05, 1.2)
             return 'IN_BOX'
         
-    elif state == 'IN_BOX':
+    elif image.state == 'IN_BOX':
         if check_state(image, 'SWSH', 'box_open'):
             release_pokemon(ctrl, image, 'SWSH', input)
-            state = "PROGRAM_FINISHED"
+            image.state = "PROGRAM_FINISHED"
             
-    return state
+    return image.state

@@ -61,6 +61,7 @@ GENERIC_STATES = {
 }
 
 SWSH_STATES = {
+    # screens
     "title_screen": {
         "color": (255, 255, 254),
         "positions": [(717, 78), (557, 79)],
@@ -71,7 +72,7 @@ SWSH_STATES = {
         "positions": [(802, 87), (868, 665)],
         "tol": 10,
     },
-    
+    # in game
     "in_game": {
         "color": (254, 254, 254),
         "positions": [(54, 690), (8, 690)],
@@ -97,9 +98,20 @@ SWSH_STATES = {
         "positions": [(854, 663), (366, 655), (1138, 670)],
         "tol": 10,
     },
+    # rois
+    "pokemon_name": (313, 395, 143, 31),
+
+    # program_specific
+    "static_encounter": {
+        "static_roi": (999, 244, 181, 320),
+        "static_v_threshold": 245,
+        "static_s_max": 40,
+        "static_brightness_ratio": 0.05
+    }
 }
 
 BDSP_STATES = {
+    # screens
     "loading_title": {
         "color": (224, 225, 225),
         "positions": [(509, 432), (830, 443)],
@@ -115,7 +127,7 @@ BDSP_STATES = {
         "positions": [(837, 84), (358, 87)],
         "tol": 10,
     },
-    
+    # in game
     "multi_select": {
         "color": (80, 164, 76),
         "positions": [(258, 8), (257, 59)],
@@ -163,13 +175,12 @@ BDSP_STATES = {
         "positions": [(1257, 190), (1257, 129)],
         "tol": 10,
     },
-  
-    "nursery_man_roi": {
-        "roi": (165, 343, 40, 54),
-    },
+    #   rois
+    "nursery_man": (165, 343, 40, 54),
     "text_box_roi": {
         "roi": (268, 591, 757, 107)
         },
+    # program specific
 }
 
 LA_STATES = {}
@@ -177,6 +188,7 @@ LA_STATES = {}
 SV_STATES = {}
 
 LZA_STATES = {
+    # screens
     "title_screen": {
         "color": (255, 255, 254),
         "positions": [(469, 444), (663, 446), (562, 292)],
@@ -219,7 +231,7 @@ LZA_STATES = {
             (43, 109)
         ]
     },
-    
+    # in game
     "multi_select": {
         'color': (243, 227, 54),
         "positions": [
@@ -257,7 +269,7 @@ LZA_STATES = {
             (94, 453)
         ]
     },
-    
+    # rois
     "donut_powers_rois": [
         (172, 552, 250, 24),
         (172, 584, 250, 24),
@@ -282,6 +294,7 @@ LZA_STATES = {
         (22, 554, 289, 49),
         (22, 616, 289, 49)
     ],
+    # program specific
 }
 
 # Map a game string to its state dict
@@ -292,6 +305,13 @@ GAME_STATES = {
     "LA": LA_STATES,
     "SV": SV_STATES,
     "LZA": LZA_STATES,
+}
+
+PROGRAM_META = {
+    ("BDSP", "Egg_Collector_BDSP"): {
+        "desc": "Stand at the Day Care man. Party must have 1 empty slot. Program will collect eggs then walk to reposition.",
+        "img": "Media/Docs/BDSP_EggCollector_Setup.png",
+    }
 }
 
 

@@ -115,7 +115,7 @@ class GUI(pyqt_w.QWidget):
         SWSH_layout.addWidget(pyqt_w.QLabel('SWSH programs'))
 
         STATIC_ENCOUNTER_SWSH = pyqt_w.QPushButton('Static Encounter', self)
-        STATIC_ENCOUNTER_SWSH.setProperty('tracks', ['pokemon_encountered', 'resets', 'shinies', 'playtime_seconds'])
+        STATIC_ENCOUNTER_SWSH.setProperty('tracks', ['pokemon_encountered', 'resets', 'shinies', 'playtime_seconds', 'state'])
         STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, btn= STATIC_ENCOUNTER_SWSH: self.update_script('SWSH', btn, 'Static_Encounter_SWSH', checked))
         
         SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
@@ -129,19 +129,19 @@ class GUI(pyqt_w.QWidget):
         STATIC_ENCOUNTER_BDSP.clicked.connect(lambda checked, p='Static_Encounter_BDSP': self.update_script('BDSP', p, checked))
         
         EGG_COLLECTOR_BDSP = pyqt_w.QPushButton('Egg Collector', self)
-        EGG_COLLECTOR_BDSP.setProperty('tracks', ['eggs_collected', 'shinies', 'playtime_seconds'])
+        EGG_COLLECTOR_BDSP.setProperty('tracks', ['eggs_collected', 'shinies', 'playtime_seconds', 'state'])
         EGG_COLLECTOR_BDSP.clicked.connect(lambda checked, btn= EGG_COLLECTOR_BDSP: self.update_script('BDSP', btn, 'Egg_Collector_BDSP', checked))
         
         EGG_HATCHER_BDSP = pyqt_w.QPushButton('Egg Hatcher', self)
-        EGG_HATCHER_BDSP.setProperty('tracks', ['eggs_hatched', 'shinies', 'playtime_seconds'])
+        EGG_HATCHER_BDSP.setProperty('tracks', ['eggs_hatched', 'shinies', 'playtime_seconds', 'state'])
         EGG_HATCHER_BDSP.clicked.connect(lambda checked, btn= EGG_HATCHER_BDSP: self.update_script('BDSP', btn, 'Egg_Hatcher_BDSP', checked))
         
         AUTOMATED_EGG_BDSP = pyqt_w.QPushButton('Automated Egg Collector/Hatcher/Releaser')
-        AUTOMATED_EGG_BDSP.setProperty('tracks', ['eggs_collected', 'eggs_hatched', 'pokemon_released', 'shinies', 'playtime_seconds'])
+        AUTOMATED_EGG_BDSP.setProperty('tracks', ['eggs_collected', 'eggs_hatched', 'pokemon_released', 'shinies', 'playtime_seconds', 'phase', 'state'])
         AUTOMATED_EGG_BDSP.clicked.connect(lambda checked, btn= AUTOMATED_EGG_BDSP: self.update_script('BDSP', btn, 'Automated_Egg_BDSP', checked))
         
         RELEASER_BDSP = pyqt_w.QPushButton('Pokemon Releaser', self)
-        RELEASER_BDSP.setProperty('tracks', ['pokemon_released', 'pokemon_skipped', 'playtime_seconds'])
+        RELEASER_BDSP.setProperty('tracks', ['pokemon_released', 'pokemon_skipped', 'playtime_seconds', 'state'])
         RELEASER_BDSP.clicked.connect(lambda checked, btn= RELEASER_BDSP: self.update_script('BDSP', btn, 'Pokemon_Releaser_BDSP', checked))
 
         BDSP_layout.addWidget(STATIC_ENCOUNTER_BDSP)
@@ -163,12 +163,12 @@ class GUI(pyqt_w.QWidget):
         LZA_layout = pyqt_w.QVBoxLayout()
         LZA_layout.addWidget(pyqt_w.QLabel('LZA programs'))
 
-        DONUT_MAKER_BERRY = pyqt_w.QPushButton('Donut Maker Berry WIP', self)
-        DONUT_MAKER_BERRY.setProperty('tracks', ['actions', 'action_hits', 'resets', 'playtime_seconds'])
+        DONUT_MAKER_BERRY = pyqt_w.QPushButton('Donut Maker Berry', self)
+        DONUT_MAKER_BERRY.setProperty('tracks', ['actions', 'action_hits', 'resets', 'playtime_seconds', 'state'])
         DONUT_MAKER_BERRY.clicked.connect(lambda checked, btn = DONUT_MAKER_BERRY: self.update_script('LZA', btn, 'Donut_Checker_Berry', 1, checked))
 
-        DONUT_MAKER_SHINY = pyqt_w.QPushButton('Donut Maker Shiny WIP', self)
-        DONUT_MAKER_SHINY.setProperty('tracks', ['actions', 'action_hits', 'resets', 'playtime_seconds'])
+        DONUT_MAKER_SHINY = pyqt_w.QPushButton('Donut Maker Shiny', self)
+        DONUT_MAKER_SHINY.setProperty('tracks', ['actions', 'action_hits', 'resets', 'playtime_seconds', 'state'])
         DONUT_MAKER_SHINY.clicked.connect(lambda checked, btn = DONUT_MAKER_SHINY: self.update_script('LZA', btn, 'Donut_Checker_Shiny', 2, checked))
 
         LZA_layout.addWidget(DONUT_MAKER_BERRY)
@@ -233,7 +233,7 @@ class GUI(pyqt_w.QWidget):
         button_row_program.addWidget(self.stop_button)
 
         input_row_inputs = pyqt_w.QHBoxLayout()
-        input_row_inputs.addWidget(pyqt_w.QLabel('Runs:', self))
+        input_row_inputs.addWidget(pyqt_w.QLabel('Amount Desired:', self))
         input_row_inputs.addWidget(self.run_spin)
         input_row_inputs.addWidget(pyqt_w.QLabel('Profile #:', self))
         input_row_inputs.addWidget(self.profile_spin)
@@ -267,7 +267,7 @@ class GUI(pyqt_w.QWidget):
             return
 
         frame_to_show = frame
-        if getattr(self.image, 'draw_debug', False):
+        if getattr(self.image, 'debug_draw', False):
             frame_to_show = self.image.draw_debug(frame.copy())
 
         # convert BGR -> RGB
@@ -301,10 +301,13 @@ class GUI(pyqt_w.QWidget):
             val = getattr(s, key, 0)
             if key == 'playtime_seconds':
                 parts.append(f'time: {format_hms(int(val))}')
+            elif key == 'phase':
+                parts.append(f'phase: {getattr(self.image, 'phase', None)}')
+            elif key == 'state':
+                parts.append(f'state: {getattr(self.image, 'state', None)}')
             else:
                 parts.append(f'{key}: {val}')
-        parts.append(f'total: {getattr(self.image, 'run', None)}')
-        parts.append(f'state: {getattr(self.image, 'state', None)}')
+                
         return ' | '.join(parts)
     # creates the timer that is used to see how long the program ran
     def stat_timer(self):
@@ -381,8 +384,10 @@ class GUI(pyqt_w.QWidget):
     def update_debug(self) -> None:
         if self.image.debug_draw == False:
             self.image.debug_draw = True
+            self.debug_button.setText('Remove Debug')
         else:
             self.image.debug_draw = False
+            self.debug_button.setText('Draw Debug')
     # Allows the player to take a screenshot
     def on_screenshot_clicked(self) -> None:
         filename, _ = pyqt_w.QFileDialog.getSaveFileName(

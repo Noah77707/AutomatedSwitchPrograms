@@ -23,9 +23,15 @@ BTN_RSTICK = 11
 BTN_HOME = 12
 BTN_CAPTURE = 13
 
-def return_state(image: Image_Processing, state: str) -> str:
+def return_phase(image: Image_Processing, phase: str) -> str:
+    if image.phase != phase:
+        image.phase = phase
+    return phase
+
+def return_states(image: Image_Processing, state: str) -> str:
     if image.state != state:
         image.state = state
+        image.debug_rois_state = state
     return state
 
 def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
@@ -66,9 +72,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
     return "PROGRAM_FINISHED"
     
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
-    if not hasattr(image, "debug_rois_collector"):
-        image.add_debug_roi(const.GENERIC_STATES['playing']['roi'], (0,255,0))
-        image.debug_rois_collector = True
+    image.set_debug_rois_for_state('PAIRING', [(194, 400, 136, 35)], (0, 255, 0))
 
     if not hasattr(image, "_playing_lm"):
         image._playing_lm = get_landmark("GENERIC", "playing", 0.7)
@@ -102,9 +106,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
             image.playing_last_score = detect_template(image.original_image, lm)
 
         score = image.playing_last_score
-        print('template score:', score)
         if score >= lm.threshold:
-            print(score)
             ctrl.tap(BTN_A)
             image.playing = True
             image.state= 'IN_GAME'

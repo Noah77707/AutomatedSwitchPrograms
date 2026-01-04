@@ -144,12 +144,13 @@ def controller_control(
 
                 image.database_component = RunStats()
 
-            elif cmd == 'STOP' or state == 'PROGRAM FINISHED':
+            elif cmd == 'STOP' or image.state == 'PROGRAM FINISHED':
                 if running and game and program:
                     finish_and_reset()
                 running = False
                 paused = False
                 state = False
+                image.state = None
 
             elif cmd == 'PAUSE':
                 paused = True

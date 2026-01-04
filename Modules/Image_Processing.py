@@ -18,14 +18,16 @@ class Image_Processing():
         self.resized_image = None
         self.pyqt_image = None
         self.state = None
+        self.phase = None
         self.playing = False
         self.run = 0
         self.profile = 0
         self.profile_set = False
 
-        self.debug_draw = True
+        self.debug_draw = False
         self.debug_rois = []
-        self.debug_pixels = []
+        self.debug_focus_roi: tuple[tuple[int,int,int,int], tuple[int,int,int]] | None = None
+        self.debug_state = None
 
         self.shiny_frames_checked = 0
         self.shiny_hits = 0
@@ -35,7 +37,6 @@ class Image_Processing():
         
         self.generic_state = None
         self.generic_count = 0
-        self.generic_count2 = 0
         self.generic_bool = False
 
         self.last_check_t = 0.0
@@ -194,40 +195,43 @@ class Image_Processing():
 
     def clear_debug(self):
         self.debug_rois.clear()
-        self.debug_pixels.clear()
+        self.debug_focus_roi = None
+        self.debug_state = None
 
     def add_debug_roi(self, roi, color=(0, 0, 255)):
         # roi: (x, y, w, h)
         self.debug_rois.append((roi, color))
 
-    def add_debug_pixel(self, x, y, color=(255, 0, 0)):
-        self.debug_pixels.append((x, y, color))
+    def set_debug_rois_for_state(self, state: str, rois, color=(0, 0, 255)) -> None:
+        self.debug_state = state
+        out = []
+        for r in rois:
+            out.append((tuple(map(int, r)), color))
+        self.debug_rois = out
+        self.debug_focus_roi = None
 
-    def draw_debug(self, frame):
-        if not self.debug_draw:
-            return frame
-        
-        if not isinstance(frame, np.ndarray) or frame.size == 0:
-            return frame
-        
-        if not self.debug_draw:
-            return frame
-
-        debug_frame = frame
-
-        # draw ROIs
-        for (roi, color) in self.debug_rois:
-            x, y, w, h = roi
-            cv.rectangle(debug_frame, (x, y), (x + w, y + h), color, 2)
-
-        # draw pixel markers
-        for (x, y, color) in self.debug_pixels:
-            cv.rectangle(
-                debug_frame,
-                (x - 2, y - 2),
-                (x + 2, y + 2),
-                color,
-                1
-            )
-        return debug_frame
+    def set_debug_focus_roi(self, roi, color=(255, 0, 0)) -> None:
+        self.debug_focus_roi = (tuple(map(int, roi)), color)
     
+    def draw_debug(self, frame):
+        if self.debug_state != self.state:
+            return frame
+        
+        rois = self.debug_rois
+        if isinstance(rois, list):
+            for item in rois:
+                try:
+                    roi, color = item  # expected ((x,y,w,h), (b,g,r))
+                    x, y, w, h = map(int, roi)
+                    cv.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+                except Exception as e:
+                    print("BAD debug_rois item (not (roi,color)):", item, e)
+                    continue
+
+        if self.debug_focus_roi is not None:
+            roi, color = self.debug_focus_roi
+            x, y, w, h = map(int, roi)
+            cv.rectangle(frame, (x, y), (x + w, y + h), color, 2)
+
+        return frame
+        
