@@ -14,7 +14,7 @@ NEW_INT_COLS = [
     ("eggs_collected", 0),
     ("eggs_hatched", 0),
     ("pokemon_released", 0),
-    ("action_hit", 0)
+    ("action_hits", 0)
 ]
 
 def _add_missing_columns(cur: sqlite3.Cursor, table: str) -> None:
@@ -39,16 +39,18 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 program TEXT NOT NULL,
 
                 runs INTEGER NOT NULL DEFAULT 0,
-                action INTEGER NOT NULL DEFAULT 0,
                 resets INTEGER NOT NULL DEFAULT 0,
-                pokemon_encountered INTEGER NOT NULL DEFAULT 0,
-                pokemon_caught INTEGER NOT NULL DEFAULT 0,
+                actions INTEGER NOT NULL DEFAULT 0,
+                action_hits INTEGER NOT NULL DEFAULT 0,
+
                 eggs_collected INTEGER NOT NULL DEFAULT 0,
                 eggs_hatched INTEGER NOT NULL DEFAULT 0,
+                    
+                pokemon_encountered INTEGER NOT NULL DEFAULT 0,
+                pokemon_caught INTEGER NOT NULL DEFAULT 0,
                 pokemon_released INTEGER NOT NULL DEFAULT 0,
 
                 shinies INTEGER NOT NULL DEFAULT 0,
-                action_hit INTEGER NOT NULL DEFAULT 0,
                 playtime_seconds INTEGER NOT NULL DEFAULT 0,
 
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -66,7 +68,7 @@ def add_deltas(
     game: str,
     program: str,
     *,
-    action_delta: int = 0,
+    actions_delta: int = 0,
     resets_delta: int = 0,
     pokemon_encountered_delta: int = 0,
     pokemon_caught_delta: int = 0,
@@ -74,20 +76,20 @@ def add_deltas(
     eggs_hatched_delta: int = 0,
     pokemon_released_delta: int = 0,
     shinies_delta: int = 0,
-    action_hit_delta: int = 0,
+    action_hits_delta: int = 0,
 
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
     if not game or not program:
         raise ValueError("game and program are required")
-    if min(action_delta, shinies_delta, playtime_seconds_delta) < 0:
+    if min(actions_delta, shinies_delta, playtime_seconds_delta) < 0:
         raise ValueError("deltas must be >= 0")
 
     if all(d == 0 for d in (
-        action_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
+        actions_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
         eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
-        shinies_delta, action_hit_delta, playtime_seconds_delta
+        shinies_delta, action_hits_delta, playtime_seconds_delta
     )):
         return
 
@@ -104,7 +106,7 @@ def add_deltas(
         cur.execute("""
             UPDATE program_stats
             SET
-                action = action + ?,
+                actions = actions + ?,
                 resets = resets + ?,
                 pokemon_encountered = pokemon_encountered + ?,
                 pokemon_caught = pokemon_caught + ?,
@@ -112,12 +114,12 @@ def add_deltas(
                 eggs_hatched = eggs_hatched + ?,
                 pokemon_released = pokemon_released + ?,
                 shinies = shinies + ?,
-                action_hit = action_hit + ?,
+                action_hits = action_hits + ?,
                 playtime_seconds = playtime_seconds + ?,
                 updated_at = datetime('now')
             WHERE game = ? AND program = ?
         """, (
-            int(action_delta),
+            int(actions_delta),
             int(resets_delta),
             int(pokemon_encountered_delta),
             int(pokemon_caught_delta),
@@ -125,7 +127,7 @@ def add_deltas(
             int(eggs_hatched_delta),
             int(pokemon_released_delta),
             int(shinies_delta),
-            int(action_hit_delta),
+            int(action_hits_delta),
             int(playtime_seconds_delta),
             game, program
         ))
@@ -135,7 +137,7 @@ def finish_run(
     game: str,
     program: str,
     *,
-    action_delta: int = 0,
+    actions_delta: int = 0,
     resets_delta: int = 0,
     pokemon_encountered_delta: int = 0,
     pokemon_caught_delta: int = 0,
@@ -143,7 +145,7 @@ def finish_run(
     eggs_hatched_delta: int = 0,
     pokemon_released_delta: int = 0,
     shinies_delta: int = 0,
-    action_hit_delta: int = 0,
+    action_hits_delta: int = 0,
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
@@ -151,9 +153,9 @@ def finish_run(
         raise ValueError("game and program are required")
 
     deltas = [
-        action_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
+        actions_delta, resets_delta, pokemon_encountered_delta, pokemon_caught_delta,
         eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
-        shinies_delta, action_hit_delta, playtime_seconds_delta
+        shinies_delta, action_hits_delta, playtime_seconds_delta
     ]
     if any(d < 0 for d in deltas):
         raise ValueError("deltas must be >= 0")
@@ -168,14 +170,14 @@ def finish_run(
             INSERT INTO program_stats (
                 game, program,
                 runs,
-                action, resets, pokemon_encountered, pokemon_caught,
+                actions, resets, pokemon_encountered, pokemon_caught,
                 eggs_collected, eggs_hatched, pokemon_released,
-                shinies, action_hit, playtime_seconds
+                shinies, action_hits, playtime_seconds
             )
             VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(game, program) DO UPDATE SET
                 runs = runs + 1,
-                action = action + excluded.action,
+                actions = actions + excluded.actions,
                 resets = resets + excluded.resets,
                 pokemon_encountered = pokemon_encountered + excluded.pokemon_encountered,
                 pokemon_caught = pokemon_caught + excluded.pokemon_caught,
@@ -183,12 +185,12 @@ def finish_run(
                 eggs_hatched = eggs_hatched + excluded.eggs_hatched,
                 pokemon_released = pokemon_released + excluded.pokemon_released,
                 shinies = shinies + excluded.shinies,
-                action_hit = action_hit + excluded.action_hit,
+                action_hits = action_hits + excluded.action_hits,
                 playtime_seconds = playtime_seconds + excluded.playtime_seconds,
                 updated_at = datetime('now')
         """, (
             game, program,
-            int(action_delta),
+            int(actions_delta),
             int(resets_delta),
             int(pokemon_encountered_delta),
             int(pokemon_caught_delta),
@@ -196,7 +198,7 @@ def finish_run(
             int(eggs_hatched_delta),
             int(pokemon_released_delta),
             int(shinies_delta),
-            int(action_hit_delta),
+            int(action_hits_delta),
             int(playtime_seconds_delta),
         ))
 
@@ -209,11 +211,11 @@ def get_stats(game: str, program: str, db_file: str = DATABASE_PATH) -> Optional
         cur.execute("""
             SELECT
                 game, program, runs,
-                action, resets,
+                actions, resets,
                 pokemon_encountered, pokemon_caught,
                 eggs_collected, eggs_hatched,
                 pokemon_released, shinies, 
-                action_hit, playtime_seconds,
+                action_hits, playtime_seconds,
                 created_at, updated_at
             FROM program_stats
             WHERE game = ? AND program = ?

@@ -185,7 +185,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
     )
     image.clear_debug()
     image.add_debug_roi((200, 120, 200, 200), (0, 0, 255))
-    image.add_debug_roi(const.BDSP_CONSTANTS['text_box_roi'], (255, 0, 0))
+    image.add_debug_roi(const.BDSP_STATES['text_box_roi'], (255, 0, 0))
     count = image.run * 30
     # Start of the state program
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
@@ -271,7 +271,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         score = 1.0
         # looks for the text 'hatched from the egg!' to increment the hatched egg
         if check_state(image, 'BDSP', 'text_box'):
-            hit, score = match_text_fragment(image, hatched, const.BDSP_CONSTANTS['text_box_roi'], sqdiff_max= 0.2)
+            hit, score = match_text_fragment(image, hatched, const.BDSP_STATES['text_box_roi'], sqdiff_max= 0.2)
             print('sqdiff:', score)
             sleep(0.02); ctrl.tap(BTN_A)
 
@@ -341,7 +341,7 @@ def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str 
             image.state = 'IN_BOX'
         
     elif image.state == 'IN_BOX':
-        if check_state(image, 'BDSP', 'box_open'):
+        if check_state(image, 'BDSP', 'box_screen'):
             release_pokemon(ctrl, image, 'BDSP', image.run)
             image.state = "PROGRAM_FINISHED"
             

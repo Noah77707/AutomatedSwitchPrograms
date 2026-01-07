@@ -141,7 +141,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
         
     elif image.state == 'FIRST_BERRY':
         now = monotonic()
-        image.set_debug_rois_for_state('FIRST_BERRY', const.LZA_STATES['berry_select_rois'], (255, 255, 255))
+        image.set_debug_rois_for_state('FIRST_BERRY', (const.LZA_STATES['berry_select_rois']), (255, 255, 255))
 
         row = None
         if number == 1:

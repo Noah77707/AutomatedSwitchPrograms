@@ -37,6 +37,8 @@ class Image_Processing():
         
         self.generic_state = None
         self.generic_count = 0
+        self.start_time = 0
+        self.end_time = 0
         self.generic_bool = False
 
         self.last_check_t = 0.0
@@ -121,54 +123,6 @@ class Image_Processing():
             f"diff=({b-eb},{g-eg},{r-er})"
     )
 
-    def ocr_text(self, roi: tuple[int,int,int,int], *, psm: int = 6, timeout_s: int = 1) -> str:
-        frame = getattr(self, "original_image", None)
-        if frame is None:
-            return ""
-
-        x, y, w, h = map(int, roi)
-        H, W = frame.shape[:2]
-
-        x1 = max(0, x); y1 = max(0, y)
-        x2 = min(W, x + w); y2 = min(H, y + h)
-        if x2 <= x1 or y2 <= y1:
-            return ""
-
-        crop = frame[y1:y2, x1:x2]
-        if crop.size == 0:
-            return ""
-
-        gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-        gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
-        gray = cv.GaussianBlur(gray, (3, 3), 0)
-        bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
-
-        try:
-            txt = pytesseract.image_to_string(bw, config=f"--psm {psm}", timeout=timeout_s)
-        except pt.TimeoutExpired:
-            return ""
-        except pytesseract.TesseractNotFoundError:
-            return ""
-        except Exception:
-            return ""
-
-        return " ".join(txt.split()).lower()
-
-    def ocr_text_throttled(self, roi: tuple[int,int,int,int], *, min_interval_s: float = 0.25) -> str:
-        now = time.monotonic()
-        last_t = getattr(self, "ocr_last_t", 0.0)
-        last_roi = getattr(self, "ocr_last_roi", None)
-
-        # cache per ROI
-        if last_roi == roi and (now - last_t) < min_interval_s:
-            return getattr(self, "ocr_last_txt", "")
-
-        txt = self.ocr_text(roi)
-        self.ocr_last_t = now
-        self.ocr_last_roi = roi
-        self.ocr_last_txt = txt
-        return txt
-
     def is_sparkle_visible(self, roi, v_thres, s_max, min_bright_ratio: float) -> bool:
         frame = getattr(self, 'original_image', None)
         x, y, w, h = roi
@@ -190,7 +144,6 @@ class Image_Processing():
 
         bright = cv.countNonZero(mask)
         ratio = bright / mask.size
-        print(f"sparkle ratio: {ratio:.4f}")
         return ratio >= min_bright_ratio
 
     def clear_debug(self):

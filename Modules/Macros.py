@@ -72,7 +72,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
     return "PROGRAM_FINISHED"
     
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
-    image.set_debug_rois_for_state('PAIRING', [(194, 400, 136, 35)], (0, 255, 0))
+    image.set_debug_rois_for_state('PAIRING', [const.GENERIC_STATES['playing']['roi']], (0, 255, 0))
 
     if not hasattr(image, "_playing_lm"):
         image._playing_lm = get_landmark("GENERIC", "playing", 0.7)
@@ -294,3 +294,74 @@ def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_fra
             streak = 0
         sleep(0.02)
     return False
+# time range is the amount of frames between the first battle textbox and the second battle textbox
+# this finds the shiny due to the shiny animation adding a lot more frames inbetween both text boxes
+def shiny_wait_checker(image, game, frames: int, time_range_min: int, time_range_max: int):
+    fid = getattr(image, 'frame_id', 0)
+    last = getattr(image, 'last_frame_id', -1)
+    if fid == last:
+        return image.state
+    image.last_frame_id = fid
+
+    if check_state(image, game, 'text_box') and image.generic_bool == False:
+        image.generic_bool = True
+        if image.generic_count == 0:
+            image.start_time = getattr(image, 'frame_id', 0)
+            image.generic_count = 1
+        else:
+            image.end_time = getattr(image, 'frame_id', 0)
+            image.generic_count = 2
+
+    if not check_state(image, game, 'text_box') and image.generic_bool == True:
+        image.generic_bool = False
+    
+    if image.generic_count == 2:
+        frames_seen = (image.end_time - image.start_time)
+        print(frames_seen)
+        if frames_seen > time_range_min and frames_seen < time_range_max:  
+            image.generic_count = 0
+            image.state = "NOT_SHINY"
+        else:
+            image.generic_count = 0
+            image.state = "FOUND_SHINY"
+    return image.state
+
+def shiny_checker(image,
+                game: str,
+                roi,
+                v_thres,
+                s_max,
+                ratio: float,
+                frames: int,
+                hits_required: int = 3) -> str:
+        frame = image.original_image
+        if frame is None:
+            return image.state
+
+        fid = getattr(image, 'frame_id', 0)
+        last = getattr(image, 'last_frame_id', -1)
+        if fid == last:
+            return image.state
+        image.last_frame_id = fid
+
+        shiny_check = image.is_sparkle_visible(
+            roi,
+            v_thres= v_thres,
+            s_max= s_max,
+            min_bright_ratio= ratio
+        )
+        image.shiny_frames_checked += 1
+        if shiny_check:
+            image.shiny_hits += 1
+
+        if image.shiny_hits >= hits_required: # How many rames are shiny
+            image.database_component.pokemon_encountered += 1
+            image.database_component.shinies += 1
+            return return_states(image, 'FOUND_SHINY')
+            
+        if image.shiny_frames_checked >= frames or check_state(image, game, "battle_screen"):
+            image.shiny_frames_checked = 0
+            image.database_component.pokemon_encountered += 1
+            return return_states(image, 'NOT_SHINY')
+
+        return "CHECK_SHINY"

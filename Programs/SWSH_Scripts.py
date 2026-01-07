@@ -20,11 +20,7 @@ def Start_SWSH(image: Image_Processing, ctrl: Controller, state: str | None) -> 
     
     return image.state
 
-def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
-    if not hasattr(image, "debug_rois_collector"):
-        image.add_debug_roi(const.SWSH_CONSTANTS['static_roi'], (0,255,0))
-        image.debug_rois_collector = True
-    
+def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:    
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
         image.state = Start_SWSH(image, ctrl, image.state)
 
@@ -35,60 +31,28 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             ctrl.tap(BTN_A, 0.05, 0.7)
             ctrl.tap(BTN_A, 0.05, 0.7)
             ctrl.tap(BTN_A)
-            return 'IN_BATTLE'
-        
-    elif image.state == 'IN_BATTLE':
-        if check_state(image, 'SWSH', 'encounter_text'):
-            return 'CHECK_SHINY'
-        return 'IN_BATTLE'
+            return return_states(image, "CHECK_SHINY")
     
-    elif image.state == 'CHECK_SHINY':
-        fid = getattr(image, 'frame_id', 0)
-        last = getattr(image, 'last_frame_id', -1)
-        if fid == last:
-            return state
-        image.last_frame_id = fid
-        roi = const.SWSH_CONSTANTS['static_roi']
-            
-        shiny_check = image.is_sparkle_visible(
-            roi,
-            v_thres= const.SWSH_CONSTANTS['static_v_threshold'],
-            s_max = const.SWSH_CONSTANTS['static_s_max'],
-            min_bright_ratio = const.SWSH_CONSTANTS['static_brightness_ratio']
-        )
-
-        image.shiny_frames_checked += 1
-        if shiny_check:
-            image.shiny_hits += 1
-
-        if image.shiny_hits >= 3: # How many rames are shiny
-            image.database_component.pokemon_encountered += 1
-            image.database_component.shinies += 1
-            return 'FOUND_SHINY'
-            
-        if image.shiny_frames_checked >= 240:
-            image.shiny_frames_checked = 0
-            image.database_component.pokemon_encountered += 1
-            return 'NOT_SHINY'
-        return image.state
+    elif image.state == 'CHECK_SHINY':        
+        # non-shiny times:
+        # 244, 228, 232, 186, 208, 228, 220, 210, 212, 218, 212
+        # 
+        image.state = shiny_wait_checker(image,
+                                    "SWSH",
+                                    0, 
+                                    0, 
+                                    250)
+        return return_states(image, image.state)
     
     elif image.state == 'FOUND_SHINY':
         image.state == "SHINY"
 
     elif image.state == 'NOT_SHINY':
         image.database_component.resets += 1
-        print("Not Shiny")
         ctrl.tap(BTN_HOME, 0.05, 0.45)
         ctrl.tap(BTN_X, 0.05, 0.25)
         ctrl.tap(BTN_A, 0.05, 02.95)
-        import time
-        now = time.monotonic()
-        if now - getattr(image, "_perf_t0", 0) > 5:
-            image._perf_t0 = now
-            print("debug_rois:", len(getattr(image, "debug_rois", [])))
-            print("frame_id:", getattr(image, "frame_id", 0))
-
-        return 'PAIRING'
+        return return_states(image, 'PAIRING')
     return image.state
 
 def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, input: int) -> str:

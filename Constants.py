@@ -1,3 +1,5 @@
+from Modules.Dataclasses import *
+
 ORIGINAL_FRAME_SIZE = (1920, 1080)
 BOT_FRAME_SIZE = (1100, 570)
 MAIN_FRAME_SIZE = (1280, 720)
@@ -72,6 +74,16 @@ SWSH_STATES = {
         "positions": [(802, 87), (868, 665)],
         "tol": 10,
     },
+    "battle_screen": {
+        "color": (255, 255, 254),
+        "positions": [
+            (5, 621),
+            (6, 668),
+            (149, 618),
+            (114, 24),
+            (1271, 25)
+        ]
+    },
     # in game
     "in_game": {
         "color": (254, 254, 254),
@@ -98,16 +110,23 @@ SWSH_STATES = {
         "positions": [(854, 663), (366, 655), (1138, 670)],
         "tol": 10,
     },
+    "text_box": {
+        "color": (38, 38, 38),
+        "positions": [
+            (67, 579),
+            (1259, 631),
+            (1245, 691)
+        ]
+    },
     # rois
     "pokemon_name": (313, 395, 143, 31),
 
     # program_specific
-    "static_encounter": {
-        "static_roi": (999, 244, 181, 320),
-        "static_v_threshold": 245,
-        "static_s_max": 40,
-        "static_brightness_ratio": 0.05
-    }
+    # static encounter
+    "static_roi": (750, 200, 350, 350),
+    "static_v_threshold": 245,
+    "static_s_max": 40,
+    "static_brightness_ratio": 0.3
 }
 
 BDSP_STATES = {
@@ -314,22 +333,20 @@ PROGRAM_META = {
     }
 }
 
-
-SWSH_CONSTANTS = {
-    "pokemon_name": (313, 395, 143, 31),
-    "static_roi": (999, 244, 181, 320),
-    "static_v_threshold": 245,
-    "static_s_max": 40,
-    "static_brightness_ratio": 0.05
-}
-
-BDSP_CONSTANTS = {
-    "step_roi": (620, 393, 60, 7),
-    "hatchery_poke_center": (1012, 374, 268, 346),
-    "nursery_man": (165, 343, 40, 54),
-    "text_box_roi": (268, 591, 757, 107)
-    
-}
+SWSH_SHINY_CFG = ShinyCheckConfig(
+    model_roi=(650, 160, 520, 420),        # tune
+    sparkle_roi=(780, 220, 320, 260),      # tune tighter
+    v_thres=245,
+    s_max=40,
+    warmup_seconds_after_model=0.35,
+    max_window_seconds=2.5,
+    hits_required=8,
+    misses_before_reset=3,
+    min_blob_area=6,
+    max_blob_area=220,
+    max_big_component_ratio=0.60,
+    model_edge_density_thres=0.030,
+)
 
 COLOR_ON_SCREEN = {
     "top_left": (50, MAIN_FRAME_SIZE[1] - 50),

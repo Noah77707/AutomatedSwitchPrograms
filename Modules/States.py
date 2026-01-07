@@ -15,6 +15,123 @@ from .Image_Processing import Image_Processing
 state_timer = 0
 LM_CACHE: dict[tuple[str, str], TemplateLandmark] = {}
 
+def _crop(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
+    """Safe ROI crop. Returns empty array if invalid."""
+    if frame is None:
+        return np.empty((0, 0), dtype=np.uint8)
+
+    x, y, w, h = map(int, roi)
+    if w <= 0 or h <= 0:
+        return np.empty((0, 0), dtype=np.uint8)
+
+    H, W = frame.shape[:2]
+    x1 = max(0, x)
+    y1 = max(0, y)
+    x2 = min(W, x + w)
+    y2 = min(H, y + h)
+
+    if x2 <= x1 or y2 <= y1:
+        return np.empty((0, 0), dtype=np.uint8)
+
+    return frame[y1:y2, x1:x2]
+
+def roi_mean_v(frame_bgr: np.ndarray, roi: Tuple[int, int, int, int]) -> float:
+    """Mean HSV Value (brightness) for ROI. Higher = brighter."""
+    crop = _crop(frame_bgr, roi)
+    if crop.size == 0:
+        return 0.0
+    hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV) if crop.ndim == 3 else crop
+    if hsv.ndim == 3:
+        v = hsv[:, :, 2]
+        return float(np.mean(v))
+    # If caller passed gray by mistake, treat it as brightness
+    return float(np.mean(hsv))
+
+def roi_edge_density(
+    frame_bgr: np.ndarray,
+    roi: Tuple[int, int, int, int],
+    canny1: int = 60,
+    canny2: int = 160,
+) -> float:
+    """
+    Edge density in ROI: count(edges)/pixels.
+    Useful to reject big white washes (pokeball flash) which often have low edges,
+    vs sparkle particles which have more high-frequency edges.
+    """
+    crop = _crop(frame_bgr, roi)
+    if crop.size == 0:
+        return 0.0
+
+    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY) if crop.ndim == 3 else crop
+    edges = cv.Canny(gray, canny1, canny2)
+    return float(np.count_nonzero(edges)) / float(edges.size)
+
+def sparkle_mask(
+    frame_bgr: np.ndarray,
+    roi: Tuple[int, int, int, int],
+    v_thres: int,
+    s_max: int,
+    open_ksize: int = 3,
+    close_ksize: int = 3,
+) -> np.ndarray:
+    """
+    Returns a binary mask (uint8 0/255) of bright, low-saturation pixels in ROI.
+    You can countNonZero(mask) or compute ratio.
+    """
+    crop = _crop(frame_bgr, roi)
+    if crop.size == 0:
+        return np.zeros((0, 0), dtype=np.uint8)
+
+    hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV) if crop.ndim == 3 else None
+    if hsv is None:
+        return np.zeros((0, 0), dtype=np.uint8)
+
+    mask = cv.inRange(hsv, (0, 0, int(v_thres)), (180, int(s_max), 255))
+
+    if open_ksize and open_ksize > 1:
+        k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (open_ksize, open_ksize))
+        mask = cv.morphologyEx(mask, cv.MORPH_OPEN, k, iterations=1)
+
+    if close_ksize and close_ksize > 1:
+        k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (close_ksize, close_ksize))
+        mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, k, iterations=1)
+
+    return mask
+
+def sparkle_score_from_mask(mask: np.ndarray,
+                             min_blob_area: int,
+                             max_blob_area: int,
+                             max_big_component_ratio: float) -> Tuple[bool, dict]:
+    m = cv.morphologyEx(mask, cv.MORPH_OPEN, np.ones((3, 3), np.uint8), iterations=1)
+
+    num_labels, labels, stats, centroids = cv.connectedComponentsWithStats(m, connectivity=8)
+    # stats: [label, x, y, w, h, area] but OpenCV uses columns:
+    # stats[i] = [x, y, w, h, area]
+
+    if num_labels <= 1:
+        return False, {"reason": "no_components"}
+
+    areas = stats[1:, cv.CC_STAT_AREA].astype(np.int32)  # exclude background
+    total_on = int(np.sum(areas))
+    if total_on <= 0:
+        return False, {"reason": "no_pixels"}
+
+    biggest = int(np.max(areas)) if areas.size else 0
+    biggest_ratio = biggest / float(total_on)
+
+    # Reject large-contiguous flash
+    if biggest_ratio >= float(max_big_component_ratio):
+        return False, {"reason": "big_component", "biggest_ratio": biggest_ratio, "total_on": total_on}
+
+    # Count "sparkle-sized" components
+    good = 0
+    for a in areas:
+        if int(min_blob_area) <= int(a) <= int(max_blob_area):
+            good += 1
+
+    # Require at least a few blobs
+    ok = good >= 4
+    return ok, {"good_blobs": good, "biggest_ratio": biggest_ratio, "total_on": total_on}
 
 def wait_for_roi_condition(
         image: Image_Processing,
@@ -41,27 +158,6 @@ def wait_for_roi_condition(
             good = 0
         sleep(0.01)
     return False
-# trhe function that checks the colors
-def check_image_position_colors(
-    image,
-    color: Tuple[int,int,int],
-    positions: List[Tuple[int,int]],
-    tol: int = 10,
-) -> bool:
-    frame = getattr(image, "original_image", None)
-    if frame is None:
-        return False
-
-    h, w = frame.shape[:2]
-    for (x, y) in positions:
-        if x < 0 or y < 0 or x >= w or y >= h:
-            return False
-
-        # get pixel BGR
-        b, g, r = frame[y, x]  # OpenCV is row=y, col=x
-        if not _color_close((int(b), int(g), int(r)), color, tol):
-            return False
-    return True
 # this passes everything to the check_iamge_position_colors. It mainly makes everything more readable
 def _color_close(bgr: Tuple[int,int,int], target: Tuple[int,int,int], tol: int) -> bool:
     return (abs(bgr[0] - target[0]) <= tol and
@@ -127,7 +223,7 @@ def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[
     _, maxv, _, _ = cv.minMaxLoc(res)
     print(maxv)
     return float(maxv)
-
+# this uses the TemplateLandmark and returns the information first. It doesn't do the same job as get_tpl
 def detect_template(frame_bgr: np.ndarray, lm: TemplateLandmark) -> float:
     x, y, w, h = lm.roi
     crop = frame_bgr[y:y+h, x:x+w]
@@ -195,9 +291,6 @@ def _clahe_gray(img: np.ndarray) -> np.ndarray:
     clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return clahe.apply(gray)
 
-def _crop_roi(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
-    x, y, w, h = roi
-    return frame[y:y+h, x:x+w]
 # these functinos make a text fragment more visible to the clahe program
 def prep_text(img_bgr_or_gray: np.ndarray) -> np.ndarray:
     if img_bgr_or_gray.ndim == 3:
@@ -276,7 +369,7 @@ def walk_until_landmark_dpad(
     for _ in range(max_steps):
         frame = getattr(image, "original_image", None)
         if frame is not None:
-            crop = _crop_roi(frame, lm.roi)
+            crop = _crop(frame, lm.roi)
             if crop.size:
                 crop_p = _clahe_gray(crop)
                 res = cv.matchTemplate(crop_p, tmpl_p, lm.method)
@@ -332,8 +425,7 @@ def match_any_slot(frame_bgr, rois, tpl_gray, threshold=0.78) -> tuple[bool, flo
         if match_label(frame_bgr, roi, tpl_gray, threshold):
             return True
     return False
-
-
+# Important
 def get_tpl(image, path: str, flags=cv.IMREAD_GRAYSCALE):
     if not hasattr(image, "tpl_cache"):
         image.tpl_cache = {}

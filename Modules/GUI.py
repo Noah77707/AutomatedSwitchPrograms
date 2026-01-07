@@ -116,6 +116,7 @@ class GUI(pyqt_w.QWidget):
 
         STATIC_ENCOUNTER_SWSH = pyqt_w.QPushButton('Static Encounter', self)
         STATIC_ENCOUNTER_SWSH.setProperty('tracks', ['pokemon_encountered', 'resets', 'shinies', 'playtime_seconds', 'state'])
+        STATIC_ENCOUNTER_SWSH.setProperty('db', ['pokemon_encountered', 'resets', 'shinies', 'playtime_seconds'])
         STATIC_ENCOUNTER_SWSH.clicked.connect(lambda checked, btn= STATIC_ENCOUNTER_SWSH: self.update_script('SWSH', btn, 'Static_Encounter_SWSH', checked))
         
         SWSH_layout.addWidget(STATIC_ENCOUNTER_SWSH)
@@ -260,11 +261,17 @@ class GUI(pyqt_w.QWidget):
             self.close()
             return
         
-        self.items['stats_label'].setText(self.update_stats())
-
         frame = getattr(self.image, 'original_image', None)
         if frame is None:
             return
+
+        fid = getattr(self.image, 'frame_id', None)
+        if not hasattr(self, '_last_gui_frame_id'):
+            self._last_gui_frame_id = -1
+        if fid is not None and fid == self._last_gui_frame_id:
+            return
+        if fid is not None:
+            self._last_gui_frame_id
 
         frame_to_show = frame
         if getattr(self.image, 'debug_draw', False):
@@ -286,7 +293,7 @@ class GUI(pyqt_w.QWidget):
                 self.items['switch_capture_label'].width(),
                 self.items['switch_capture_label'].height(),
                 pyqt_c.Qt.AspectRatioMode.KeepAspectRatio,
-                pyqt_c.Qt.TransformationMode.SmoothTransformation
+                pyqt_c.Qt.TransformationMode.FastTransformation
             )
         self.items['switch_capture_label'].setPixmap(pix)
     # updates the stats that are shown to the player
@@ -295,19 +302,23 @@ class GUI(pyqt_w.QWidget):
         if not s:
             return ''
         
+        db = get_stats(str(self.game), str(self.program)) or {}
         parts = []
         parts.append(f'program: {self.program}')
         for key in self.tracks:
             val = getattr(s, key, 0)
+            db_val = db.get(key, 0)
+
             if key == 'playtime_seconds':
-                parts.append(f'time: {format_hms(int(val))}')
+                parts.append(f'run time: {format_hms(int(val))}')
+                parts.append(f'total_time: {format_hms(int(db_val + val))}')
             elif key == 'phase':
                 parts.append(f'phase: {getattr(self.image, 'phase', None)}')
             elif key == 'state':
                 parts.append(f'state: {getattr(self.image, 'state', None)}')
             else:
-                parts.append(f'{key}: {val}')
-                
+                parts.append(f'{key}: {val} (total {db_val + val})')
+
         return ' | '.join(parts)
     # creates the timer that is used to see how long the program ran
     def stat_timer(self):

@@ -19,7 +19,7 @@ from Programs.LA_Scripts import *
 from Programs.SV_Scripts import *
 from Programs.LZA_Scripts import *
 
-from queue import Queue, Empty
+from queue import Queue, Empty, Full
 
 ProgramFn = Callable[[object, Controller, str], str]
 
@@ -58,24 +58,36 @@ def start_control_video(
         Shutdown_event: Event,
         stop_event: Event
         ) -> None:
+    
     capture = WindowCapture(Device_Index)
 
-    if not capture.video_capture.isOpened():
+    cap = capture.video_capture
+    if not cap.isOpened():
         capture.stop()
         print("NO CAPTURE CARD AVAILABLE")
         return
 
-    while not Shutdown_event.is_set():
-        ok, frame = capture.video_capture.read()
-        if not ok:
-            sleep(0.001)
-            continue
+    try:
+        cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
+    except Exception:
+        pass
 
+    while not Shutdown_event.is_set():
+        ok, frame = cap.read()
+        if not ok or frame is None:
+            sleep(0.005)
+            continue
+        
         # drop old frame if present
-        try:
-            Image_Queue.get_nowait()
-        except Empty:
-            pass
+        while True:
+            try:
+                Image_Queue.put_nowait(frame)
+                break
+            except Full:
+                try:
+                    Image_Queue.get_nowait()
+                except Empty:
+                    break
 
         Image_Queue.put(frame)
         sleep(0.001)
@@ -106,7 +118,7 @@ def controller_control(
 
         finish_run(
             game, program,
-            action_delta=d.actions,
+            actions_delta=d.actions,
             resets_delta=d.resets,
             pokemon_encountered_delta=d.pokemon_encountered,
             pokemon_caught_delta=d.pokemon_caught,
@@ -114,7 +126,7 @@ def controller_control(
             eggs_hatched_delta=d.eggs_hatched,
             pokemon_released_delta=d.pokemon_released,
             shinies_delta=d.shinies,
-            action_hit_delta=d.action_hits,
+            action_hits_delta=d.action_hits,
             playtime_seconds_delta=d.playtime_seconds,
         )
         image.database_component = RunStats()
@@ -181,19 +193,22 @@ def controller_control(
     ctrl.close()
         
 def frame_pump(Image_queue, shutdown_event, image):
-    while not shutdown_event.is_set():
-        frame = None
-        try:
-            while True:
-                frame = Image_queue.get_nowait()
-        except Empty:
-            pass
+    if not hasattr(image, "frame_id"):
+        image.frame_id = 0
 
-        if frame is not None:
-            image.original_image = frame
-            image.frame_id = getattr(image, "frame_id", 0) + 1
-        else:
-            sleep(0.001)
+    while not shutdown_event.is_set():
+        try:
+            # Block briefly waiting for one frame
+            frame = Image_queue.get_nowait()
+        except Empty:
+            sleep(0.0001)
+            continue
+
+        if frame is None:
+            continue
+
+        image.original_image = frame
+        image.frame_id += 1
     
 def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
     while not shutdown_event.is_set():

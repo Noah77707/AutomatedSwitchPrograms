@@ -39,7 +39,6 @@ if __name__ == "__main__":
             "thread": Thread(target=lambda: frame_pump(Image_queue, shutdown_event, image), daemon=True)
         })
 
-
         threads.append({
             'function': 'check_threads',
             'thread': Thread(target=lambda: check_threads(threads, shutdown_event),
