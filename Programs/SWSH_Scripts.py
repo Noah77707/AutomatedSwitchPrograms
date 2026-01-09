@@ -33,15 +33,17 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
             ctrl.tap(BTN_A)
             return return_states(image, "CHECK_SHINY")
     
-    elif image.state == 'CHECK_SHINY':        
-        # non-shiny times:
-        # 244, 228, 232, 186, 208, 228, 220, 210, 212, 218, 212
-        # 
+    elif image.state == 'CHECK_SHINY': 
+        # times
+        # not shiny: ~2.69
+        # shiny: Registeel = 4.577999999979511 
+        image.set_debug_rois_for_state('CHECK_SHINY', [const.SWSH_STATES['encounter_name']], (0, 0, 0))
         image.state = shiny_wait_checker(image,
                                     "SWSH",
+                                    const.SWSH_STATES['encounter_name'],
                                     0, 
-                                    0, 
-                                    250)
+                                    2.8,
+                                    3)
         return return_states(image, image.state)
     
     elif image.state == 'FOUND_SHINY':
@@ -53,6 +55,7 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         ctrl.tap(BTN_X, 0.05, 0.25)
         ctrl.tap(BTN_A, 0.05, 02.95)
         return return_states(image, 'PAIRING')
+    
     return image.state
 
 def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, input: int) -> str:

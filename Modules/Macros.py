@@ -6,7 +6,7 @@ import serial
 from .Controller import Controller
 from .Image_Processing import Image_Processing
 from .States import *
-
+from .Database import *
 # controller_buttons.py
 BTN_Y = 0
 BTN_B = 1
@@ -296,34 +296,94 @@ def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_fra
     return False
 # time range is the amount of frames between the first battle textbox and the second battle textbox
 # this finds the shiny due to the shiny animation adding a lot more frames inbetween both text boxes
-def shiny_wait_checker(image, game, frames: int, time_range_min: int, time_range_max: int):
+def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, stable_frames: int = 2):
+    now = monotonic()
     fid = getattr(image, 'frame_id', 0)
     last = getattr(image, 'last_frame_id', -1)
     if fid == last:
         return image.state
     image.last_frame_id = fid
 
-    if check_state(image, game, 'text_box') and image.generic_bool == False:
+    if not hasattr(image, "generic_bool"):
+        image.generic_bool = False
+    if not hasattr(image, "generic_count"):
+        image.generic_count = 0
+    if not hasattr(image, "start_time"):
+        image.start_time = 0.0
+    if not hasattr(image, "end_time"):
+        image.end_time = 0.0
+
+    if not hasattr(image, "name"):
+        image.name = ""
+    if not hasattr(image, "name_captured"):
+        image.name_captured = False
+    if not hasattr(image, "name_prev"):
+        image.name_prev = ""
+    if not hasattr(image, "name_streak"):
+        image.name_streak = 0
+
+    text_visible = check_state(image, game, "text_box")
+
+    # Rising edge: textbox appears
+    if text_visible and not image.generic_bool:
         image.generic_bool = True
+
         if image.generic_count == 0:
-            image.start_time = getattr(image, 'frame_id', 0)
+            image.start_time = now
             image.generic_count = 1
-        else:
-            image.end_time = getattr(image, 'frame_id', 0)
+
+            # reset name capture state for this encounter
+            image.name = ""
+            image.name_captured = False
+            image.name_prev = ""
+            image.name_streak = 0
+
+        elif image.generic_count == 1:
+            image.end_time = now
             image.generic_count = 2
 
-    if not check_state(image, game, 'text_box') and image.generic_bool == True:
+    # While first textbox is visible: capture name when stable (no fixed delay)
+    if text_visible and image.generic_bool and image.generic_count == 1 and not image.name_captured:
+        raw = Image_Processing.recognize_pokemon(image, roi)
+        raw = (raw or "").strip()
+
+        # ignore trivial garbage
+        if len(raw) >= 3:
+            if raw == image.name_prev:
+                image.name_streak += 1
+            else:
+                image.name_prev = raw
+                image.name_streak = 1
+
+            if image.name_streak >= stable_frames:
+                image.database_component.pokemon_name = raw
+                image.name_captured = True
+                print("Name:", image.database_component.pokemon_name)
+
+    # Falling edge: textbox disappears
+    if (not text_visible) and image.generic_bool:
         image.generic_bool = False
-    
+
+    # Decide after second textbox
     if image.generic_count == 2:
-        frames_seen = (image.end_time - image.start_time)
-        print(frames_seen)
-        if frames_seen > time_range_min and frames_seen < time_range_max:  
-            image.generic_count = 0
+        dt = float(image.end_time - image.start_time)
+        print("dt_seconds:", dt)
+
+        # reset for next
+        image.generic_count = 0
+        image.name_prev = ""
+        image.name_streak = 0
+        image.name_captured = False
+        image.database_component.pokemon_encountered += 1
+
+        add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, encountered_delta=1)
+        if dt < time_range_max:
+            add_program_deltas(image.game, image.program, resets_delta=1)
             image.state = "NOT_SHINY"
         else:
-            image.generic_count = 0
+            add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, shinies_delta=1)
             image.state = "FOUND_SHINY"
+
     return image.state
 
 def shiny_checker(image,

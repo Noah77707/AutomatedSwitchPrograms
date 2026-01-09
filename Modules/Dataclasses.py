@@ -36,6 +36,7 @@ class ShinyCheckConfig:
 
 @dataclass
 class RunStats:
+    pokemon_name: str = None
     runs: int = 0
     resets: int = 0
     encounters: int = 0

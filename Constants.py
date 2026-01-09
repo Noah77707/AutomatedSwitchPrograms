@@ -120,6 +120,7 @@ SWSH_STATES = {
     },
     # rois
     "pokemon_name": (313, 395, 143, 31),
+    "encounter_name": (93, 578, 900, 101),
 
     # program_specific
     # static encounter

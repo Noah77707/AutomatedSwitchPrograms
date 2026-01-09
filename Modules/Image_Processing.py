@@ -2,14 +2,16 @@ import os
 import sys
 import cv2 as cv
 import numpy as np
-import pytesseract
 import PyQt6.QtGui as pyqt_g
 from pytesseract import pytesseract as pt
 from typing import Tuple, Union, Dict, Optional, Sequence
 from time import time, sleep
+import re
 
 import Constants as const
 from .Dataclasses import *
+
+pt.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 class Image_Processing():
     def __init__(self, image: Union[str, np.ndarray] = ''):
@@ -23,6 +25,8 @@ class Image_Processing():
         self.run = 0
         self.profile = 0
         self.profile_set = False
+        self.game = None
+        self.program = None
 
         self.debug_draw = False
         self.debug_rois = []
@@ -34,6 +38,7 @@ class Image_Processing():
         self.egg_count = 0
         self.egg_phase = 0
         self.shiny = 0
+        self.name = 0
         
         self.generic_state = None
         self.generic_count = 0
@@ -188,3 +193,45 @@ class Image_Processing():
 
         return frame
         
+    def recognize_pokemon(self, roi) -> str:
+        frame = getattr(self, "original_image", None)
+        if frame is None:
+            return ""
+        
+        x, y, w, h = map(int, roi)
+        crop = frame[y:y+h,x:x+w]
+        if crop.size == 0:
+            return ""
+        
+        gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+        gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
+        gray = cv.GaussianBlur(gray, (3, 3), 0)
+        bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+
+        custom_config = "--oem 1 --psm 7"
+        text = pt.image_to_string(bw, config=custom_config)
+        test = re.sub(r"\s+", " ", text).strip()
+
+        if not text:
+            return ""
+        
+        pokemon_text = text
+
+        for part in ["Go!", "go!", "¡", "!", "’"]:
+            pokemon_text = pokemon_text.replace(part, '')
+
+        pokemon_text = pokemon_text.strip()
+
+        m = re.search(r"\bwild\s+(.+?)\s+appeared\b", pokemon_text, flags=re.IGNORECASE)
+        if m:
+            return m.group(1).strip(" .,'")
+        
+        m = re.search(r"^(.+?)\s+appeared\b", pokemon_text, flags=re.IGNORECASE)
+        if m:
+            return m.group(1).strip(" ,.'")
+        
+        words = [w for w in pokemon_text.split(" ") if w]
+        if words:
+            return words[-1].strip(" ,.'")
+        
+        return text.strip()

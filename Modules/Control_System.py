@@ -103,34 +103,10 @@ def controller_control(
     initialize_database()
     ensure_stats(image)
     
-    game = None
-    program = None
     state = None
     input = None
     running = False
     paused = False
-
-    def finish_and_reset():
-        nonlocal game, program
-        if not game or not program:
-            return
-        d: RunStats = getattr(image, "database_component", RunStats())
-
-        finish_run(
-            game, program,
-            actions_delta=d.actions,
-            resets_delta=d.resets,
-            pokemon_encountered_delta=d.pokemon_encountered,
-            pokemon_caught_delta=d.pokemon_caught,
-            eggs_collected_delta=d.eggs_collected,
-            eggs_hatched_delta=d.eggs_hatched,
-            pokemon_released_delta=d.pokemon_released,
-            shinies_delta=d.shinies,
-            action_hits_delta=d.action_hits,
-            playtime_seconds_delta=d.playtime_seconds,
-        )
-        image.database_component = RunStats()
-
 
     while not shutdown_event.is_set():
         try:
@@ -142,11 +118,10 @@ def controller_control(
             cmd = msg.get('cmd')
             print(msg)
             if cmd == 'SET_PROGRAM':
-                game = msg.get('game')
-                program = msg.get('program')
+                image.game = msg.get('game')
+                image.program = msg.get('program')
                 input = msg.get('number')
                 
-
                 image.run = int(msg.get('runs', 1))
                 image.profile = int(msg.get('profile', 1))
 
@@ -157,8 +132,17 @@ def controller_control(
                 image.database_component = RunStats()
 
             elif cmd == 'STOP' or image.state == 'PROGRAM FINISHED':
-                if running and game and program:
-                    finish_and_reset()
+                add_program_deltas(image.game,
+                                    image.program,
+                                    actions_delta=int(getattr(image.database_component, "actions", 0)),
+                                    action_hits_delta=int(getattr(image.database_component, "action_hits", 0)),
+                                    resets_delta=int(getattr(image.database_component, "resets", 0)),
+                                    eggs_collected_delta=int(getattr(image.database_component, "eggs_collected", 0)),
+                                    eggs_hatched_delta=int(getattr(image.database_component, "eggs_hatched", 0)),
+                                    pokemon_released_delta=int(getattr(image.database_component, "pokemon_released", 0)),
+                                    playtime_seconds_delta=int(getattr(image.database_component, "playtime_seconds", 0)),
+                            )
+                image.database_component = RunStats()
                 running = False
                 paused = False
                 state = False
@@ -174,7 +158,7 @@ def controller_control(
         if stop_event.is_set():
             running = False
 
-        if not running or game is None or program is None:
+        if not running or image.game is None or image.program is None:
             sleep(0.01)
             continue
 
@@ -182,7 +166,7 @@ def controller_control(
             sleep(0.01)
             continue
 
-        key = (game, program)
+        key = (image.game, image.program)
         step_fn = PROGRAM_TABLE.get(key)
         
         if step_fn is None:

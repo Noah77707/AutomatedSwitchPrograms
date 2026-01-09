@@ -14,7 +14,7 @@ import PyQt6.QtCore as pyqt_c
 import PyQt6.QtGui as pyqt_g
 
 from .Image_Processing import Image_Processing
-from .Database import get_stats, format_hms
+from .Database import get_program_totals, format_hms
 from Programs.HOME_Scripts import *
 from Programs.SWSH_Scripts import *
 from Programs.BDSP_Scripts import *
@@ -302,7 +302,7 @@ class GUI(pyqt_w.QWidget):
         if not s:
             return ''
         
-        db = get_stats(str(self.game), str(self.program)) or {}
+        db = get_program_totals(str(self.game), str(self.program)) or {}
         parts = []
         parts.append(f'program: {self.program}')
         for key in self.tracks:
@@ -317,7 +317,7 @@ class GUI(pyqt_w.QWidget):
             elif key == 'state':
                 parts.append(f'state: {getattr(self.image, 'state', None)}')
             else:
-                parts.append(f'{key}: {val} (total {db_val + val})')
+                parts.append(f'{key}: {val} (total {db_val})')
 
         return ' | '.join(parts)
     # creates the timer that is used to see how long the program ran
