@@ -28,7 +28,7 @@ class Image_Processing():
         self.game = None
         self.program = None
 
-        self.debug_draw = False
+        self.debug = False
         self.debug_rois = []
         self.debug_focus_roi: tuple[tuple[int,int,int,int], tuple[int,int,int]] | None = None
         self.debug_state = None
@@ -39,6 +39,7 @@ class Image_Processing():
         self.egg_phase = 0
         self.shiny = 0
         self.name = 0
+        self.donut_cfg = []
         
         self.generic_state = None
         self.generic_count = 0
@@ -192,8 +193,8 @@ class Image_Processing():
             cv.rectangle(frame, (x, y), (x + w, y + h), color, 2)
 
         return frame
-        
-    def recognize_pokemon(self, roi) -> str:
+# Mainly used for pokemon
+    def recognize_text(self, roi) -> str:
         frame = getattr(self, "original_image", None)
         if frame is None:
             return ""
@@ -235,3 +236,57 @@ class Image_Processing():
             return words[-1].strip(" ,.'")
         
         return text.strip()
+    
+    def ocr_line(image, roi, *, psm: int = 7) -> str:
+        frame = getattr(image, "original_image", None)
+        if frame is None:
+            return ""
+
+        x, y, w, h = map(int, roi)
+        crop = frame[y:y+h, x:x+w]
+        if crop.size == 0:
+            return ""
+
+        gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+        gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
+        gray = cv.GaussianBlur(gray, (3, 3), 0)
+        bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+
+        txt = pt.image_to_string(bw, config=f"--oem 1 --psm {psm}")
+        txt = re.sub(r"\s+", " ", txt).strip()
+        return txt
+
+    def stable_ocr_line(image, roi, *, key: str, stable_frames: int = 2, min_len: int = 4) -> str:
+        """
+        Reads OCR every new frame and returns a stable line only when it repeats for N frames.
+        Stores per-key state on image:
+        _ocr_prev_<key>, _ocr_streak_<key>, _ocr_stable_<key>
+        """
+        prev_key = f"_ocr_prev_{key}"
+        streak_key = f"_ocr_streak_{key}"
+        stable_key = f"_ocr_stable_{key}"
+
+        raw = Image_Processing.ocr_line(image, roi, psm=7)
+        raw = raw.strip()
+
+        # ignore tiny junk (like "R", "wi", etc)
+        if len(raw) < min_len:
+            setattr(image, prev_key, "")
+            setattr(image, streak_key, 0)
+            setattr(image, stable_key, "")
+            return ""
+
+        prev = getattr(image, prev_key, "")
+        if raw == prev:
+            streak = getattr(image, streak_key, 0) + 1
+        else:
+            streak = 1
+            setattr(image, prev_key, raw)
+
+        setattr(image, streak_key, streak)
+
+        if streak >= stable_frames:
+            setattr(image, stable_key, raw)
+            return raw
+
+        return ""

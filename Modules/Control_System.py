@@ -12,6 +12,7 @@ from .Window_Capture import WindowCapture
 from .Image_Processing import Image_Processing
 from .Controller import Controller
 from .Database import *
+from .Debug import *
 from Programs.HOME_Scripts import *
 from Programs.SWSH_Scripts import *
 from Programs.BDSP_Scripts import *
@@ -61,20 +62,9 @@ def start_control_video(
     
     capture = WindowCapture(Device_Index)
 
-    cap = capture.video_capture
-    if not cap.isOpened():
-        capture.stop()
-        print("NO CAPTURE CARD AVAILABLE")
-        return
-
-    try:
-        cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
-    except Exception:
-        pass
-
     while not Shutdown_event.is_set():
-        ok, frame = cap.read()
-        if not ok or frame is None:
+        frame = capture.read_frame()
+        if frame is None:
             sleep(0.005)
             continue
         
@@ -88,8 +78,6 @@ def start_control_video(
                     Image_Queue.get_nowait()
                 except Empty:
                     break
-
-        Image_Queue.put(frame)
         sleep(0.001)
     
 def controller_control(
@@ -131,7 +119,7 @@ def controller_control(
 
                 image.database_component = RunStats()
 
-            elif cmd == 'STOP' or image.state == 'PROGRAM FINISHED':
+            elif cmd == 'STOP':
                 add_program_deltas(image.game,
                                     image.program,
                                     actions_delta=int(getattr(image.database_component, "actions", 0)),
@@ -147,6 +135,8 @@ def controller_control(
                 paused = False
                 state = False
                 image.state = None
+            elif image.state == 'PROGRAM FINISHED':
+                Command_queue.put({'cmd': 'STOP'})
 
             elif cmd == 'PAUSE':
                 paused = True
@@ -185,7 +175,7 @@ def frame_pump(Image_queue, shutdown_event, image):
             # Block briefly waiting for one frame
             frame = Image_queue.get_nowait()
         except Empty:
-            sleep(0.0001)
+            sleep(0.001)
             continue
 
         if frame is None:
@@ -199,5 +189,5 @@ def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
         for thread in threads:
             if not thread['thread'].is_alive():
                 shutdown_event.set()
-        sleep(5)
+        sleep(1)
 

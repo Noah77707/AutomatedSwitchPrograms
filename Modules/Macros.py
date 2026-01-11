@@ -344,7 +344,7 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
     # While first textbox is visible: capture name when stable (no fixed delay)
     if text_visible and image.generic_bool and image.generic_count == 1 and not image.name_captured:
-        raw = Image_Processing.recognize_pokemon(image, roi)
+        raw = Image_Processing.recognize_text(image, roi)
         raw = (raw or "").strip()
 
         # ignore trivial garbage
@@ -386,42 +386,22 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
     return image.state
 
-def shiny_checker(image,
-                game: str,
-                roi,
-                v_thres,
-                s_max,
-                ratio: float,
-                frames: int,
-                hits_required: int = 3) -> str:
-        frame = image.original_image
-        if frame is None:
-            return image.state
+def had_keywords(lines: list[str], keywords: list[str]) -> bool:
+    joined = " | ".join(lines).lower()
+    return all(k.lower() in joined for k in keywords)
 
-        fid = getattr(image, 'frame_id', 0)
-        last = getattr(image, 'last_frame_id', -1)
-        if fid == last:
-            return image.state
-        image.last_frame_id = fid
-
-        shiny_check = image.is_sparkle_visible(
-            roi,
-            v_thres= v_thres,
-            s_max= s_max,
-            min_bright_ratio= ratio
+def read_lines(image, rois, stable_frames: int = 2, min_len: int = 4) -> list[str] | None:
+    lines = []
+    for idx, roi in enumerate(rois):
+        line = Image_Processing.stable_ocr_line(
+            image, roi,
+            key=f"donut_line_{idx}",
+            stable_frames= stable_frames,
+            min_len= min_len
         )
-        image.shiny_frames_checked += 1
-        if shiny_check:
-            image.shiny_hits += 1
-
-        if image.shiny_hits >= hits_required: # How many rames are shiny
-            image.database_component.pokemon_encountered += 1
-            image.database_component.shinies += 1
-            return return_states(image, 'FOUND_SHINY')
-            
-        if image.shiny_frames_checked >= frames or check_state(image, game, "battle_screen"):
-            image.shiny_frames_checked = 0
-            image.database_component.pokemon_encountered += 1
-            return return_states(image, 'NOT_SHINY')
-
-        return "CHECK_SHINY"
+        if not line:
+            return None
+        
+        lines.append(line)
+    return lines
+        

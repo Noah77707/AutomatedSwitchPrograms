@@ -48,7 +48,6 @@ class WindowCapture:
         self._running = False
         self._thread.join()
         self.video_capture.release()
-        cv.destroyAllWindows()
 
     def _get_connection_error_image(self) -> None:
         if self.connection_error_image is None:

@@ -1,4 +1,4 @@
-import os
+import sys, os, traceback, threading, faulthandler, time
 from queue import Queue
 from threading import Event, Thread
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         shutdown_event = Event()
         stop_event = Event()
         image = Image_Processing()
-        
+
         threads = []
         threads.append({
             'function': 'control_system',
@@ -50,7 +50,7 @@ if __name__ == "__main__":
             thread['thread'].start()
 
         GUI_App = App()
-        GUI(Image_queue, Command_queue, shutdown_event, stop_event, image)
+        GUI(Image_queue, Command_queue, shutdown_event, image)
         GUI_App.exec()
 
         shutdown_event.set()

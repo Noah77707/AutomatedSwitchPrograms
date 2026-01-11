@@ -1,0 +1,538 @@
+
+[2026-01-11 13:43:47] UNCAUGHT EXCEPTION (thread Thread-7 (<lambda>)):
+Traceback (most recent call last):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 29, in <lambda>
+    start_control_video(2, Switch_Controller, Image_queue, shutdown_event, stop_event),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 61, in start_control_video
+    if time.monotonic() - last_beat > 1.0:
+       ^^^^^^^^^^^^^^
+AttributeError: 'builtin_function_or_method' object has no attribute 'monotonic'
+
+
+[2026-01-11 13:43:47] UNCAUGHT EXCEPTION (thread Thread-8 (<lambda>)):
+Traceback (most recent call last):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 36, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 113, in controller_control
+    if time.monotonic() - last_beat > 1.0:
+       ^^^^^^^^^^^^^^
+AttributeError: 'builtin_function_or_method' object has no attribute 'monotonic'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0001e4f0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 210 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 47 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00028200 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 196 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 42 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000250b4 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 325 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0001fac8 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 355 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_timeout.py", line 43 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002878c (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 279 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00027c04 (most recent call first):
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 227 in _read_line
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 245 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00028cb4 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\queue.py", line 180 in get
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 390 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000268b0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 57 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 60 in <module>
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 118 in _run_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 127 in _run_module_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 310 in run_path
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 358 in run_file
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 508 in main
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy\__main__.py", line 71 in <module>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 88 in _run_code
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 198 in _run_module_as_main
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00026b4c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 205 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 44 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00028ccc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 191 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 39 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00024cb4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 165 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 33 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00029258 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 63 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 26 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00029308 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 325 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00025c44 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_timeout.py", line 43 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00029348 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 279 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00020fdc (most recent call first):
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 227 in _read_line
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 245 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00024060 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\queue.py", line 180 in get
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 390 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000290fc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 54 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 57 in <module>
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 118 in _run_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 127 in _run_module_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 310 in run_path
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 358 in run_file
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 508 in main
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy\__main__.py", line 71 in <module>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 88 in _run_code
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 198 in _run_module_as_main
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00025b54 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 203 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 44 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000292e0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 189 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 39 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000261a4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 163 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 33 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00028f04 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 63 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 26 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00022fcc (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 325 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00005f0c (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_timeout.py", line 43 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00027c94 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 279 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002541c (most recent call first):
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 227 in _read_line
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 245 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00027ba0 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\queue.py", line 180 in get
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 390 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0002156c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 54 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 57 in <module>
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 118 in _run_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 127 in _run_module_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 310 in run_path
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 358 in run_file
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 508 in main
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy\__main__.py", line 71 in <module>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 88 in _run_code
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 198 in _run_module_as_main
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00020ab0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 203 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 44 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000292f4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 189 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 39 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000275ac (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 163 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 33 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x0002814c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 63 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 26 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00028f58 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 325 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00005f0c (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_timeout.py", line 43 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00022fcc (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 279 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00027efc (most recent call first):
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 227 in _read_line
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 245 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00028d24 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\queue.py", line 180 in get
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 390 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00029270 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 54 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 57 in <module>
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 118 in _run_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 127 in _run_module_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 310 in run_path
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 358 in run_file
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 508 in main
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy\__main__.py", line 71 in <module>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 88 in _run_code
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 198 in _run_module_as_main
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00029370 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 192 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 44 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x0002762c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 178 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 39 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x0002824c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 152 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 33 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x0001672c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 63 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 26 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000256d8 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 325 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00024884 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_timeout.py", line 43 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00027bf8 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 279 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002903c (most recent call first):
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 227 in _read_line
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 245 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00028d18 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\queue.py", line 180 in get
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 390 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00028564 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 54 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 57 in <module>
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 118 in _run_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 127 in _run_module_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 310 in run_path
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 358 in run_file
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 508 in main
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy\__main__.py", line 71 in <module>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 88 in _run_code
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 198 in _run_module_as_main
+
+[2026-01-11 13:55:48] UNCAUGHT EXCEPTION (thread Thread-7 (<lambda>)):
+Traceback (most recent call last):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 26, in <lambda>
+    start_control_video(2, Switch_Controller, Image_queue, shutdown_event, stop_event),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 66, in start_control_video
+    ok, frame = capture.read_frame()
+    ^^^^^^^^^
+TypeError: cannot unpack non-iterable NoneType object
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x000286b4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 192 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 44 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x0001fab8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 178 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 39 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00029270 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 152 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 33 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x000292f4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 63 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 26 in <lambda>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydev_bundle\pydev_monkey.py", line 1134 in __call__
+
+Thread 0x00022700 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 325 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00026f34 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_timeout.py", line 43 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00020c04 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 655 in wait
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\pydevd.py", line 279 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002670c (most recent call first):
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 227 in _read_line
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 245 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00029114 (most recent call first):
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 359 in wait
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\queue.py", line 180 in get
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_comm.py", line 390 in _on_run
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_daemon_thread.py", line 53 in run
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000204f4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 54 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 57 in <module>
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 118 in _run_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 127 in _run_module_code
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\_vendored\pydevd\_pydevd_bundle\pydevd_runpy.py", line 310 in run_path
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 358 in run_file
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy/..\debugpy\server\cli.py", line 508 in main
+  File "c:\Users\Noahh\.vscode\extensions\ms-python.debugpy-2025.18.0-win32-x64\bundled\libs\debugpy\launcher/../..\debugpy\__main__.py", line 71 in <module>
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 88 in _run_code
+  File "c:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\runpy.py", line 198 in _run_module_as_main

@@ -97,7 +97,6 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
 
         conn.commit()
 
-
 def ensure_program_row(game: str, program: str, db_file: str = DATABASE_PATH) -> None:
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
@@ -214,9 +213,6 @@ def add_pokemon_delta(
         """, (game, program, pokemon_name, int(encountered_delta), int(caught_delta), int(shinies_delta)))
         conn.commit()
 
-# ----------------------------
-# Reads
-# ----------------------------
 def get_program_totals(game: str, program: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row

@@ -44,15 +44,31 @@ def Start_LZA(image: Image_Processing, ctrl: Controller, state: str | None):
     return state
 
 def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, number: int | None):
+    _lv_fix = re.compile(r"\(\s*lv\s*\.?\s*(\d+)\s*[\)\}]", re.IGNORECASE)
+    def norm_line(s: str) -> str:
+        s = (s or "").strip()
+        s = s.replace("}", ")")             # fix OCR brace bug
+        s = re.sub(r"\s+", " ", s)          # collapse spaces
+        # normalize "(Lv.2)" / "(Lv. 2}" / "(lv 2)" -> "(Lv. 2)"
+        s = _lv_fix.sub(lambda m: f"(Lv. {m.group(1)})", s)
+        return s
+
+    def expected_power_lines(power: str, lvl_range: tuple[int, int]) -> list[str]:
+        lo, hi = map(int, lvl_range)
+        if lo > hi:
+            lo, hi = hi, lo
+        return [norm_line(f"{power} (Lv. {lv})") for lv in range(lo, hi + 1)]
+    
+    def has_power(lines: list[str], power: str, lvl_range: tuple[int, int]) -> bool:
+        line_set = {norm_line(x) for x in lines}
+        expected = expected_power_lines(power, lvl_range)
+        return any(e in line_set for e in expected)
+
     hotel_tpl   = get_tpl(image, "Media/LZA_Images/Hotel_Z.png")
     roseli_tpl  = get_tpl(image, "Media/LZA_Images/Roseli.png")
     haban_tpl   = get_tpl(image, "Media/LZA_Images/Haban.png")
     tanga_tpl   = get_tpl(image, "Media/LZA_Images/Tanga.png")
     kasib_tpl   = get_tpl(image, "Media/LZA_Images/Kasib.png")
-    berries_tpl = get_tpl(image, "Media/LZA_Images/Berries.png")
-    big_haul_tpl= get_tpl(image, "Media/LZA_Images/Big_Haul.png")
-    shining_tpl = get_tpl(image, "Media/LZA_Images/AllTypes.png")
-    alpha_tpl   = get_tpl(image, "Media/LZA_Images/Alpha.png")
 
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN', 'BACKUP_SCREEN'):
         image.state = Start_LZA(image, ctrl, image.state)
@@ -215,52 +231,40 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             return image.state
     
     elif image.state == 'DONUT_FINISHED':
-        now = monotonic()
         image.set_debug_rois_for_state('DONUT_FINISHED', const.LZA_STATES['donut_powers_rois'], (0, 0, 0))
-
-        if not hasattr(image, "donut_results_processed"):
-            image.donut_results_processed = False
-        if not hasattr(image, "donut_visible_since_t"):
-            image.donut_visible_since_t = None
-
-        visible = check_state(image, "LZA", "donut_results")
-
-        if visible:
-            if image.donut_visible_since_t is None:
-                image.donut_visible_since_t = now
-        else:
-            if image.donut_visible_since_t is not None and (now - image.donut_visible_since_t) > 0.2:
-                image.donut_visible_since_t = None
-            image.donut_results_processed = False
+        if not check_state(image, "LZA", "donut_results"):
+            # reset stable OCR trackers so next results screen works
+            for i in range(3):
+                setattr(image, f"_ocr_prev_donut_line_{i}", "")
+                setattr(image, f"_ocr_streak_donut_line_{i}", 0)
+                setattr(image, f"_ocr_stable_donut_line_{i}", "")
             return image.state
-
-        if image.donut_results_processed:
-            return image.state
-
-        if image.donut_visible_since_t is None or (now - image.donut_visible_since_t) < 2:
-            return image.state
-
-        rois = const.LZA_STATES['donut_powers_rois']
-
-        if number == 1:
-            has_berries  = match_any_slot(image.original_image, rois, berries_tpl, 0.75)
-            has_big_haul = match_any_slot(image.original_image, rois, big_haul_tpl, 0.75)
-            has_all = has_berries and has_big_haul
-        else:
-            has_alltypes = match_any_slot(image.original_image, rois, shining_tpl, 0.75)
-            has_alpha    = match_any_slot(image.original_image, rois, alpha_tpl, 0.75)
-            has_all = has_alltypes and has_alpha
-
-        image.donut_results_processed = True
-        image.database_component.actions += 1
-
-        if has_all:
-            image.database_component.action_hits += 1
-            image.state = 'DONUT_OK'
-        else:
-            image.state = 'DONUT_BAD'
-        return image.state
         
+        lines = read_lines(image, const.LZA_STATES["donut_powers_rois"], 3, 4)
+        if lines is None:
+            return image.state
+        
+        ok = (
+            has_power(lines, image.donut_cfg['power1'], image.donut_cfg["lvl1"]) and
+            has_power(lines, image.donut_cfg['power2'], image.donut_cfg['lvl2'])
+        )
+
+        print(lines)
+        print(ok)
+
+        if not hasattr(image, "donut_scored"):
+            image.donut_scored = False
+
+        if not image.donut_scored:
+            image.donut_scored = True
+
+            image.database_component.actions += 1
+            if ok:
+                image.database_component.action_hits += 1
+
+        return return_states(image, "DONUT_OK") if ok else return_states(image, "DONUT_BAD")
+
+
     elif image.state == 'DONUT_BAD':
         image.donut_results_processed = False
         image.donut_visible_since_t = None

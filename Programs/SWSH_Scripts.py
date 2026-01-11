@@ -42,7 +42,7 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
                                     "SWSH",
                                     const.SWSH_STATES['encounter_name'],
                                     0, 
-                                    2.8,
+                                    3.2,
                                     3)
         return return_states(image, image.state)
     

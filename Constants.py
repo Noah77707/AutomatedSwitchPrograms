@@ -334,20 +334,22 @@ PROGRAM_META = {
     }
 }
 
-SWSH_SHINY_CFG = ShinyCheckConfig(
-    model_roi=(650, 160, 520, 420),        # tune
-    sparkle_roi=(780, 220, 320, 260),      # tune tighter
-    v_thres=245,
-    s_max=40,
-    warmup_seconds_after_model=0.35,
-    max_window_seconds=2.5,
-    hits_required=8,
-    misses_before_reset=3,
-    min_blob_area=6,
-    max_blob_area=220,
-    max_big_component_ratio=0.60,
-    model_edge_density_thres=0.030,
-)
+DONUT_POWER_OPTIONS = [
+    "Item Power: Berries",
+    "Big Haul Power",
+    "Sparkling Power: All Types",
+    "Alpha",
+]
+
+DONUT_LEVEL_OPTIONS = [
+    "1",
+    "2",
+    "3",
+    "1-2",
+    "2-3",
+    "1-3",
+]
+
 
 COLOR_ON_SCREEN = {
     "top_left": (50, MAIN_FRAME_SIZE[1] - 50),

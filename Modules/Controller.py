@@ -4,60 +4,21 @@ import threading
 
 class Controller:
     def __init__(self, port: str, baud: int = 115200):
-        self.ser = serial.Serial(port, baud, timeout=1)
+        # No ACK reader, no seq/ack state.
+        # Keep timeouts so dead ports don't hang forever.
+        self.ser = serial.Serial(port, baud, timeout=0.1, write_timeout=0.2)
 
-        self.seq = 0
-        self.ack_lock = threading.Lock()
-        self.last_ack = 0
-
-        self._ack_thread = threading.Thread(
-            target=self.read_acks,
-            daemon=True
-        )
-        self._ack_thread.start()
-
-    def read_acks(self):
-        buf = b""
-        while True:
-            try:
-                if self.ser.in_waiting:
-                    buf += self.ser.read(self.ser.in_waiting)
-
-                    while b"\n" in buf:
-                        line, buf = buf.split(b"\n", 1)
-                        line = line.decode("ascii", errors="ignore").strip()
-
-                        if line.startswith("ACK:"):
-                            ack_seq = int(line[4:])
-
-                            with self.ack_lock:
-                                self.last_ack = ack_seq
-
-            except Exception as e:
-                print("ACK reader error:", e)
-
-            time.sleep(0.001)
-
-    def send(self, line: str):
-        self.seq += 1
-        seq = self.seq
-        timeout = 5.0
-
-
-        payload = f"{seq}:{line}\n"
-        self.ser.write(payload.encode("ascii"))
-
-        t0 = time.time()
-        while True:
-            with self.ack_lock:
-                if self.last_ack >= seq:
-                    return True
-
-            if time.time() - t0 > timeout:
-                print("ACK TIMEOUT for seq", seq, line)
-                return False
-
-            time.sleep(0.001)
+    def send(self, line: str) -> bool:
+        """
+        Fire-and-forget send. Returns False on write failure.
+        """
+        try:
+            payload = f"{line}\n"
+            self.ser.write(payload.encode("ascii"))
+            return True
+        except Exception as e:
+            print("SERIAL send error:", e)
+            return False
 
     def tap(self, idx: int, press_s: float = 0.05, gap_s: float = 0.2):
         self.send(f"BTN {idx} TAP")
@@ -91,7 +52,27 @@ class Controller:
         self.send(f"HAT HOLD {dir}")
 
     def dpad_up(self):
-        self.send(f"HAT RELEASE")
+        self.send("HAT RELEASE")
 
     def close(self):
-        self.ser.close()
+        try:
+            self.ser.close()
+        except Exception:
+            pass
+
+    @staticmethod
+    def interruptible_sleep(
+        seconds: float,
+        stop_event: threading.Event,
+        pause_event: threading.Event | None = None,
+        step: float = 0.02
+    ) -> bool:
+        end = time.monotonic() + seconds
+        while time.monotonic() < end:
+            if stop_event.is_set():
+                return False
+            if pause_event is not None and pause_event.is_set():
+                time.sleep(step)
+                continue
+            time.sleep(step)
+        return True

@@ -1,6 +1,4 @@
-import os
-import sys
-import subprocess
+import os, sys, subprocess, traceback
 from queue import Queue, Empty
 from time import sleep, monotonic
 from typing import TYPE_CHECKING
@@ -45,7 +43,6 @@ class GUI(pyqt_w.QWidget):
             Image_queue: Queue, 
             Command_queue: Queue, 
             shutdown_event: Event, 
-            stop_event: Event, 
             image: Image_Processing) -> None:
         super().__init__()
 
@@ -90,10 +87,19 @@ class GUI(pyqt_w.QWidget):
             'tab_sv':   pyqt_w.QWidget(self),
             'tab_lza':  pyqt_w.QWidget(self),
         }
+
+        self.donut_cfg = {
+            "power1": None, "lvl1": (1, 3),
+            "power2": None, "lvl2": (1, 3),
+        }
+
         # sets up the switch capture label so that the program outputs the screen
         self.items['switch_capture_label'].setFixedSize(*const.MAIN_FRAME_SIZE)
         self.items['switch_capture_label'].setStyleSheet(image_label_style)
-
+        self.items["switch_capture_label"].setAttribute(
+            pyqt_c.Qt.WidgetAttribute.WA_TransparentForMouseEvents, True
+        )
+        
         self.tabs = pyqt_w.QTabWidget()
         self.tabs.setTabPosition(pyqt_w.QTabWidget.TabPosition.West)
         self.tabs.setMovable(True)
@@ -224,6 +230,34 @@ class GUI(pyqt_w.QWidget):
         self.profile_spin.setRange(1, 999999)
         self.profile_spin.setValue(1)
 
+        self.donut_row = pyqt_w.QHBoxLayout()
+
+        self.donut_power1 = pyqt_w.QComboBox(self)
+        self.donut_power1.addItems(const.DONUT_POWER_OPTIONS)
+
+        self.donut_lvl1 = pyqt_w.QComboBox(self)
+        self.donut_lvl1.addItems(const.DONUT_LEVEL_OPTIONS)
+
+        self.donut_power2 = pyqt_w.QComboBox(self)
+        self.donut_power2.addItems(const.DONUT_POWER_OPTIONS)
+
+        self.donut_lvl2 = pyqt_w.QComboBox(self)
+        self.donut_lvl2.addItems(const.DONUT_LEVEL_OPTIONS)
+
+        # ---------- putting the items in order in the rows ----------
+
+        self.donut_row.addWidget(pyqt_w.QLabel("Power 1:", self))
+        self.donut_row.addWidget(self.donut_power1)
+        self.donut_row.addWidget(pyqt_w.QLabel("Level:", self))
+        self.donut_row.addWidget(self.donut_lvl1)
+
+        self.donut_row.addSpacing(10)
+
+        self.donut_row.addWidget(pyqt_w.QLabel("Power 2:", self))
+        self.donut_row.addWidget(self.donut_power2)
+        self.donut_row.addWidget(pyqt_w.QLabel("Level:", self))
+        self.donut_row.addWidget(self.donut_lvl2)
+
         button_row_debug = pyqt_w.QHBoxLayout()
         button_row_debug.addWidget(self.debug_button)
         button_row_debug.addWidget(self.screenshot_button)
@@ -239,10 +273,24 @@ class GUI(pyqt_w.QWidget):
         input_row_inputs.addWidget(pyqt_w.QLabel('Profile #:', self))
         input_row_inputs.addWidget(self.profile_spin)
 
+        # ---------- temporary rows per program ----------
+        self.donut_row_widget = pyqt_w.QWidget(self)
+        self.donut_row_widget.setLayout(self.donut_row)
+        self.donut_row_widget.setVisible(False)
+
+        self.donut_power1.currentIndexChanged.connect(self._update_donut_cfg)
+        self.donut_lvl1.currentIndexChanged.connect(self._update_donut_cfg)
+        self.donut_power2.currentIndexChanged.connect(self._update_donut_cfg)
+        self.donut_lvl2.currentIndexChanged.connect(self._update_donut_cfg)
+
+        self._update_donut_cfg()
+        # ---------- adding rows to right panel ----------
+
         right_panel.addLayout(info_row)
         right_panel.addLayout(input_row_inputs)
         right_panel.addLayout(button_row_program)
         right_panel.addLayout(button_row_debug)
+        right_panel.addWidget(self.donut_row_widget)
         right_panel.addStretch(1)
 
         # ---------- attach to main ----------
@@ -251,51 +299,54 @@ class GUI(pyqt_w.QWidget):
 
         self.timer = pyqt_c.QTimer(self)
         self.timer.timeout.connect(lambda: self.update_GUI(shutdown_event))
-        self.timer.start(16)
+        self.timer.start(33)
 
         self.show()
 
     # updates the GUI's capture screen so the current frame from the switch is being shown
     def update_GUI(self, shutdown_event: Event) -> None:
-        if shutdown_event.is_set():
-            self.close()
-            return
-        
-        frame = getattr(self.image, 'original_image', None)
-        if frame is None:
-            return
+        try:
+            if shutdown_event.is_set():
+                self.close()
+                return
+            
+            frame = getattr(self.image, 'original_image', None)
+            if frame is None:
+                return
 
-        fid = getattr(self.image, 'frame_id', None)
-        if not hasattr(self, '_last_gui_frame_id'):
-            self._last_gui_frame_id = -1
-        if fid is not None and fid == self._last_gui_frame_id:
-            return
-        if fid is not None:
-            self._last_gui_frame_id
+            fid = getattr(self.image, 'frame_id', None)
+            if not hasattr(self, '_last_gui_frame_id'):
+                self._last_gui_frame_id = -1
+            if fid is not None and fid == self._last_gui_frame_id:
+                return
+            if fid is not None:
+                self._last_gui_frame_id
 
-        frame_to_show = frame
-        if getattr(self.image, 'debug_draw', False):
-            frame_to_show = self.image.draw_debug(frame.copy())
+            frame_to_show = frame
+            if getattr(self.image, 'debug_draw', False):
+                frame_to_show = self.image.draw_debug(frame.copy())
 
-        # convert BGR -> RGB
-        frame_rgb = cv.cvtColor(frame_to_show, cv.COLOR_BGR2RGB)
-        h, w, ch = frame_rgb.shape
-        bytes_per_line = ch * w
+            # convert BGR -> RGB
+            frame_rgb = cv.cvtColor(frame_to_show, cv.COLOR_BGR2RGB)
+            h, w, ch = frame_rgb.shape
+            bytes_per_line = ch * w
 
-        qimg = pyqt_g.QImage(
-            frame_rgb.data, w, h, bytes_per_line,
-            pyqt_g.QImage.Format.Format_RGB888
-        )
-        pix = pyqt_g.QPixmap.fromImage(qimg)
-        # if label size differs from frame size, scale
-        if (self.items['switch_capture_label'].width(), self.items['switch_capture_label'].height()) != (w, h):
-            pix = pix.scaled(
-                self.items['switch_capture_label'].width(),
-                self.items['switch_capture_label'].height(),
-                pyqt_c.Qt.AspectRatioMode.KeepAspectRatio,
-                pyqt_c.Qt.TransformationMode.FastTransformation
+            qimg = pyqt_g.QImage(
+                frame_rgb.data, w, h, bytes_per_line,
+                pyqt_g.QImage.Format.Format_RGB888
             )
-        self.items['switch_capture_label'].setPixmap(pix)
+            pix = pyqt_g.QPixmap.fromImage(qimg)
+            # if label size differs from frame size, scale
+            if (self.items['switch_capture_label'].width(), self.items['switch_capture_label'].height()) != (w, h):
+                pix = pix.scaled(
+                    self.items['switch_capture_label'].width(),
+                    self.items['switch_capture_label'].height(),
+                    pyqt_c.Qt.AspectRatioMode.KeepAspectRatio,
+                    pyqt_c.Qt.TransformationMode.FastTransformation
+                )
+            self.items['switch_capture_label'].setPixmap(pix)
+        except Exception:
+            traceback.print_exc()
     # updates the stats that are shown to the player
     def update_stats(self):
         s = getattr(self.image, 'database_component', None)
@@ -312,33 +363,36 @@ class GUI(pyqt_w.QWidget):
             if key == 'playtime_seconds':
                 parts.append(f'run time: {format_hms(int(val))}')
                 parts.append(f'total_time: {format_hms(int(db_val + val))}')
-            elif key == 'phase':
-                parts.append(f'phase: {getattr(self.image, 'phase', None)}')
-            elif key == 'state':
-                parts.append(f'state: {getattr(self.image, 'state', None)}')
+            elif key == "phase":
+                parts.append(f"phase: {getattr(self.image, 'phase', None)}")
+            elif key == "state":
+                parts.append(f"state: {getattr(self.image, 'state', None)}")
             else:
                 parts.append(f'{key}: {val} (total {db_val})')
 
         return ' | '.join(parts)
     # creates the timer that is used to see how long the program ran
     def stat_timer(self):
-        if self.running and not self.paused:
-            now = monotonic()
-            if self.run_last_t is None:
-                self.run_last_t = now
-            else:
-                dt = (now - self.run_last_t)
-                self.run_last_t = now
-                if dt > 0:
-                    self.run_seconds += dt
-                    whole = int(self.run_seconds)
-                    if whole > 0:
-                        self.run_seconds -= whole
-                        database = getattr(self.image, 'database_component', None)
-                        if database is not None:
-                            database.playtime_seconds += whole
-        
-        self.items['stats_label'].setText(self.update_stats())
+        try:
+            if self.running and not self.paused:
+                now = monotonic()
+                if self.run_last_t is None:
+                    self.run_last_t = now
+                else:
+                    dt = (now - self.run_last_t)
+                    self.run_last_t = now
+                    if dt > 0:
+                        self.run_seconds += dt
+                        whole = int(self.run_seconds)
+                        if whole > 0:
+                            self.run_seconds -= whole
+                            database = getattr(self.image, 'database_component', None)
+                            if database is not None:
+                                database.playtime_seconds += whole
+            
+            self.items['stats_label'].setText(self.update_stats())
+        except Exception:
+            traceback.print_exc()
     # changes the programs you can see per tab
     def on_tab_changed(self, index: int) -> None:
         self.current_program_name = self.tabs.tabText(index)
@@ -352,6 +406,7 @@ class GUI(pyqt_w.QWidget):
         self.program = program
         self.tracks = btn.property('tracks') or []
         self.numberinput = int(number)
+        self._update_visibility_for_program()
     # starts the script/program
     def start_scripts(self) -> None:
         runs = int(self.run_spin.value())
@@ -369,6 +424,7 @@ class GUI(pyqt_w.QWidget):
         self.paused = False
         self.run_last_t = monotonic()
         self.run_seconds = 0.0
+        print(self.image.donut_cfg)
     # pauses the script/program
     def pause_scripts(self) -> None:
         if not self.running:
@@ -391,13 +447,35 @@ class GUI(pyqt_w.QWidget):
         self.paused = False
         self.run_last_t = None
         self.run_seconds = 0.0
+#    allows rows to become visible/not visible
+    def _update_visibility_for_program(self):
+        is_donut = (self.game == "LZA" and self.program == "Donut_Checker_Berry")
+        self.donut_row_widget.setVisible(is_donut)
+
+        # optional: set defaults for donut berry mode
+        if is_donut:
+            # Example defaults
+            # Power 1 = Berries Lv 3
+            # Power 2 = Big Haul Lv 3
+            self.donut_power1.setCurrentText("Berries")
+            self.donut_lvl1.setCurrentText("3")
+            self.donut_power2.setCurrentText("Big Haul")
+            self.donut_lvl2.setCurrentText("3")
+
+            # keep cfg in sync
+            self.donut_cfg["power1"] = self.donut_power1.currentText()
+            self.donut_cfg["lvl1"] = self.parse_level_range(self.donut_lvl1.currentText())
+            self.donut_cfg["power2"] = self.donut_power2.currentText()
+            self.donut_cfg["lvl2"] = self.parse_level_range(self.donut_lvl2.currentText())
+        else:
+            self.image.donut_cfg = None
     # allows the player to put the debug information (rois only currently) onto the screen
     def update_debug(self) -> None:
-        if self.image.debug_draw == False:
-            self.image.debug_draw = True
+        if self.image.debug == False:
+            self.image.debug = True
             self.debug_button.setText('Remove Debug')
         else:
-            self.image.debug_draw = False
+            self.image.debug = False
             self.debug_button.setText('Draw Debug')
     # Allows the player to take a screenshot
     def on_screenshot_clicked(self) -> None:
@@ -411,3 +489,24 @@ class GUI(pyqt_w.QWidget):
             return  # user cancelled
 
         cv.imwrite(filename, self.image.original_image)
+    # goes with the _update_donut_cfg
+    @staticmethod
+    def parse_level_range(s: str) -> tuple[int, int]:
+        s = s.strip()
+        if "-" in s:
+            a, b = s.split("-", 1)
+            return int(a), int(b)
+        v = int(s)
+        return v, v
+
+    def _update_donut_cfg(self):
+        cfg = {
+            "power1": self.donut_power1.currentText(),
+            "lvl1": self.parse_level_range(self.donut_lvl1.currentText()),
+            "power2": self.donut_power2.currentText(),
+            "lvl2": self.parse_level_range(self.donut_lvl2.currentText()),
+        }
+        self.donut_cfg = cfg
+        self.image.donut_cfg = cfg
+
+
