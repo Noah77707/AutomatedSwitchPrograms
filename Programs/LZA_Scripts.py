@@ -227,8 +227,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
         if not check_state(image, 'LZA', 'donut_results'):
             ctrl.tap(BTN_A, 0.05, 0.5)
         else:
-            image.state = 'DONUT_FINISHED'
-            return image.state
+            return return_states(image, 'DONUT_FINISHED')
     
     elif image.state == 'DONUT_FINISHED':
         image.set_debug_rois_for_state('DONUT_FINISHED', const.LZA_STATES['donut_powers_rois'], (0, 0, 0))
@@ -261,9 +260,10 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             image.database_component.actions += 1
             if ok:
                 image.database_component.action_hits += 1
-
-        return return_states(image, "DONUT_OK") if ok else return_states(image, "DONUT_BAD")
-
+        
+        if image.donut_scored == True:
+            image.donut_scored = False
+            return return_states(image, "DONUT_OK") if ok else return_states(image, "DONUT_BAD")
 
     elif image.state == 'DONUT_BAD':
         image.donut_results_processed = False
@@ -279,8 +279,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
         ctrl.tap(BTN_A, 0.05, 02.95)
         image.database_component.resets += 1
         image.generic_bool = True
-        image.state = 'PAIRING'
-        return image.state
+        return return_states(image, 'PAIRING')
     
     elif image.state == 'DONUT_OK':
         image.donut_results_processed = False
@@ -295,8 +294,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
         ctrl.tap(BTN_B, 0.05, 1)
         if image.database_component.action_hits == image.run:
             image.state = "PROGRAM_FINISHED"
-            return image.state
-        image.state = 'IN_GAME1'
-        return image.state
+            return return_states(image, 'PROGRAM_FINISHED')
+        return return_states(image, 'IN_GAME1')
     
     return image.state

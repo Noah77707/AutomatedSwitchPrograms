@@ -6,7 +6,7 @@ import PyQt6.QtGui as pyqt_g
 from pytesseract import pytesseract as pt
 from typing import Tuple, Union, Dict, Optional, Sequence
 from time import time, sleep
-import re
+import re, json
 
 import Constants as const
 from .Dataclasses import *
@@ -193,57 +193,42 @@ class Image_Processing():
             cv.rectangle(frame, (x, y), (x + w, y + h), color, 2)
 
         return frame
-# Mainly used for pokemon
-    def recognize_text(self, roi) -> str:
-        frame = getattr(self, "original_image", None)
-        if frame is None:
-            return ""
-        
-        x, y, w, h = map(int, roi)
-        crop = frame[y:y+h,x:x+w]
-        if crop.size == 0:
-            return ""
-        
-        gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
-        gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
-        gray = cv.GaussianBlur(gray, (3, 3), 0)
-        bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
-
-        custom_config = "--oem 1 --psm 7"
-        text = pt.image_to_string(bw, config=custom_config)
-        test = re.sub(r"\s+", " ", text).strip()
-
-        if not text:
-            return ""
-        
-        pokemon_text = text
-
-        for part in ["Go!", "go!", "¡", "!", "’"]:
-            pokemon_text = pokemon_text.replace(part, '')
-
-        pokemon_text = pokemon_text.strip()
-
-        m = re.search(r"\bwild\s+(.+?)\s+appeared\b", pokemon_text, flags=re.IGNORECASE)
-        if m:
-            return m.group(1).strip(" .,'")
-        
-        m = re.search(r"^(.+?)\s+appeared\b", pokemon_text, flags=re.IGNORECASE)
-        if m:
-            return m.group(1).strip(" ,.'")
-        
-        words = [w for w in pokemon_text.split(" ") if w]
-        if words:
-            return words[-1].strip(" ,.'")
-        
-        return text.strip()
     
+class Text:
+    @staticmethod
+    def load_pokemon_name_set(path: str) -> set[str]:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return set(data["names"])
+
+    @staticmethod
+    def normalize_ocr_name(s: str) -> str:
+        s = (s or "").strip().lower()
+        s = s.replace("’", "'")
+        s = re.sub(r"[^a-z0-9\s\-']", "", s)
+        s = s.replace("'", "")
+        s = re.sub(r"\s+", "-", s)
+        s = re.sub(r"-+", "-", s)
+        return s.strip("-")
+
+    @staticmethod
+    def canonicalize_with_set(raw: str, name_set: set[str]) -> str:
+        slug = Text.normalize_ocr_name(raw)
+        if slug in name_set:
+            return slug
+        compact = slug.replace("-", "")
+        if compact in name_set:
+            return compact
+        return slug
+
+    @staticmethod
     def ocr_line(image, roi, *, psm: int = 7) -> str:
         frame = getattr(image, "original_image", None)
         if frame is None:
             return ""
 
         x, y, w, h = map(int, roi)
-        crop = frame[y:y+h, x:x+w]
+        crop = frame[y : y + h, x : x + w]
         if crop.size == 0:
             return ""
 
@@ -253,23 +238,16 @@ class Image_Processing():
         bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
 
         txt = pt.image_to_string(bw, config=f"--oem 1 --psm {psm}")
-        txt = re.sub(r"\s+", " ", txt).strip()
-        return txt
+        return re.sub(r"\s+", " ", (txt or "")).strip()
 
+    @staticmethod
     def stable_ocr_line(image, roi, *, key: str, stable_frames: int = 2, min_len: int = 4) -> str:
-        """
-        Reads OCR every new frame and returns a stable line only when it repeats for N frames.
-        Stores per-key state on image:
-        _ocr_prev_<key>, _ocr_streak_<key>, _ocr_stable_<key>
-        """
         prev_key = f"_ocr_prev_{key}"
         streak_key = f"_ocr_streak_{key}"
         stable_key = f"_ocr_stable_{key}"
 
-        raw = Image_Processing.ocr_line(image, roi, psm=7)
-        raw = raw.strip()
+        raw = Text.ocr_line(image, roi, psm=7).strip()
 
-        # ignore tiny junk (like "R", "wi", etc)
         if len(raw) < min_len:
             setattr(image, prev_key, "")
             setattr(image, streak_key, 0)
@@ -290,3 +268,74 @@ class Image_Processing():
             return raw
 
         return ""
+
+    @staticmethod
+    def _prep_for_matching(s: str) -> str:
+        s = (s or "").strip()
+        s = s.replace("\n", " ").replace("\r", " ")
+        s = re.sub(r"\s+", " ", s)
+        return s
+
+    @staticmethod
+    def extract_name(line: str, patterns: list[str]) -> str:
+        line = Text._prep_for_matching(line)
+        if not line:
+            return ""
+
+        for pat in patterns:
+            m = re.search(pat, line, flags=re.IGNORECASE)
+            if not m:
+                continue
+            raw = (m.group(1) or "").strip(" .,'!¡’")
+            return raw
+
+        return ""
+
+    @staticmethod
+    def display_capitalize(slug_or_name: str) -> str:
+        """
+        Converts:
+          "mr-mime" -> "Mr Mime"
+          "ho-oh"   -> "Ho Oh"
+          "type-null" -> "Type Null"
+        """
+        s = (slug_or_name or "").strip()
+        if not s:
+            return ""
+        s = s.replace("_", "-")
+        parts = [p for p in s.split("-") if p]
+        return " ".join(p[:1].upper() + p[1:].lower() for p in parts)
+
+    @staticmethod
+    def recognize_text(image, roi) -> str:
+        # OCR the ROI (single line) and extract candidate name using shared patterns
+        line = Text.ocr_line(image, roi, psm=7)
+        if not line:
+            return ""
+
+        # Expect patterns in constants.TEXT["PATTERNS"]
+        patterns = getattr(image, "pokemon_text_patterns", None)
+        if not isinstance(patterns, list):
+            # fallback: look for module-level TEXT if you imported it
+            try:
+                patterns = TEXT["PATTERNS"]  # type: ignore[name-defined]
+            except Exception:
+                patterns = [
+                    r"\bwild\s+(.+?)\s+appeared\b",
+                    r"\bencountered\s+(?:a\s+)?wild\s+(.+?)(?:[.!]|$)",
+                    r"^(.+?)\s+hatched\s+from\s+the\s+egg\b",
+                    r"\bgo!?\s+(.+?)(?:[.!]|$)",
+                    r"^(.+?)\s+appeared\b",
+                ]
+
+        raw_name = Text.extract_name(line, patterns)
+        if not raw_name:
+            return ""
+
+        name_set = getattr(image, "pokemon_name_set", None)
+        if isinstance(name_set, set):
+            key = Text.canonicalize_with_set(raw_name, name_set)   # slug or compact
+        else:
+            key = Text.normalize_ocr_name(raw_name)
+
+        return Text.display_capitalize(key)

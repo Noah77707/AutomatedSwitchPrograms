@@ -5,7 +5,8 @@ from threading import Event, Thread
 from Modules.Controller import Controller
 from Modules.GUI import App, GUI
 from Modules.Control_System import start_control_video, controller_control, frame_pump, check_threads
-from Modules.Image_Processing import Image_Processing
+from Modules.Image_Processing import Image_Processing, Text
+
 
 MODULE_NAME = 'SwitchConnector'
 if __name__ == "__main__":
@@ -18,6 +19,7 @@ if __name__ == "__main__":
         shutdown_event = Event()
         stop_event = Event()
         image = Image_Processing()
+        image.pokemon_name_set = Text.load_pokemon_name_set("Media/pokemon_names.json")
 
         threads = []
         threads.append({

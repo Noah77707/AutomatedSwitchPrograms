@@ -4,7 +4,7 @@ import time
 from time import monotonic
 import serial
 from .Controller import Controller
-from .Image_Processing import Image_Processing
+from .Image_Processing import Image_Processing, Text
 from .States import *
 from .Database import *
 # controller_buttons.py
@@ -31,7 +31,7 @@ def return_phase(image: Image_Processing, phase: str) -> str:
 def return_states(image: Image_Processing, state: str) -> str:
     if image.state != state:
         image.state = state
-        image.debug_rois_state = state
+        image.debug_state = state
     return state
 
 def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
@@ -86,7 +86,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
         ctrl.tap(BTN_HOME, 0.05, 0.5)
         image.state= 'PAIRING'
 
-    elif check_state(image, 'GENERIC', 'controller_screen') and check_state(image, 'GENERIC', 'player_1'):
+    elif check_state(image, 'GENERIC', 'controller_screen'):
         ctrl.tap(BTN_A, 0.05, 1.5)
         image.state= 'PAIRING'
 
@@ -111,7 +111,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
             image.playing = True
             image.state= 'IN_GAME'
         else:
-            ctrl.tap(BTN_A, 0.05, 0.75)
+            ctrl.tap(BTN_A, 0.05, 1)
             if image.profile_set == False:
                 for _ in range(image.profile - 1):
                     ctrl.dpad(2, 0.05); sleep(0.3)
@@ -142,33 +142,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
 
 
     return image.state
-
-        # ctrl.tap(BTN_B, 0.05, 0.3)
-        # ctrl.tap(BTN_HOME, 0.1, 1.2)
-        # ctrl.dpad(4, 0.2)
-        # for _ in range(5):
-        #    sleep(0.07)
-        #    ctrl.dpad(2, 0.05)
-        # ctrl.tap(BTN_A, 0.05, 1)
-        # sleep(1)
-        # if not check_state(image, 'GENERIC', 'controller_screen'):
-        #     ctrl.tap(BTN_HOME)
-        #     ctrl.tap(BTN_HOME)
-        #     return 'PAIRING'
-        # else:
-        #     if check_state(image, 'GENERIC', 'local_communication'):
-        #         ctrl.tap(BTN_A)
-            
-        #     ctrl.tap(BTN_A, 0.05, 0.7)
-        #     ctrl.tap(BTN_L)
-        #     ctrl.tap(BTN_R, 0.05, 1)
-        #     ctrl.tap(BTN_A, 0.1, 1)
-        #     sleep(1)
-        #     if check_state(image, 'GENERIC', 'player_1'):
-        #         ctrl.tap(BTN_HOME, 0.1, 1.75)
-        #         ctrl.tap(BTN_HOME)
-        #     return 'IN_GAME'
-    
+ 
 def swsh_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
     if image.state == 'START_SCREEN':
         if check_state(image, 'SWSH', 'title_screen'):
@@ -192,6 +166,14 @@ def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = 
             ctrl.tap(BTN_A)
             return 'IN_GAME'
         
+    return image.state
+
+def sv_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
+    if image.state == 'START_SCREEN':
+        if check_state(image, 'SV', 'title_screen'):
+            ctrl.tap(BTN_A, 0.1, 0.2)
+            return 'IN_GAME'
+        return "START_SCREEN"
     return image.state
 
 def mash_a_while_textbox(
@@ -344,7 +326,7 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
     # While first textbox is visible: capture name when stable (no fixed delay)
     if text_visible and image.generic_bool and image.generic_count == 1 and not image.name_captured:
-        raw = Image_Processing.recognize_text(image, roi)
+        raw = Text.recognize_text(image, roi)
         raw = (raw or "").strip()
 
         # ignore trivial garbage

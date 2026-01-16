@@ -20,17 +20,19 @@ def Start_SWSH(image: Image_Processing, ctrl: Controller, state: str | None) -> 
     
     return image.state
 
-def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:    
+def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:    
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
-        image.state = Start_SWSH(image, ctrl, image.state)
+        return return_states(image, Start_SWSH(image, ctrl, image.state))
 
     elif state == 'IN_GAME':
-        if check_state(image, 'SWSH', 'in_game'):
+        if check_state(image, 'SWSH', 'in_game') and number == 0:
             ctrl.stick('l', 128, 255, 0.016, True)
             ctrl.tap(BTN_A, 0.05, 0.7)
             ctrl.tap(BTN_A, 0.05, 0.7)
             ctrl.tap(BTN_A, 0.05, 0.7)
             ctrl.tap(BTN_A)
+            return return_states(image, "CHECK_SHINY")
+        elif check_state(image, 'SWSH', 'in_game') and number == 1:
             return return_states(image, "CHECK_SHINY")
     
     elif image.state == 'CHECK_SHINY': 
@@ -47,7 +49,7 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         return return_states(image, image.state)
     
     elif image.state == 'FOUND_SHINY':
-        image.state == "SHINY"
+        image.state == "PROGRAM_FINISHED"
 
     elif image.state == 'NOT_SHINY':
         image.database_component.resets += 1

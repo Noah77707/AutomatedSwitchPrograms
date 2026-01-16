@@ -178,7 +178,7 @@ BDSP_STATES = {
         "positions": [(1108, 580), (1251, 600), (1253, 638)],
         "tol": 10,
     },
-    'daycare_sign': {
+    "daycare_sign": {
         "path": "Media/BDSP_Images/Day_Care_Sign.png",
         "roi": (240, 160, 180, 180)
     },
@@ -188,7 +188,7 @@ BDSP_STATES = {
         "tol": 10,
     },
     "egg_hatching": {
-        'path': 'Media/BDSP_Images/Hatched.png',
+        "path": "Media/BDSP_Images/Hatched.png",
     },
     "poketch": {
         "color": (48, 0, 144),
@@ -205,7 +205,97 @@ BDSP_STATES = {
 
 LA_STATES = {}
 
-SV_STATES = {}
+SV_STATES = {
+    # screens
+    "title_screen": {
+        "color": (13, 220, 243),
+        "positions": [
+            (870, 238),
+            (970, 216),
+            (824, 206),
+            (1029, 236)
+            ],
+    },
+    "menu_screen": {
+        "color": (252, 252, 252),
+        "positions": [
+            (626, 683),
+            (989, 687),
+            (1187, 686),
+            (1197, 697)
+            ],
+    },
+    "box_screen": {
+        "color": (251, 251, 251),
+        "positions": [
+            (329, 621),
+            (329, 605),
+            (321, 613),
+            (338, 613)
+        ]
+    },
+    "all_box_screen": {
+        "color": (255, 255, 254),
+        "positions": [
+            (979, 619),
+            (709, 618),
+            (702, 613)
+        ]
+    },
+    # in game
+    "pokemon_in_box": {
+        "color": (13, 212, 244),
+        "positions": [
+            (854, 404),
+            (904, 438),
+            (1275, 1),
+            (1267, 46)
+            ],
+    },
+    "egg_in_box": {
+        "color": (1, 0 ,1),
+        "positions": [
+            (904, 21),
+            (904, 29),
+            (922, 40),
+            (926, 40)
+        ]
+    },
+    "pokemon_highlighted": {
+        # box offsets are: left is from 300 to 384, down is from 133 to 217
+        "color": (33, 215, 218),
+        "roi": (300, 133, 82, 81),
+        "positions": [
+            (376, 138),
+            (376, 136),
+            (304, 138),
+            (304, 136)
+        ]
+    },
+    "shiny_symbol": {
+        "path": "Media/SV_Images/Shiny_Symbol.png",
+        "roi": (1106, 58, 121, 34)
+    },
+    "box_highlighted": {
+        # box 1 is 602, 143. box 2 is 682, 143. box 9 is 602, 223. box roi is 80x80
+        "color": (33, 213, 227),
+        "roi": (602, 143, 80, 80),
+        "positions": [
+            (672, 149),
+            (672, 215),
+            (610, 149),
+            (610, 215)
+        ]
+    },
+    "text_box": {
+        "color": (12, 212, 242),
+        "positions": [
+            (326, 525),
+            (954, 648)
+        ]
+    },
+
+}
 
 LZA_STATES = {
     # screens
@@ -219,9 +309,9 @@ LZA_STATES = {
         "positions": [(527, 277), (787, 278), (631, 280)],
         "tol": 10,
     },
-    'backup_screen': {
-        'color': (71, 51, 52),
-        'positions': [
+    "backup_screen": {
+        "color": (71, 51, 52),
+        "positions": [
             (768, 486),
             (505, 491),
             (654, 453),
@@ -234,7 +324,7 @@ LZA_STATES = {
         "tol": 10,
     },
     "box_screen": {
-        'color': (255, 255, 254),
+        "color": (255, 255, 254),
         "positions": [
             (290, 27),
             (259, 34),
@@ -253,7 +343,7 @@ LZA_STATES = {
     },
     # in game
     "multi_select": {
-        'color': (243, 227, 54),
+        "color": (243, 227, 54),
         "positions": [
             (126, 697),
             (129, 694),
@@ -273,16 +363,16 @@ LZA_STATES = {
         "roi": (1045, 82, 42, 22)
     },
     "text_box": {
-        'color': (239, 238, 239),
-        'positions': [
+        "color": (239, 238, 239),
+        "positions": [
             (329, 680),
             (341, 574),
             (916, 572)
         ]
     },
-    'donut_results': {
-        'color': (238, 253, 251),
-        'positions': [
+    "donut_results": {
+        "color": (238, 253, 251),
+        "positions": [
             (93, 649),
             (729, 664),
             (731, 457),
@@ -327,29 +417,34 @@ GAME_STATES = {
     "LZA": LZA_STATES,
 }
 
-PROGRAM_META = {
-    ("BDSP", "Egg_Collector_BDSP"): {
-        "desc": "Stand at the Day Care man. Party must have 1 empty slot. Program will collect eggs then walk to reposition.",
-        "img": "Media/Docs/BDSP_EggCollector_Setup.png",
-    }
+TEXT = {
+    "DONUT_POWER_OPTIONS": [
+        "Item Power: Berries",
+        "Item Power: Special",
+        "Item Power: Poké Balls",
+        "Item Power: Candies",
+        "Item Power: Coins",
+        "Item Power: Treasures",
+        "Big Haul Power",
+        "Sparkling Power: All Types",
+        "Alpha",
+    ],
+    "PATTERNS": [
+        r"\bwild\s+(.+?)\s+appeared\b",
+        r"\bencountered\s+(?:a\s+)?wild\s+(.+?)(?:[.!]|$)",
+        r"^(.+?)\s+hatched\s+from\s+the\s+egg\b",
+        r"\bgo!?\s+(.+?)(?:[.!]|$)",
+        r"^(.+?)\s+appeared\b",
+    ],
+    "DONUT_LEVEL_OPTIONS": [
+        "1",
+        "2",
+        "3",
+        "1-2",
+        "2-3",
+        "1-3",
+    ]
 }
-
-DONUT_POWER_OPTIONS = [
-    "Item Power: Berries",
-    "Big Haul Power",
-    "Sparkling Power: All Types",
-    "Alpha",
-]
-
-DONUT_LEVEL_OPTIONS = [
-    "1",
-    "2",
-    "3",
-    "1-2",
-    "2-3",
-    "1-3",
-]
-
 
 COLOR_ON_SCREEN = {
     "top_left": (50, MAIN_FRAME_SIZE[1] - 50),

@@ -44,7 +44,8 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # LA
 
     # SV
-
+    ('SV', 'Pokemon_Releaser_SV'): Pokemon_Releaser_SV,
+    
     # LZA
     ('LZA', 'Donut_Checker_Berry'): Donut_Checker,
     ('LZA', 'Donut_Checker_Shiny'): Donut_Checker,
@@ -119,7 +120,7 @@ def controller_control(
 
                 image.database_component = RunStats()
 
-            elif cmd == 'STOP':
+            elif cmd == 'STOP' or image.state == "PROGRAM_FINISHED":
                 add_program_deltas(image.game,
                                     image.program,
                                     actions_delta=int(getattr(image.database_component, "actions", 0)),
@@ -135,9 +136,6 @@ def controller_control(
                 paused = False
                 state = False
                 image.state = None
-            elif image.state == 'PROGRAM FINISHED':
-                Command_queue.put({'cmd': 'STOP'})
-
             elif cmd == 'PAUSE':
                 paused = True
 
