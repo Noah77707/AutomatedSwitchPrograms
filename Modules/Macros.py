@@ -7,6 +7,7 @@ from .Controller import Controller
 from .Image_Processing import Image_Processing, Text
 from .States import *
 from .Database import *
+from .Debug import *
 # controller_buttons.py
 BTN_Y = 0
 BTN_B = 1
@@ -31,7 +32,7 @@ def return_phase(image: Image_Processing, phase: str) -> str:
 def return_states(image: Image_Processing, state: str) -> str:
     if image.state != state:
         image.state = state
-        image.debug_state = state
+        image.debugger._state = state
     return state
 
 def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
@@ -72,7 +73,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
     return "PROGRAM_FINISHED"
     
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
-    image.set_debug_rois_for_state('PAIRING', [const.GENERIC_STATES['playing']['roi']], (0, 255, 0))
+    image.debugger.set_rois_for_state('PAIRING', [const.GENERIC_STATES['playing']['roi']], (0, 255, 0))
 
     if not hasattr(image, "_playing_lm"):
         image._playing_lm = get_landmark("GENERIC", "playing", 0.7)
@@ -340,7 +341,7 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
             if image.name_streak >= stable_frames:
                 image.database_component.pokemon_name = raw
                 image.name_captured = True
-                print("Name:", image.database_component.pokemon_name)
+                image.debugger.log("Name:", image.database_component.pokemon_name)
 
     # Falling edge: textbox disappears
     if (not text_visible) and image.generic_bool:
@@ -349,7 +350,7 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
     # Decide after second textbox
     if image.generic_count == 2:
         dt = float(image.end_time - image.start_time)
-        print("dt_seconds:", dt)
+        image.debugger.log("dt_seconds:", dt)
 
         # reset for next
         image.generic_count = 0
@@ -360,9 +361,11 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
         add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, encountered_delta=1)
         if dt < time_range_max:
+            image.database_component.resets += 1
             add_program_deltas(image.game, image.program, resets_delta=1)
             image.state = "NOT_SHINY"
         else:
+            image.database_component.shinies += 1
             add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, shinies_delta=1)
             image.state = "FOUND_SHINY"
 
@@ -375,7 +378,7 @@ def had_keywords(lines: list[str], keywords: list[str]) -> bool:
 def read_lines(image, rois, stable_frames: int = 2, min_len: int = 4) -> list[str] | None:
     lines = []
     for idx, roi in enumerate(rois):
-        line = Image_Processing.stable_ocr_line(
+        line = Text.stable_ocr_line(
             image, roi,
             key=f"donut_line_{idx}",
             stable_frames= stable_frames,

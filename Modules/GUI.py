@@ -28,10 +28,28 @@ MODULE_NAME = "GUI"
 
 image_label_style = "background-color: #000; border: 1px solid #aaa"
 
+
 class App(pyqt_w.QApplication):
     def __init__(self):
         super().__init__([])
-        self.setStyleSheet("QWidget { background-color: #333; }")
+        self.setStyleSheet("""
+QWidget { 
+    background-color: #333;
+}
+QPushButton {
+    background-color: #333;
+    color: white;
+    border: 1px solid #666;
+    padding: 6px;
+}
+QPushButton:checked {
+    background-color: #2b2b2b;
+    border: 1px solid #aaa;
+}
+QPushButton:hover {
+    background-color: #555;
+}
+""")
 
 class DynamicRow(pyqt_w.QWidget):
     def __init__(self, const_mod, parent=None):
@@ -45,7 +63,6 @@ class DynamicRow(pyqt_w.QWidget):
         self._active = None
         self._cfg = {}
         self.setVisible(False)
-
 
         self._input_spin: list[pyqt_w.QSpinBox] = []
 
@@ -174,26 +191,51 @@ class DynamicRow(pyqt_w.QWidget):
 class HomeTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
     
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
         layout = pyqt_w.QVBoxLayout(self)
         layout.addWidget(pyqt_w.QLabel("HOME programs"))
 
+        self.btn_ar = pyqt_w.QPushButton("Push A Repeatedly")
+        self.btn_ar.setProperty("tracks", ['actions', "playtime_seconds", "state"])
+        self.btn_ar.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_ar, "Press_A_Repeatadly", 0, 0))
+
         self.btn_cct = pyqt_w.QPushButton("Controller Connection Test", self)
         self.btn_cct.setProperty("tracks", [])
-        self.btn_cct.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_cct, "Connect_Controller_Test", 0))
+        self.btn_cct.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_cct, "Connect_Controller_Test", 0, 0))
 
         self.btn_rht = pyqt_w.QPushButton("Return Home Test", self)
         self.btn_rht.setProperty("tracks", [])
-        self.btn_rht.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_rht, "Return_Home_Test", 0))
+        self.btn_rht.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_rht, "Return_Home_Test", 0, 0))
 
         layout.addWidget(self.btn_cct)
         layout.addWidget(self.btn_rht)
+        layout.addWidget(self.btn_ar)
         layout.addStretch(1)
 
 class SWSHTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -201,24 +243,56 @@ class SWSHTab(pyqt_w.QWidget):
         layout = pyqt_w.QVBoxLayout(self)
         layout.addWidget(pyqt_w.QLabel("SWSH programs"))
 
+        self.group = pyqt_w.QButtonGroup(self)
+        self.group.setExclusive(True)
+
         # Static Encounter - Regi
         self.ser = pyqt_w.QPushButton("Static Encounter - Regi", self)
+        self.ser.setCheckable(True)
+        self.group.addButton(self.ser)
         self.ser.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds", "state"])
         self.ser.setProperty("db", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
-        self.ser.clicked.connect(lambda _: self.program_selected.emit("SWSH", self.ser, "Static_Encounter_SWSH", 0, 0))
+        self.ser.clicked.connect(lambda _:
+                                 (self._set_program_info("Static_Encounter_SWSH"),
+                                 self.program_selected.emit("SWSH", self.ser, "Static_Encounter_SWSH", 0, 0)))
 
         # Static Encounter - Sword of Justice
         self.sej = pyqt_w.QPushButton("Static Encounter - Sword of Justice", self)
+        self.sej.setCheckable(True)
+        self.group.addButton(self.sej)
         self.sej.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds", "state"])
         self.sej.setProperty("db", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
-        self.sej.clicked.connect(lambda _: self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1))
+        self.sej.clicked.connect(lambda _:
+                                (self._set_program_info(Static_Encounter_SWSH),
+                                self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1)))
 
         layout.addWidget(self.ser)
         layout.addWidget(self.sej)
         layout.addStretch(1)
 
+        self.info_img = pyqt_w.QLabel(self)
+        self.info_img.setFixedHeight(140)
+        self.info_img.setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        self.info_img.setScaledContents(True)
+
+        self.info_text = pyqt_w.QLabel(self)
+        self.info_text.setWordWrap(True)
+
+        layout.addWidget(self.info_img)
+        layout.addWidget(self.info_text)
+
 class BDSPTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -227,30 +301,53 @@ class BDSPTab(pyqt_w.QWidget):
         layout.addWidget(pyqt_w.QLabel("BDSP programs"))
         self.setLayout(layout)
 
+        self.group = pyqt_w.QButtonGroup(self)
+        self.group.setExclusive(True)
+
         # static encounter
         self.se = pyqt_w.QPushButton("Static Encounter WIP", self)
+        self.se.setCheckable(True)
+        self.group.addButton(self.se)
         self.se.setProperty("tracks", [])
-        self.se.clicked.connect(lambda _: self.program_selected.emit("BDSP", self.se, "Static_Encounter_BDSP", 0, 0))   
+        self.se.clicked.connect(lambda _:
+                                (self._set_program_info("Static_Encounter_BDSP"),
+                                  self.program_selected.emit("BDSP", self.se, "Static_Encounter_BDSP", 0, 0)))
 
         # egg collector
         self.ec = pyqt_w.QPushButton("Egg Collector", self)
+        self.ec.setCheckable(True)
+        self.group.addButton(self.ec)
         self.ec.setProperty("tracks", ["eggs_collected", "shinies", "playtime_seconds", "state"])
-        self.ec.clicked.connect(lambda _: self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0))
+        self.ec.clicked.connect(lambda _:
+                                (self._set_program_info("Static_Encounter_BDSP"),
+                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0)))
 
         # egg hatcher
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
+        self.eh.setCheckable(True)
+        self.group.addButton(self.eh)
         self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds", "state"])
-        self.eh.clicked.connect(lambda _: self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0))
+        self.eh.clicked.connect(lambda _:
+                                (self._set_program_info("Egg_Hatcher_BDSP"),
+                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0)))
 
         # automated egg
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
+        self.ae.setCheckable(True)
+        self.group.addButton(self.ae)
         self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase", "state"])
-        self.ae.clicked.connect(lambda _: self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0))
+        self.ae.clicked.connect(lambda _:
+                                (self._set_program_info("Automated_Egg_BDSP"),
+                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0)))
 
         # pokemon releaser
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
+        self.pr.setCheckable(True)
+        self.group.addButton(self.pr)
         self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
-        self.pr.clicked.connect(lambda _: self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0))
+        self.pr.clicked.connect(lambda _:
+                                (self._set_program_info("Pokemon_Releaser_BDSP"),
+                                  self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0)))
 
         layout.addWidget(self.se)
         layout.addWidget(self.ec)
@@ -259,8 +356,29 @@ class BDSPTab(pyqt_w.QWidget):
         layout.addWidget(self.pr)
         layout.addStretch(1)
 
+        self.info_img = pyqt_w.QLabel(self)
+        self.info_img.setFixedHeight(140)
+        self.info_img.setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        self.info_img.setScaledContents(True)
+
+        self.info_text = pyqt_w.QLabel(self)
+        self.info_text.setWordWrap(True)
+
+        layout.addWidget(self.info_img)
+        layout.addWidget(self.info_text)
+
 class LATab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -268,9 +386,34 @@ class LATab(pyqt_w.QWidget):
         layout = pyqt_w.QVBoxLayout(self)
         layout.addWidget(pyqt_w.QLabel("LA programs"))
         self.setLayout(layout)
+
+        self.group = pyqt_w.QButtonGroup(self)
+        self.group.setExclusive(True)
+
         
+        self.info_img = pyqt_w.QLabel(self)
+        self.info_img.setFixedHeight(140)
+        self.info_img.setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        self.info_img.setScaledContents(True)
+
+        self.info_text = pyqt_w.QLabel(self)
+        self.info_text.setWordWrap(True)
+
+        layout.addWidget(self.info_img)
+        layout.addWidget(self.info_text)
+
 class SVTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -279,16 +422,44 @@ class SVTab(pyqt_w.QWidget):
         layout.addWidget(pyqt_w.QLabel("SV programs"))
         self.setLayout(layout)
 
+        self.group = pyqt_w.QButtonGroup(self)
+        self.group.setExclusive(True)
+
         # pokemon releaser
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
+        self.pr.setCheckable(True)
+        self.group.addButton(self.pr)
         self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
-        self.pr.clicked.connect(lambda _: self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 0, 0))
+        self.pr.clicked.connect(lambda _:
+                                (self._set_program_info("Static_Encounter_BDSP"),
+                                 self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 1, 0)))
 
         layout.addWidget(self.pr)
         layout.addStretch(1)
 
+        self.info_img = pyqt_w.QLabel(self)
+        self.info_img.setFixedHeight(140)
+        self.info_img.setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        self.info_img.setScaledContents(True)
+
+        self.info_text = pyqt_w.QLabel(self)
+        self.info_text.setWordWrap(True)
+
+        layout.addWidget(self.info_img)
+        layout.addWidget(self.info_text)
+
 class LZATab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -297,20 +468,49 @@ class LZATab(pyqt_w.QWidget):
         layout.addWidget(pyqt_w.QLabel("LZA programs"))
         self.setLayout(layout)
         
+        self.group = pyqt_w.QButtonGroup(self)
+        self.group.setExclusive(True)
+
         # donut maker - sour
         self.dms = pyqt_w.QPushButton("Donut Maker - Sour", self)
+        self.dms.setCheckable(True)
+        self.group.addButton(self.dms)
         self.dms.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
-        self.dms.clicked.connect(lambda _, btn=self.dms: self.program_selected.emit("LZA", btn, "Donut_Checker_Berry", 2, 1))
+        self.dms.clicked.connect(lambda _:
+                                 (self._set_program_info("Static_Encounter_BDSP"),
+                                  self.program_selected.emit("LZA", self.dms, "Donut_Checker_Berry", 2, 1)))
 
         # donut maker - sweet
         self.dmw = pyqt_w.QPushButton("Donut Maker - Sweet", self)
+        self.dmw.setCheckable(True)
+        self.group.addButton(self.dmw)
         self.dmw.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
-        self.dmw.clicked.connect(lambda _, btn=self.dmw: self.program_selected.emit("LZA", btn, "Donut_Checker_Shiny", 2, 2))
+        self.dmw.clicked.connect(lambda _:
+                                 (self._set_program_info("Static_Encounter_BDSP"),
+                                  self.program_selected.emit("LZA", self.dmw, "Donut_Checker_Shiny", 2, 2)))
         
         layout.addWidget(self.dms)
         layout.addWidget(self.dmw)
         layout.addStretch(1)
-        
+
+        self.info_img = pyqt_w.QLabel(self)
+        self.info_img.setFixedHeight(140)
+        self.info_img.setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        self.info_img.setScaledContents(True)
+
+        self.info_text = pyqt_w.QLabel(self)
+        self.info_text.setWordWrap(True)
+
+        layout.addWidget(self.info_img)
+        layout.addWidget(self.info_text)
+
+class ProgramInfo(pyqt_w.QWidget):
+    def get(program: str) -> tuple[str, str]:
+        info = const.TEXT.get("PROGRAM_DESCRIPTIONS", {}).get(program, {})
+        text = info.get("text")
+        image = info.get("image")
+        return text, image
+
 class GUI(pyqt_w.QWidget):
     def __init__(
         self,
@@ -343,9 +543,6 @@ class GUI(pyqt_w.QWidget):
 
         self.setWindowTitle("Auto Switch Programs")
         main_layout = pyqt_w.QHBoxLayout(self)
-
-        self.latest_frame = None
-        self.region_radius = 5
 
         self.items = {
             "switch_capture_label": pyqt_w.QLabel(self),
@@ -406,7 +603,7 @@ class GUI(pyqt_w.QWidget):
         self.items["stats_label"].setText(self.update_stats())
         self.items["stats_label"].setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
 
-        self.debug_button = pyqt_w.QPushButton("Draw Debug", self)
+        self.debug_button = pyqt_w.QPushButton("Debug On", self)
         self.debug_button.clicked.connect(self.update_debug)
 
         self.screenshot_button = pyqt_w.QPushButton("Save Screenshot", self)
@@ -468,8 +665,8 @@ class GUI(pyqt_w.QWidget):
                 self._last_gui_frame_id = fid
 
             frame_to_show = frame
-            if getattr(self.image, "debug", False):
-                frame_to_show = self.image.draw_debug(frame.copy())
+            if getattr(self.image, "debugger", None) is not None:
+                frame_to_show = self.image.debugger.draw(frame.copy(), getattr(self.image, "state", None))
 
             frame_rgb = cv.cvtColor(frame_to_show, cv.COLOR_BGR2RGB)
             h, w, ch = frame_rgb.shape
@@ -606,20 +803,54 @@ class GUI(pyqt_w.QWidget):
         self.run_seconds = 0.0
 
     def update_debug(self) -> None:
-        if self.image.debug is False:
-            self.image.debug = True
-            self.debug_button.setText("Remove Debug")
+        dbg = getattr(self.image, "debugger", None)
+        dbg.set_enabled(not dbg.enabled)
+
+
+        if dbg.enabled:
+            self.debug_button.setText("Debug Off")
         else:
-            self.image.debug = False
-            self.debug_button.setText("Draw Debug")
+            self.debug_button.setText("Debug On")
 
     def on_screenshot_clicked(self) -> None:
-        filename = pyqt_w.QFileDialog.getSaveFileName(
-            self,
-            "Save Screenshot",
-            "",
-            "PNG Image (*.png);;JPEG Image (*.jpg *.jpeg);;All Files (*)",
-        )
-        if not filename:
-            return
-        cv.imwrite(filename, self.image.original_image)
+        try:
+            frame = getattr(self.image, "original_image", None)
+            if frame is None or getattr(frame, "size", 0) == 0:
+                pyqt_w.QMessageBox.warning(self, "Screenshot", "No frame available to save.")
+                return
+
+            result = pyqt_w.QFileDialog.getSaveFileName(
+                self,
+                "Save Screenshot",
+                "",
+                "PNG Image (*.png);;JPEG Image (*.jpg *.jpeg);;All Files (*)",
+            )
+
+            # PyQt returns (filename, selected_filter)
+            if not result or len(result) < 1:
+                return
+
+            filename = result[0]
+            selected_filter = result[1] if len(result) > 1 else ""
+
+            # Ensure filename is a plain Python str
+            filename = str(filename).strip()
+            if not filename:
+                return
+
+            low = filename.lower()
+            if not (low.endswith(".png") or low.endswith(".jpg") or low.endswith(".jpeg")):
+                if "PNG" in selected_filter:
+                    filename += ".png"
+                elif "JPEG" in selected_filter:
+                    filename += ".jpg"
+                else:
+                    filename += ".png"
+
+            ok = cv.imwrite(filename, frame)
+            if not ok:
+                pyqt_w.QMessageBox.critical(self, "Screenshot", f"cv.imwrite failed:\n{filename}")
+
+        except Exception as e:
+            pyqt_w.QMessageBox.critical(self, "Screenshot", f"{type(e).__name__}: {e}")
+            traceback.print_exc()

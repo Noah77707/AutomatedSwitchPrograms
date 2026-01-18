@@ -7,6 +7,7 @@ from Modules.Macros import *
 from Modules.States import *
 from Modules.Dataclasses import *
 from Modules.Image_Processing import *
+from Modules.Database import *
 
 def Start_BDSP(image: Image_Processing, ctrl: Controller, state: str | None):
     ensure_stats(image)
@@ -20,6 +21,44 @@ def Start_BDSP(image: Image_Processing, ctrl: Controller, state: str | None):
         image.state = bdsp_start_screens_macro(ctrl, image, image.state)
 
     return image.state
+
+def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> None:
+    def get_menu_cursor_index(image: Image_Processing, game: str = "BDSP") -> int | None:
+        menu = const.GAME_STATES[game]["menu"]
+        for name, cfg in menu.items():
+            if check_state(image, game, "menu", name):
+                return int(cfg["index"])
+        return None
+
+    menu = const.BDSP_STATES["menu"]
+    
+    target_position = menu[target]['index']
+    cur = get_menu_cursor_index(image, "BDSP")
+    image.debugger.log("menu cursor:", cur, "target:", target_position)
+
+    if cur is None:
+        return
+    
+    def row(i: int) -> int: return 0 if i < 5 else 1
+    def col(i: int) -> int: return i % 5
+
+    if row(cur) != row(target_position):
+        ctrl.dpad(0 if row(cur) < row(target_position) else 4, 0.05)
+        sleep(0.12)
+        cur = get_menu_cursor_index(image, "BDSP")
+        if cur is None:
+            return
+        
+    while col(cur) != col(target_position):
+        if col(cur) < col(target_position):
+            ctrl.dpad(2, 0.05)
+        else:
+            ctrl.dpad(6, 0.05)
+        sleep(0.4)
+        nxt = get_menu_cursor_index(image, "BDSP")
+        if nxt is None:
+            return
+        cur = nxt
 
 def Static_Encounter_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
     return None
@@ -183,9 +222,9 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         threshold= 0.65,
         hits_required= 3
     )
-    image.clear_debug()
-    image.add_debug_roi((200, 120, 200, 200), (0, 0, 255))
-    image.add_debug_roi(const.BDSP_STATES['text_box_roi'], (255, 0, 0))
+    image.debugger.clear()
+    image.debugger.set_rois_for_state((200, 120, 200, 200), (0, 0, 255))
+    image.debugger.set_rois_for_state(const.BDSP_STATES['text_box_roi'], (255, 0, 0))
     count = image.run * 30
     # Start of the state program
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
@@ -272,11 +311,11 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         # looks for the text 'hatched from the egg!' to increment the hatched egg
         if check_state(image, 'BDSP', 'text_box'):
             hit, score = match_text_fragment(image, hatched, const.BDSP_STATES['text_box_roi'], sqdiff_max= 0.2)
-            print('sqdiff:', score)
+            Debug.log('sqdiff:', score)
             sleep(0.02); ctrl.tap(BTN_A)
 
         if hit and not image.generic_bool:
-            print('hit')
+            Debug.log('hit')
             image.database_component.eggs_hatched += 1
             image.egg_count += 1
             image.generic_count += 1

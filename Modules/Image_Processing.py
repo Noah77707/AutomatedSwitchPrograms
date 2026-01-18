@@ -10,6 +10,7 @@ import re, json
 
 import Constants as const
 from .Dataclasses import *
+from .Debug import Debug
 
 pt.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -28,10 +29,7 @@ class Image_Processing():
         self.game = None
         self.program = None
 
-        self.debug = False
-        self.debug_rois = []
-        self.debug_focus_roi: tuple[tuple[int,int,int,int], tuple[int,int,int]] | None = None
-        self.debug_state = None
+        self.debugger = Debug(enabled=False)
 
         self.shiny_frames_checked = 0
         self.shiny_hits = 0
@@ -152,48 +150,6 @@ class Image_Processing():
         ratio = bright / mask.size
         return ratio >= min_bright_ratio
 
-    def clear_debug(self):
-        self.debug_rois.clear()
-        self.debug_focus_roi = None
-        self.debug_state = None
-
-    def add_debug_roi(self, roi, color=(0, 0, 255)):
-        # roi: (x, y, w, h)
-        self.debug_rois.append((roi, color))
-
-    def set_debug_rois_for_state(self, state: str, rois, color=(0, 0, 255)) -> None:
-        self.debug_state = state
-        out = []
-        for r in rois:
-            out.append((tuple(map(int, r)), color))
-        self.debug_rois = out
-        self.debug_focus_roi = None
-
-    def set_debug_focus_roi(self, roi, color=(255, 0, 0)) -> None:
-        self.debug_focus_roi = (tuple(map(int, roi)), color)
-    
-    def draw_debug(self, frame):
-        if self.debug_state != self.state:
-            return frame
-        
-        rois = self.debug_rois
-        if isinstance(rois, list):
-            for item in rois:
-                try:
-                    roi, color = item  # expected ((x,y,w,h), (b,g,r))
-                    x, y, w, h = map(int, roi)
-                    cv.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-                except Exception as e:
-                    print("BAD debug_rois item (not (roi,color)):", item, e)
-                    continue
-
-        if self.debug_focus_roi is not None:
-            roi, color = self.debug_focus_roi
-            x, y, w, h = map(int, roi)
-            cv.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-
-        return frame
-    
 class Text:
     @staticmethod
     def load_pokemon_name_set(path: str) -> set[str]:
@@ -339,3 +295,9 @@ class Text:
             key = Text.normalize_ocr_name(raw_name)
 
         return Text.display_capitalize(key)
+
+    @staticmethod
+    def string_from_roi(image, roi, *, psm: int = 7, stable: bool = False, key: str = "roi") -> str:
+        if stable:
+            return Text.stable_ocr_line(image, roi, key=key, stable_frames=2, min_len=1)
+        return Text.ocr_line(image, roi, psm=psm)

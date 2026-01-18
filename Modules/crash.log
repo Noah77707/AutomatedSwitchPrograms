@@ -3735,3 +3735,1779 @@ Thread 0x000318b0 (most recent call first):
 Current thread 0x000349d0 (most recent call first):
   File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
   File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00034c2c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00034920 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000321a4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002c18c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00034470 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0002ea60 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000030d4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035450 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003451c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0002cd68 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00034fc4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035684 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000321b4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00032c0c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000338dc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-15 18:21:53] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Pokemon_Releaser_SV() takes 3 positional arguments but 4 were given
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00030ec4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00030674 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00034d90 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035994 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003544c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-15 18:22:05] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Pokemon_Releaser_SV() takes 3 positional arguments but 4 were given
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0002993c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035b50 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000358fc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002bec8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003421c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-16 07:34:09] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 43, in Static_Encounter_SWSH
+    image.state = shiny_wait_checker(image,
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Macros.py", line 361, in shiny_wait_checker
+    add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, encountered_delta=1)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Database.py", line 193, in add_pokemon_delta
+    raise ValueError("game, program, pokemon_name are required")
+ValueError: game, program, pokemon_name are required
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00036420 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000309dc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037120 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00036d08 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0002f24c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00035f54 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00030c1c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002ff5c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00036e90 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000351d0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x000320c8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037750 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000314d8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037164 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000341d4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003777c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002fbf4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000383e4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035b1c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00031efc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 10:31:24] UNCAUGHT EXCEPTION (main thread):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line 628, in on_screenshot_clicked
+    cv.imwrite(filename, self.image.original_image)
+cv2.error: OpenCV(4.11.0) :-1: error: (-5:Bad argument) in function 'imwrite'
+> Overload resolution failed:
+>  - Expected 'filename' to be a str or path-like object
+>  - Expected 'filename' to be a str or path-like object
+
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00037614 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 33 in _capture_loop
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003777c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002fbf4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000383e4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035b1c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 82 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00031efc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line 620 in on_screenshot_clicked
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 10:32:04] UNCAUGHT EXCEPTION (main thread):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line 628, in on_screenshot_clicked
+    cv.imwrite(filename, self.image.original_image)
+cv2.error: OpenCV(4.11.0) :-1: error: (-5:Bad argument) in function 'imwrite'
+> Overload resolution failed:
+>  - Expected 'filename' to be a str or path-like object
+>  - Expected 'filename' to be a str or path-like object
+
+
+
+[2026-01-17 10:32:12] UNCAUGHT EXCEPTION (main thread):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line 628, in on_screenshot_clicked
+    cv.imwrite(filename, self.image.original_image)
+cv2.error: OpenCV(4.11.0) :-1: error: (-5:Bad argument) in function 'imwrite'
+> Overload resolution failed:
+>  - Expected 'filename' to be a str or path-like object
+>  - Expected 'filename' to be a str or path-like object
+
+
+
+[2026-01-17 10:32:26] UNCAUGHT EXCEPTION (main thread):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line 628, in on_screenshot_clicked
+    cv.imwrite(filename, self.image.original_image)
+cv2.error: OpenCV(4.11.0) :-1: error: (-5:Bad argument) in function 'imwrite'
+> Overload resolution failed:
+>  - Expected 'filename' to be a str or path-like object
+>  - Expected 'filename' to be a str or path-like object
+
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003aa88 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039bf0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035624 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003912c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00038d98 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 10:33:09] UNCAUGHT EXCEPTION (main thread):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line 628, in on_screenshot_clicked
+    cv.imwrite(filename, self.image.original_image)
+cv2.error: OpenCV(4.11.0) :-1: error: (-5:Bad argument) in function 'imwrite'
+> Overload resolution failed:
+>  - Expected 'filename' to be a str or path-like object
+>  - Expected 'filename' to be a str or path-like object
+
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00039efc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00038ef8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a600 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037470 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003abdc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00039c78 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a44c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039a28 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00036048 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00039ad8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00037c74 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003aa70 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a990 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a600 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00038fe4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00037230 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003979c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00038de0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00034414 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a8d0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 10:55:43] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 39, in Static_Encounter_SWSH
+    image.set_debug_rois_for_state("IN_GAME", all_rois, (255, 255, 255))
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Image_Processing.py", line 168, in set_debug_rois_for_state
+    out.append((tuple(map(int, r)), color))
+                      ^^^^^^^^^^^
+TypeError: 'int' object is not iterable
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003a2b4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ac48 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ae64 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0002e138 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00039144 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003ae64 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003aebc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003808c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ac98 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003af18 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x000384b8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037474 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00036c88 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039808 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00037e78 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003af14 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037228 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ae1c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ac34 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003966c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003ad00 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a658 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003acec (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003875c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00038af4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003aca0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b120 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b360 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a13c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00034be0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: access violation
+
+Thread 0x0003a494 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 33 in _capture_loop
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003aca0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b120 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b360 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a13c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 82 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00034be0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line ??? in <lambda>
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003b2d4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037cc0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003927c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00036710 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00036e2c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00035098 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ab94 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000379e0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037578 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a138 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003a244 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ae78 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00038cd8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a9ac (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003b34c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00037a00 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039f14 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000396f4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a184 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a73c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003af90 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037848 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039be8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00034128 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00034b38 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 11:42:03] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 100, in Static_Encounter_SWSH
+    Menu_Navigation_SWSH(ctrl, image, "pokemon_camp")
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 32, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item["name"]):
+                                          ~~~~^^^^^^^^
+KeyError: 'name'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00036070 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039760 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ac74 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a938 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a8f4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 11:44:30] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 100, in Static_Encounter_SWSH
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 32, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item["name"]):
+                                          ~~~~^^^^^^^^
+KeyError: 'name'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x000376f0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039578 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039f9c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b254 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a4e4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x000297cc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b3c4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00036d74 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003aa74 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003b264 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 11:53:19] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 109, in Static_Encounter_SWSH
+    Menu_Navigation_SWSH(ctrl, image, 'pokemon_camp')
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 32, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item["name"]):
+                                          ~~~~^^^^^^^^
+KeyError: 'name'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003a794 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b3c4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b2f8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003ac54 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003b134 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 11:54:32] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 109, in Static_Encounter_SWSH
+    Menu_Navigation_SWSH(ctrl, image, 'pokemon_camp')
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 32, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item["name"]):
+                                          ~~~~^^^^^^^^
+KeyError: 'name'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00026788 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b264 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a828 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037118 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003aba8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 11:57:47] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 109, in Static_Encounter_SWSH
+    Menu_Navigation_SWSH(ctrl, image, 'pokemon_camp')
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 32, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\States.py", line 175, in check_state
+    cfg = cfg.get(key)
+          ^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00037f3c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b088 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003846c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003afe0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000397f4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 11:59:29] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 111, in Static_Encounter_SWSH
+    Menu_Navigation_SWSH(ctrl, image, 'pokemon_camp')
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 29, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\States.py", line 175, in check_state
+    cfg = cfg.get(key)
+          ^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003afd0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000388e0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00032ae4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a99c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000306cc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+
+[2026-01-17 12:01:58] UNCAUGHT EXCEPTION (thread Thread-2 (<lambda>)):
+Traceback (most recent call last):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075, in _bootstrap_inner
+    self.run()
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35, in <lambda>
+    'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164, in controller_control
+    state = step_fn(image, ctrl, state, input)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 111, in Static_Encounter_SWSH
+    Menu_Navigation_SWSH(ctrl, image, 'pokemon_camp')
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 29, in Menu_Navigation_SWSH
+    if check_state(image, "SWSH", "menu", item):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\States.py", line 175, in check_state
+    cfg = cfg.get(key)
+          ^^^^^^^^^^^^
+TypeError: unhashable type: 'dict'
+
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00037e94 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00038038 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037d20 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00037a14 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003b0dc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x0003a9c4 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a09c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000381f8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035948 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a8ac (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00038760 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003aa20 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a358 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b264 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0000248c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00038f14 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b3b8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a284 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003582c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a55c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00039664 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00038140 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a4c0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003904c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x000374fc (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00039a70 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000381e0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b098 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a164 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a838 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00030a20 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00035928 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039cb8 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003b300 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x00037924 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: code 0x8001010d
+
+Thread 0x00034c54 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039814 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a500 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 150 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000385f0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 19 in __init__
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 64 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a39c (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>
+Windows fatal exception: access violation
+
+Thread 0x00038454 (most recent call first):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1599 in _readerthread
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039964 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Window_Capture.py", line 33 in _capture_loop
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00034c54 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 190 in check_threads
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 46 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x00039814 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 176 in frame_pump
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 41 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x0003a500 (most recent call first):
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1356 in _make_invoke_excepthook
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 940 in __init__
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1616 in _communicate
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1209 in communicate
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytesseract\pytesseract.py", line 124 in timeout_manager
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\contextlib.py", line 137 in __enter__
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytesseract\pytesseract.py", line 258 in run_tesseract
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytesseract\pytesseract.py", line 284 in run_and_get_output
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytesseract\pytesseract.py", line 416 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\site-packages\pytesseract\pytesseract.py", line 413 in image_to_string
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Image_Processing.py", line 240 in ocr_line
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Image_Processing.py", line 312 in recognize_text
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Macros.py", line 329 in shiny_wait_checker
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Programs\SWSH_Scripts.py", line 81 in Static_Encounter_SWSH
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 164 in controller_control
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 35 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Thread 0x000385f0 (most recent call first):
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\Control_System.py", line 82 in start_control_video
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 28 in <lambda>
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1012 in run
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1075 in _bootstrap_inner
+  File "C:\Users\Noahh\AppData\Local\Programs\Python\Python312\Lib\threading.py", line 1032 in _bootstrap
+
+Current thread 0x0003a39c (most recent call first):
+  Garbage-collecting
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Modules\GUI.py", line ??? in <lambda>
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 56 in main_menu
+  File "C:\Users\Noahh\Documents\Programs\PersonalPokemonConnector\Main.py", line 59 in <module>

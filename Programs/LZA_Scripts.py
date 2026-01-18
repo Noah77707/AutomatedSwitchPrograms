@@ -5,6 +5,7 @@ import serial
 from Modules.Controller import Controller
 from Modules.Macros import *
 from Modules.Database import *
+from Modules.States import *
 
 def Start_LZA(image: Image_Processing, ctrl: Controller, state: str | None):
     ensure_stats(image)
@@ -42,6 +43,44 @@ def Start_LZA(image: Image_Processing, ctrl: Controller, state: str | None):
         return image.state
         
     return state
+
+def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> None:
+    def get_menu_cursor_index(image: Image_Processing, game: str = "LZA") -> int | None:
+        menu = const.GAME_STATES[game]["menu"]
+        for name, cfg in menu.items():
+            if check_state(image, game, "menu", name):
+                return int(cfg["index"])
+        return None
+
+    menu = const.LZA_STATES["menu"]
+    
+    target_position = menu[target]['index']
+    cur = get_menu_cursor_index(image, "LZA")
+    image.debugger.log("menu cursor:", cur, "target:", target_position)
+
+    if cur is None:
+        return
+    
+    def row(i: int) -> int: return 0 if i < 5 else 1
+    def col(i: int) -> int: return i % 5
+
+    if row(cur) != row(target_position):
+        ctrl.dpad(0 if row(cur) < row(target_position) else 4, 0.05)
+        sleep(0.12)
+        cur = get_menu_cursor_index(image, "LZA")
+        if cur is None:
+            return
+        
+    while col(cur) != col(target_position):
+        if col(cur) < col(target_position):
+            ctrl.dpad(2, 0.05)
+        else:
+            ctrl.dpad(6, 0.05)
+        sleep(0.4)
+        nxt = get_menu_cursor_index(image, "LZA")
+        if nxt is None:
+            return
+        cur = nxt
 
 def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, number: int | None):
     _lv_fix = re.compile(r"\(\s*lv\s*\.?\s*(\d+)\s*[\)\}]", re.IGNORECASE)
@@ -95,7 +134,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
     
     elif image.state == 'MAP_SELECTION':
         now = monotonic()
-        image.set_debug_rois_for_state('MAP_SELECTION', const.LZA_STATES['map_screen_rois'], (255, 255, 255))
+        image.debugger.set_rois_for_state('MAP_SELECTION', const.LZA_STATES['map_screen_rois'], (255, 255, 255))
  
         row = None
         for i, roi in enumerate(const.LZA_STATES['map_screen_rois']):
@@ -107,7 +146,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             return image.state
 
         roi = const.LZA_STATES['map_screen_rois'][row]
-        image.set_debug_focus_roi(roi, (0, 0, 0))
+        image.debugger.set_focus_roi(roi, (0, 0, 0))
         if now - image.last_check_t >= 0.2:
             image.last_check_t = now
             image.generic_bool = match_label(image.original_image, roi, hotel_tpl)
@@ -158,7 +197,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
         
     elif image.state == 'FIRST_BERRY':
         now = monotonic()
-        image.set_debug_rois_for_state('FIRST_BERRY', (const.LZA_STATES['berry_select_rois']), (255, 255, 255))
+        image.debugger.set_rois_for_state('FIRST_BERRY', (const.LZA_STATES['berry_select_rois']), (255, 255, 255))
 
         row = None
         if number == 1:
@@ -174,8 +213,8 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             return image.state
 
         roi = const.LZA_STATES['berry_select_rois'][row]
-        image.set_debug_focus_roi(roi, (0, 0, 0))
-        
+        image.debugger.set_focus_roi(roi, (0, 0, 0))
+
         if now - image.last_check_t >= 0.2:
             image.last_check_t = now
             image.generic_bool = match_label(image.original_image, roi, tpl)
@@ -191,7 +230,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
 
     elif image.state == 'SECOND_BERRY':
         now = monotonic()
-        image.set_debug_rois_for_state('SECOND_BERRY', const.LZA_STATES['berry_select_rois'], (255, 255, 255))
+        image.debugger.set_rois_for_state('SECOND_BERRY', const.LZA_STATES['berry_select_rois'], (255, 255, 255))
 
         row = None
         if number == 1:
@@ -207,7 +246,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             return image.state
 
         roi = const.LZA_STATES['berry_select_rois'][row]
-        image.set_debug_focus_roi(roi, (0, 0, 0))
+        image.debugger.set_focus_roi(roi, (0, 0, 0))
 
         if now - image.last_check_t >= 0.2:
             image.last_check_t = now
@@ -248,8 +287,8 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             has_power(lines, image.donut_cfg['power2'], image.donut_cfg['lvl2'])
         )
 
-        print(lines)
-        print(ok)
+        Debug.log(lines)
+        Debug.log(ok)
 
         if not hasattr(image, "donut_scored"):
             image.donut_scored = False

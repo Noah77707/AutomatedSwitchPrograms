@@ -164,17 +164,17 @@ def _color_close(bgr: Tuple[int,int,int], target: Tuple[int,int,int], tol: int) 
             abs(bgr[1] - target[1]) <= tol and
             abs(bgr[2] - target[2]) <= tol)
 
-def check_state(image, game: str, name: str) -> bool:
+def check_state(image, game: str, *path: str) -> bool:
     frame = getattr(image, "original_image", None)
     if frame is None:
         return False
 
     states = const.GAME_STATES.get(game)
-    if not states:
-        return False
-    cfg = states.get(name)
-    if not cfg:
-        return False
+    cfg = states
+    for key in path:
+        cfg = cfg.get(key)
+        if cfg is None:
+            return False
 
     color = cfg["color"]
     positions = cfg["positions"]

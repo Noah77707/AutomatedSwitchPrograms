@@ -60,19 +60,3 @@ class Controller:
         except Exception:
             pass
 
-    @staticmethod
-    def interruptible_sleep(
-        seconds: float,
-        stop_event: threading.Event,
-        pause_event: threading.Event | None = None,
-        step: float = 0.02
-    ) -> bool:
-        end = time.monotonic() + seconds
-        while time.monotonic() < end:
-            if stop_event.is_set():
-                return False
-            if pause_event is not None and pause_event.is_set():
-                time.sleep(step)
-                continue
-            time.sleep(step)
-        return True

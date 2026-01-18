@@ -28,6 +28,7 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # Home
     ('HOME', 'Connect_Controller_Test'): Connect_Controller_Test,
     ('HOME', 'Return_Home_Test'): Return_Home_Test,
+    ('HOME', "Press_A_Repeatadly"): Press_A_Repeatadly,
 
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
@@ -105,7 +106,7 @@ def controller_control(
 
         if isinstance(msg, dict):
             cmd = msg.get('cmd')
-            print(msg)
+            image.debugger.log(msg)
             if cmd == 'SET_PROGRAM':
                 image.game = msg.get('game')
                 image.program = msg.get('program')

@@ -77,12 +77,19 @@ SWSH_STATES = {
     "battle_screen": {
         "color": (255, 255, 254),
         "positions": [
-            (5, 621),
-            (6, 668),
-            (149, 618),
-            (114, 24),
-            (1271, 25)
+            (287, 694),
+            (322, 619),
+            (971, 30),
+            (949, 81)
         ]
+    },
+    "menu_screen": {
+        "color": (66, 32, 206),
+        "positions": [
+            (574, 3),
+            (1043, 3),
+            (160, 657)
+            ],
     },
     # in game
     "in_game": {
@@ -118,16 +125,144 @@ SWSH_STATES = {
             (1245, 691)
         ]
     },
+    "dark_text_box": {
+        "color": (51, 51, 51),
+        "positions": [
+            (337, 674),
+            (384, 578),
+            (842, 673),
+            (896, 581)
+        ]
+    },
+    "menu": { 
+        "pokedex": {
+            "index": 0,
+            "color": (1, 0, 1),
+            "rois": [(130, 107, 75, 113)],
+            "positions": [
+                (130, 107),
+                (130, 220),
+                (205, 107),
+                (205, 220)
+            ]
+        },
+        "pokemon": {    
+            "index": 1,
+            "color": (1, 0, 1),
+            "rois": [(366, 107, 75, 113)],
+            "positions": [
+                (366, 107),
+                (366, 220),
+                (441, 107),
+                (441, 220)
+            ]
+        },
+        "bag": {    
+            "index": 2,
+            "color": (1, 0, 1),
+            "rois": [(602, 107, 75, 113)],
+            "positions": [
+                (602, 107),
+                (602, 220),
+                (679, 107),
+                (679, 220)
+            ]
+        },
+        "league_card": {
+            "index": 3,
+            "color": (1, 0, 1),
+            "rois": [(838, 107, 75, 113)],
+            "positions": [
+                (838, 107),
+                (838, 220),
+                (917, 107),
+                (917, 220)
+            ]
+        },
+        "save": {
+            "index": 4,
+            "color": (1, 0, 1),
+            "rois": [(1074, 107, 75, 113)],
+            "positions": [
+                (1074, 107),
+                (1074, 220),
+                (1155, 107),
+                (1155, 220)
+            ]
+        },
+        "town_map": {
+            "index": 5,
+            "color": (1, 0, 1),
+            "rois": [(130, 347, 75, 113)],
+            "positions": [
+                (130, 347),
+                (130, 460),
+                (205, 347),
+                (205, 460)
+            ]
+        },
+        "pokemon_camp": {
+            "index": 6,
+            "color": (1, 0, 1),
+            "rois": [(366, 347, 75, 113)],
+            "positions": [
+                (366, 347),
+                (366, 460),
+                (441, 347),
+                (441, 460)
+            ]
+        },
+        "mystery_gift": {
+            "index": 7,
+            "color": (1, 0, 1),
+            "rois": [(602, 347, 75, 113)],
+            "positions": [
+                (602, 347),
+                (602, 460),
+                (679, 347),
+                (679, 460)
+            ]
+        },
+        "vs": {
+            "index": 8,
+            "color": (1, 0, 1),
+            "rois": [(838, 347, 75, 113)],
+            "positions": [
+                (838, 347),
+                (838, 460),
+                (917, 347),
+                (917, 460)
+            ]
+        },
+        "options": {
+            "index": 9,
+            "color": (1, 0, 1),
+            "rois": [(1074, 347, 75, 113)],
+            "positions": [
+                (1074, 347),
+                (1074, 460),
+                (1155, 347),
+                (1155, 460)
+            ]
+        }
+    },
+    "bag": {
+        # Medicine, Poké Balls, Battle Items, Berries, Other Items, TMs, Treasures, Ingredients, Key Items
+        "pouch_names": (799, 106, 257, 33), #Bag Name
+        "items": [
+        (799, 106, 257, 33), #Bag Name
+        (683, 149, 344, 46), #item 1
+        (683, 206, 344, 46), #item 2
+        (683, 263, 344, 46), #item 3
+        (683, 320, 344, 46), #item 4
+        (683, 377, 344, 46), #item 5
+        (683, 434, 344, 46), #item 6
+        (683, 491, 344, 46), #item 7
+        ]
+    },
     # rois
     "pokemon_name": (313, 395, 143, 31),
-    "encounter_name": (93, 578, 900, 101),
-
-    # program_specific
-    # static encounter
-    "static_roi": (750, 200, 350, 350),
-    "static_v_threshold": 245,
-    "static_s_max": 40,
-    "static_brightness_ratio": 0.3
+    "encounter_name": (93, 578, 900, 101)
 }
 
 BDSP_STATES = {
@@ -419,6 +554,7 @@ GAME_STATES = {
 
 TEXT = {
     "DONUT_POWER_OPTIONS": [
+        "Sour:",
         "Item Power: Berries",
         "Item Power: Special",
         "Item Power: Poké Balls",
@@ -426,15 +562,21 @@ TEXT = {
         "Item Power: Coins",
         "Item Power: Treasures",
         "Big Haul Power",
+        "Mega Charging Power",
+        "Mega Conservation Power",
+        "Sweet:",
         "Sparkling Power: All Types",
-        "Alpha",
-    ],
-    "PATTERNS": [
-        r"\bwild\s+(.+?)\s+appeared\b",
-        r"\bencountered\s+(?:a\s+)?wild\s+(.+?)(?:[.!]|$)",
-        r"^(.+?)\s+hatched\s+from\s+the\s+egg\b",
-        r"\bgo!?\s+(.+?)(?:[.!]|$)",
-        r"^(.+?)\s+appeared\b",
+        "Alpha Power",
+        "Teensy Power",
+        "Humungo Power",
+        "Spicy:",
+        "Sp. Attack Power",
+        "Attack Power",
+        "Speed Power",
+        "Bitter:",
+        "Defense Power",
+        "Sp. Defense Power",
+        "Resistance Power",
     ],
     "DONUT_LEVEL_OPTIONS": [
         "1",
@@ -443,7 +585,36 @@ TEXT = {
         "1-2",
         "2-3",
         "1-3",
-    ]
+    ],
+    "PATTERNS": [
+        r"\bwild\s+(.+?)\s+appeared\b",
+        r"\bencountered\s+(?:a\s+)?wild\s+(.+?)(?:[.!]|$)",
+        r"^(.+?)\s+hatched\s+from\s+the\s+egg\b",
+        r"\bgo!?\s+(.+?)(?:[.!]|$)",
+        r"^(.+?)\s+appeared\b",
+    ],
+    "PROGRAM_DESCRIPTIONS": {
+        # SWSH
+        "Static_Encounter_SWSH": {"text": "Uses a timer to find shinies.", "image": "N/A"},
+        "Fossil_Reviver_SWSH": {"text": "", "image": "N/A"},
+        "Egg_Hatcher_SWSH": {"text": "N/A", "image": "N/A"},
+        "Pokemon_Releaser_SWSH": {"text": "N/A", "image": "N/A"},
+
+        # BDSP
+        "Static_Encounter_BDSP": {"text": "N/A", "image": "N/A"},
+        "Egg_Collector_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work. The count is by box, so inputting 1 will be 30 egs, 2 is 60, etc.", "image": "N/A"},
+        "Egg_Hatcher_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work. The count is by box, so inputting 1 will be 30 egs, 2 is 60, etc.", "image": "N/A"},
+        "Automated_Egg_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work. The count is by box, so inputting 1 will be 30 egs, 2 is 60, etc.", "image": "N/A"},
+        "Pokemon_Releaser_BDSP": {"text": "N/A", "image": "N/A"},
+
+        # LA
+
+        # SV
+        "Pokemon_Releaser_SV": {"text": "N/A", "image": "N/A"},
+
+        # LZA
+        "Donut_Checker": {"text": "N/A", "image": "N/A"},
+    },
 }
 
 COLOR_ON_SCREEN = {
