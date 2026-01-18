@@ -586,6 +586,12 @@ TEXT = {
         "2-3",
         "1-3",
     ],
+    "FOSSILS_SWSH": [
+        "Fossilized Dino",
+        "Fossilized Fish",
+        "Fossilized Drake",
+        "Fossilized Bird"
+    ],
     "PATTERNS": [
         r"\bwild\s+(.+?)\s+appeared\b",
         r"\bencountered\s+(?:a\s+)?wild\s+(.+?)(?:[.!]|$)",

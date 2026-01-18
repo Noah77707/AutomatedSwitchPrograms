@@ -1,5 +1,4 @@
-import os
-import sys
+import os, sys, threading
 import cv2 as cv
 import numpy as np
 import PyQt6.QtGui as pyqt_g
@@ -16,10 +15,17 @@ pt.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 class Image_Processing():
     def __init__(self, image: Union[str, np.ndarray] = ''):
+        self.capture_index = 0
+        self.capture_status = "idle"   # "idle" | "ok" | "fail"\
+        self.capture_status_index = None      # last index tested
+        self.capture_status_msg = ""
+        self._cap_lock = threading.Lock()
+        self._cap = None
+        self._pending_capture_index = None
+        
+
         self.frame_id = 0
         self.original_image = None
-        self.resized_image = None
-        self.pyqt_image = None
         self.state = None
         self.phase = None
         self.playing = False
@@ -31,12 +37,8 @@ class Image_Processing():
 
         self.debugger = Debug(enabled=False)
 
-        self.shiny_frames_checked = 0
-        self.shiny_hits = 0
         self.egg_count = 0
         self.egg_phase = 0
-        self.shiny = 0
-        self.name = 0
         self.donut_cfg = []
         
         self.generic_state = None
@@ -49,49 +51,49 @@ class Image_Processing():
         self.last_score = 0.0
         self.last_frame_id = 0
 
-        self.ocr_last_t = 0.0
-        self.ocr_last_roi = (0, 0, 0, 0)
-        self.ocr_last_txt = None
-
         if isinstance(image, str):
             self.original_image = cv.imread(image, cv.IMREAD_UNCHANGED)
         else:
             self.original_image = image
 
-    def resize_image(self, desired_size = const.MAIN_FRAME_SIZE):
-        if self.original_image is None:
+    def request_capture_index(self, idx: int) -> None:
+        with self._cap_lock:
+            self._pending_capture_index = int(idx)
+        self.capture_status = "pending"
+        self.capture_status_msg = f"Switching capture to index {int(idx)}..."
+        
+    def consume_pending_capture_index(self) -> int | None:
+        with self._cap_lock:
+            idx = self._pending_capture_index
+            self._pending_capture_index = None
+            return idx
+
+    def _reopen_capture_if_needed(self) -> None:
+        with self._cap_lock:
+            pending = self._pending_capture_index
+            if pending is None or pending == self._capture_index:
+                return
+            self._pending_capture_index = None
+            new_index = pending
+
+        # do IO outside lock
+        if self._cap is not None:
+            try:
+                self._cap.release()
+            except Exception:
+                pass
+            self._cap = None
+
+        cap = cv.VideoCapture(new_index)
+        ok, _ = cap.read()
+        if not ok:
+            cap.release()
+            # keep old index unchanged if failed
             return
-        width, height = self.original_image.shape[1::-1]
-        aspect_ratio = width / height
-        max_size_index = np.argmax((width, height))
 
-        if max_size_index == 0:
-            new_size = [
-                desired_size[max_size_index],
-                int(desired_size[max_size_index] / aspect_ratio)
-            ]
-        else:
-            new_size = [
-                int(desired_size[max_size_index] * aspect_ratio),
-                desired_size[max_size_index]
-            ]
-        self.resized_image = cv.resize(self.original_image, new_size)
+        self._cap = cap
+        self._capture_index = new_index
 
-    def get_pyqt_image(self, image: np.ndarray) -> None:
-        if len(image.shape) == 3:
-            height, width, channel = image.shape
-            bytes_per_line = 3 * width
-            aux_image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-            qt_format = pyqt_g.QImage.Format.Format_RGB888
-        else:
-            height, width = image.shape
-            bytes_per_line = width
-            aux_image = image
-            qt_format = pyqt_g.QImage.Format.Format_Grayscale8
-
-        qt_image = pyqt_g.QImage(aux_image, width, height, bytes_per_line, qt_format)
-        self.pyqt_image = pyqt_g.QPixmap.fromImage(qt_image)
-    
     def check_pixel_colors(
             self,
             position: Tuple[int, int],

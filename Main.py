@@ -1,4 +1,3 @@
-import sys, os, traceback, threading, faulthandler, time
 from queue import Queue
 from threading import Event, Thread
 
@@ -15,7 +14,7 @@ if __name__ == "__main__":
 
         Image_queue = Queue()
         Command_queue = Queue()
-        Switch_Controller = Controller('COM15', 115200)
+        Switch_Controller = Controller(None, 115200)
         shutdown_event = Event()
         stop_event = Event()
         image = Image_Processing()
@@ -25,7 +24,7 @@ if __name__ == "__main__":
         threads.append({
             'function': 'control_system',
             'thread': Thread(target=lambda:
-                             start_control_video(2, Switch_Controller, Image_queue, shutdown_event, stop_event),
+                             start_control_video(0, Switch_Controller, Image_queue, shutdown_event, stop_event, image),
                              daemon= True
                             )
         })

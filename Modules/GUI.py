@@ -2,6 +2,7 @@ import os, sys, subprocess, traceback
 from queue import Queue, Empty
 from time import sleep, monotonic
 from threading import Event
+from serial.tools import list_ports
 
 import Constants as const
 import cv2 as cv
@@ -27,7 +28,6 @@ MEDIA_DIR = os.path.join(BASE_DIR, "media")
 MODULE_NAME = "GUI"
 
 image_label_style = "background-color: #000; border: 1px solid #aaa"
-
 
 class App(pyqt_w.QApplication):
     def __init__(self):
@@ -524,6 +524,7 @@ class GUI(pyqt_w.QWidget):
         self.Image_queue = Image_queue
         self.Command_queue = Command_queue
         self.image = image
+        self.settings = pyqt_c.QSettings("YourApp", "AutoSwitchPrograms")
 
         self.game = ""
         self.program = ""
@@ -596,13 +597,43 @@ class GUI(pyqt_w.QWidget):
 
         # ---------- RIGHT PANEL ----------
         right_panel = pyqt_w.QVBoxLayout()
-        right_panel.addWidget(self.items["switch_capture_label"])
 
-        info_row = pyqt_w.QHBoxLayout()
-        info_row.addWidget(self.items["stats_label"])
-        self.items["stats_label"].setText(self.update_stats())
-        self.items["stats_label"].setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        # ---------- CAPTURE CARD AND MCU ----------
+        self.capture_index = pyqt_w.QSpinBox(self)
+        self.capture_index.setRange(0, 20)
+        self.capture_index.setValue(int(self.settings.value("capture_index", 0)))
+        saved_idx = self.settings.value("capture_index", 0)
+        try:
+            saved_idx = int(saved_idx)
+        except Exception:
+            saved_idx = 0
+        self.capture_index.setValue(saved_idx)
 
+        self.capture_test = pyqt_w.QPushButton("Test Capture", self)
+        self.capture_test.clicked.connect(self._test_capture)
+
+        self.mcu_port = pyqt_w.QComboBox(self)
+
+        saved_port = self.settings.value("mcu_port", "")
+        if saved_port:
+            i = self.mcu_port.findData(saved_port)
+            if i >= 0:
+                self.mcu_port.setCurrentIndex(i)
+
+        self.mcu_refresh = pyqt_w.QPushButton("Refresh", self)
+        self.mcu_refresh.clicked.connect(self._refresh_ports)
+
+        self.capture_index.valueChanged.connect(
+            lambda v: self.settings.setValue("capture_index", int(v))
+        )
+
+        self.mcu_port.currentIndexChanged.connect(
+            lambda _: self.settings.setValue("mcu_port", self.mcu_port.currentData() or "")
+        )
+
+        self._refresh_ports()
+
+        # ---------- PROGRAM BUTTONS ----------
         self.debug_button = pyqt_w.QPushButton("Debug On", self)
         self.debug_button.clicked.connect(self.update_debug)
 
@@ -618,6 +649,20 @@ class GUI(pyqt_w.QWidget):
         self.stop_button = pyqt_w.QPushButton("Stop Program", self)
         self.stop_button.clicked.connect(self.stop_scripts)
 
+        # ---------- ROWS ----------
+        port_row = pyqt_w.QHBoxLayout()
+        port_row.addWidget(pyqt_w.QLabel("Capture card Index:", self))
+        port_row.addWidget(self.capture_index)
+        port_row.addWidget(self.capture_test)
+        port_row.addWidget(pyqt_w.QLabel("Micro Controller Port:", self))
+        port_row.addWidget(self.mcu_port)
+        port_row.addWidget(self.mcu_refresh)
+
+        info_row = pyqt_w.QHBoxLayout()
+        info_row.addWidget(self.items["stats_label"])
+        self.items["stats_label"].setText(self.update_stats())
+        self.items["stats_label"].setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+
         button_row_debug = pyqt_w.QHBoxLayout()
         button_row_debug.addWidget(self.debug_button)
         button_row_debug.addWidget(self.screenshot_button)
@@ -627,10 +672,11 @@ class GUI(pyqt_w.QWidget):
         button_row_program.addWidget(self.pause_button)
         button_row_program.addWidget(self.stop_button)
 
-
         # Dynamic extras row
         self.dynamic_row = DynamicRow(const, self)
 
+        right_panel.addLayout(port_row)
+        right_panel.addWidget(self.items["switch_capture_label"])
         right_panel.addLayout(info_row)
         right_panel.addWidget(self.dynamic_row)
         right_panel.addLayout(button_row_program)
@@ -643,6 +689,14 @@ class GUI(pyqt_w.QWidget):
         self.timer = pyqt_c.QTimer(self)
         self.timer.timeout.connect(lambda: self.update_GUI(shutdown_event))
         self.timer.start(33)
+
+        # ---------- CAPTURE CARD AND MCU UPDATE ----------
+        pyqt_c.QTimer.singleShot(0, lambda: self.Command_queue.put({
+            "cmd": "SET_DEVICES",
+            "capture_index": int(self.capture_index.value()),
+            "mcu_port": self.mcu_port.currentData() or "",
+        }))
+        pyqt_c.QTimer.singleShot(0, self._apply_devices)
 
         self.show()
 
@@ -757,6 +811,13 @@ class GUI(pyqt_w.QWidget):
         self.image.donut_cfg = self.dynamic_row.get_cfg()
 
     def start_scripts(self) -> None:
+        self._apply_devices()
+        cap_idx = int(self.capture_index.value())
+        mcu_port = self.mcu_port.currentData() or ""
+
+        self.settings.setValue("capture_index", cap_idx)
+        self.settings.setValue("mcu_port", mcu_port)
+
         extras = self.dynamic_row.get_cfg()  # may be None
         self.image.donut_cfg = extras if extras and extras.get("mode") == "donut" else None
 
@@ -764,6 +825,7 @@ class GUI(pyqt_w.QWidget):
         if extras and extras.get("mode") == "input":
             input_value = int(extras.get("value", 0))
 
+        self.Command_queue.put({"cmd": "SET_DEVICES", "capture_index": cap_idx, "mcu_port": mcu_port})
 
         self.Command_queue.put(
             {
@@ -854,3 +916,40 @@ class GUI(pyqt_w.QWidget):
         except Exception as e:
             pyqt_w.QMessageBox.critical(self, "Screenshot", f"{type(e).__name__}: {e}")
             traceback.print_exc()
+
+    def _test_capture(self):
+        idx = int(self.capture_index.value())
+
+        # ask backend video thread to switch
+        self.Command_queue.put({"cmd": "SET_DEVICES", "capture_index": idx, "mcu_port": ""})
+
+        # poll for result a moment later
+        pyqt_c.QTimer.singleShot(300, self._show_capture_test_result)
+
+    def _show_capture_test_result(self):
+        msg = getattr(self.image, "capture_status_msg", "")
+        if msg:
+            pyqt_w.QMessageBox.information(self, "Capture Test", msg)
+
+    def _refresh_ports(self):
+        self.mcu_port.clear()
+        ports = list(list_ports.comports())
+        for p in ports:
+            # p.device is COM3 or /dev/tty...
+            self.mcu_port.addItem(f"{p.device}  ({p.description})", p.device)
+
+        if self.mcu_port.count() == 0:
+            self.mcu_port.addItem("No ports found", "")
+
+    def _apply_devices(self):
+        cap_idx = int(self.capture_index.value())
+
+        port = (self.mcu_port.currentData() or "").strip()
+        if not port:
+            port = (self.mcu_port.currentText().split(" ", 1)[0] or "").strip()
+
+        self.Command_queue.put({
+            "cmd": "SET_DEVICES",
+            "capture_index": cap_idx,
+            "mcu_port": port,
+        })

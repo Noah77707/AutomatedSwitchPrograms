@@ -1,9 +1,7 @@
 import os
 import sys
-from datetime import datetime
-from threading import Thread, Timer
-from time import sleep, time, perf_counter, monotonic
-from typing import Any, Optional, Literal, TYPE_CHECKING, Callable
+from time import sleep
+from typing import Any, Callable
 from queue import Queue
 from threading import Event
 
@@ -59,12 +57,40 @@ def start_control_video(
         controller: Controller,
         Image_Queue: Queue,
         Shutdown_event: Event,
-        stop_event: Event
+        stop_event: Event,
+        image: Image_Processing
         ) -> None:
     
-    capture = WindowCapture(Device_Index)
+    image.capture_index = int(Device_Index)
+    capture = WindowCapture(image.capture_index)
+    try:
+        test = capture.read_frame()
+        if test is None:
+            image.capture_status = "fail"
+            image.capture_status_msg = f"Capture index {image.capture_index} read failed"
+        else:
+            image.capture_status = "ok"
+            image.capture_status_msg = f"Capture index {image.capture_index} ok"
+    except Exception as e:
+        image.capture_status = "fail"
+        image.capture_status_msg = f"Capture error: {e}"
+
 
     while not Shutdown_event.is_set():
+        pending = image.consume_pending_capture_index()
+        if pending is not None and pending != image.capture_index:
+            try:
+                # if your WindowCapture has a release/close, call it
+                if hasattr(capture, "release"):
+                    capture.release()
+                elif hasattr(capture, "close"):
+                    capture.close()
+            except Exception:
+                pass
+
+            image.capture_index = int(pending)
+            capture = WindowCapture(image.capture_index)
+
         frame = capture.read_frame()
         if frame is None:
             sleep(0.005)
@@ -90,9 +116,11 @@ def controller_control(
     image: Image_Processing
 ) -> None:
     
+    
     initialize_database()
     ensure_stats(image)
-    
+
+    current_port = None
     state = None
     input = None
     running = False
@@ -107,6 +135,27 @@ def controller_control(
         if isinstance(msg, dict):
             cmd = msg.get('cmd')
             image.debugger.log(msg)
+            if cmd == "SET_DEVICES":
+                # capture
+                cap_idx = msg.get("capture_index", None)
+                if cap_idx is not None:
+                    image.request_capture_index(int(cap_idx))
+
+                # microcontroller
+                new_port = (msg.get("mcu_port") or "").strip()
+                if new_port and new_port != current_port:
+                    try:
+                        ctrl.close()
+                    except Exception:
+                        pass
+                    try:
+                        ctrl.connect(new_port)
+                        current_port = new_port
+                    except Exception as e:
+                        current_port = None
+                        image.debugger.log(f"MCU connect failed: {e}")
+                continue
+
             if cmd == 'SET_PROGRAM':
                 image.game = msg.get('game')
                 image.program = msg.get('program')

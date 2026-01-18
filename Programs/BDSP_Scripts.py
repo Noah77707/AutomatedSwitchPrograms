@@ -325,7 +325,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             image.generic_bool = False
         # thisd checks if it has hatched all the eggs in the party
         if check_state(image, 'BDSP', 'poketch'):
-            if image.egg_count == count or image.shiny >= 1:
+            if image.egg_count == count:
                 image.state = 'HATCHING_FINISHED'
                 return image.state
             elif image.generic_count != 0 and image.generic_count == 5:
