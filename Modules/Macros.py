@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from time import monotonic
+from time import monotonic, sleep
 import serial
 from .Controller import Controller
 from .Image_Processing import Image_Processing, Text
@@ -24,54 +24,49 @@ BTN_RSTICK = 11
 BTN_HOME = 12
 BTN_CAPTURE = 13
 
-def return_phase(image: Image_Processing, phase: str) -> str:
-    if image.phase != phase:
-        image.phase = phase
-    return phase
-
-def return_states(image: Image_Processing, state: str) -> str:
-    if image.state != state:
-        image.state = state
-        image.debugger._state = state
-    return state
-
 def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
-    for box in range(int(box_amount)): 
-        for row in range(5):
-            for column in range(6):
-                sleep(1)
-                if check_state(image, game, 'pokemon_in_box') and not check_state(image, game, 'shiny_symbol') and not check_state(image, game, 'egg_in_box'):
-                    ctrl.tap(BTN_A, 0.05, 0.5)
-                    ctrl.dpad(0, 0.05)
-                    sleep(0.15)
-                    ctrl.dpad(0, 0.05)
-                    ctrl.tap(BTN_A, 0.05, 0.2)
-                    ctrl.dpad(0, 0.1)
-                    ctrl.tap(BTN_A, 0.05, 0.7)
-                    ctrl.tap(BTN_A, 0.05, 0.2)
-                    image.database_component.pokemon_released += 1
-                else:
-                    image.database_component.pokemon_skipped += 1
-                if column < 5:
-                    ctrl.dpad(2, 0.05)
-            if row < 4:
-                ctrl.dpad(4, 0.05)
-                for _ in range(5):
-                    sleep(0.17)
-                    ctrl.dpad(6, 0.05)
-        ctrl.dpad(4, 0.05)
-        sleep(0.15)
-        ctrl.dpad(4, 0.05)
-        sleep(0.15)
-        ctrl.dpad(4, 0.05)
-        sleep(0.30)
-        for _ in range(5):
-            sleep(0.17)
-            ctrl.dpad(6, 0.05)
-        sleep(0.15)
-        ctrl.tap(BTN_R, 0.10, 0.15)
+    def _slot_flags(image: Image_Processing, game: str) -> tuple[bool, bool, bool]:
+        """All relevant pokemon releaser states."""
+        has_pokemon = check_state(image, game, "pokemon", "pokemon_in_box")
+        has_shiny = check_state(image, game, "pokemon", "shiny_symbol")
+        has_egg = check_state(image, game, "pokemon", "egg_in_box")
+        return has_pokemon, has_shiny, has_egg
+
+    def _release_pokemon(ctrl: Controller):
+        """
+        Releases the selected pokemon
+        Should work for SWSH, BDSP, SV
+        """
+        ctrl.tap(BTN_A, 0.05, 0.3)
+        ctrl.dpad(0); sleep(0.1)
+        ctrl.dpad(0); sleep(0.1)
+        ctrl.tap(BTN_A, 0.05, 0.15)
+        ctrl.dpad(0); sleep(0.1)
+        ctrl.tap(BTN_A, 0.05, 0.45)
+        ctrl.tap(BTN_A, 0.05, 0.15)
+
+    cols, rows = 6, 5
+
+    for box in range(int(box_amount)):
+        row = 0
+        col = 0
+        
+        for _ in range(rows * cols):
+            image.wait_new_frame()
+            has_pokemon, has_shiny, has_egg = _slot_flags(image, game)
+
+            if has_pokemon and (not has_shiny) and (not has_egg):
+                _release_pokemon(ctrl)
+                image.database_component.pokemon_released += 1
+            else:
+                image.database_component.pokemon_skipped += 1
+
+            if not (row == rows - 1 and col == cols - 1):
+                row, col = box_grid_advance(ctrl, row, col)
+        next_box(ctrl)
+
     return "PROGRAM_FINISHED"
-    
+
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
     image.debugger.set_rois_for_state('PAIRING', [const.GENERIC_STATES['playing']['roi']], (0, 255, 0))
 
@@ -146,7 +141,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
  
 def swsh_start_screens_macro(ctrl: Controller, image: Image_Processing, state = str) -> str:
     if image.state == 'START_SCREEN':
-        if check_state(image, 'SWSH', 'title_screen'):
+        if check_state(image, 'SWSH', "screens", 'title_screen'):
             ctrl.tap(BTN_A, 0.1, 0.2)
             return 'IN_GAME'
         return "START_SCREEN"
@@ -211,15 +206,18 @@ def mash_a_while_textbox(
 
     return saw_watch
 
-def box_grid(ctrl, row: int, col:int) -> None:
-    if col < 5:
-        ctrl.dpad(2, 0.05)
-    else:
-        if row < 4:
-            ctrl.dpad(4, 0.05)
-            for _ in range(5):
-                sleep(0.17)
-                ctrl.dpad(6, 0.05)
+def box_grid_advance(ctrl, row: int, col: int, cols: int = 6, rows: int = 5, sleep_time: int = 0.05) -> tuple[int, int]:
+    if col < cols - 1:
+        ctrl.dpad(2, 0.05); sleep(sleep_time)
+        return row, col + 1
+
+    if row < rows - 1:
+        ctrl.dpad(4, 0.05); sleep(sleep_time)
+        for _ in range(cols - 1):
+            ctrl.dpad(6, 0.05); sleep(sleep_time)
+        return row + 1, 0
+
+    return row, col
 
 def next_box(ctrl) -> None:
     for _ in range(4):
@@ -264,19 +262,6 @@ def put_egg(ctrl, image, game: str) -> None:
     ctrl.tap(BTN_A, 0.05, 0.17)
     for _ in range(max(0, image.egg_phase - 1)):
         ctrl.dpad(6, 0.05); sleep(0.17)
-
-def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_frames: int = 2) -> bool:
-    t0 = monotonic()
-    streak = 0
-    while monotonic() - t0 < timeout:
-        if check_state(image, game, name):
-            streak += 1
-            if streak >= min_frames:
-                return True
-        else:
-            streak = 0
-        sleep(0.02)
-    return False
 # time range is the amount of frames between the first battle textbox and the second battle textbox
 # this finds the shiny due to the shiny animation adding a lot more frames inbetween both text boxes
 def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, stable_frames: int = 2):
@@ -286,15 +271,6 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
     if fid == last:
         return image.state
     image.last_frame_id = fid
-
-    if not hasattr(image, "generic_bool"):
-        image.generic_bool = False
-    if not hasattr(image, "generic_count"):
-        image.generic_count = 0
-    if not hasattr(image, "start_time"):
-        image.start_time = 0.0
-    if not hasattr(image, "end_time"):
-        image.end_time = 0.0
 
     if not hasattr(image, "name"):
         image.name = ""
@@ -371,7 +347,6 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
     return image.state
 
-def had_keywords(lines: list[str], keywords: list[str]) -> bool:
     joined = " | ".join(lines).lower()
     return all(k.lower() in joined for k in keywords)
 

@@ -60,20 +60,26 @@ class DynamicRow(pyqt_w.QWidget):
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._layout.setSpacing(8)
 
-        self._active = None
-        self._cfg = {}
+        self._active: str | None = None
+        self._cfg: dict = {}
         self.setVisible(False)
 
         self._input_spin: list[pyqt_w.QSpinBox] = []
 
+        # holders created per-mode
+        self._donut_count: pyqt_w.QSpinBox | None = None
+        self._fossil_count: pyqt_w.QSpinBox | None = None
+
     def _clear(self):
         while (item := self._layout.takeAt(0)) is not None:
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
+            w = item.widget()
+            if w is not None:
+                w.deleteLater()
         self._cfg = {}
         self._active = None
         self._input_spin = []
+        self._donut_count = None
+        self._fossil_count = None
 
     @staticmethod
     def parse_level_range(s: str) -> tuple[int, int]:
@@ -81,37 +87,46 @@ class DynamicRow(pyqt_w.QWidget):
         if "-" in s:
             a, b = s.split("-", 1)
             return int(a), int(b)
-        v = int(s)
+        v = int(s) if s else 0
         return v, v
 
-    def _build_inputs(self, text: str = "Input"):
+    def _make_spin(self, *, minimum=0, maximum=999999, value=0) -> pyqt_w.QSpinBox:
+        sp = pyqt_w.QSpinBox(self)
+        sp.setRange(int(minimum), int(maximum))
+        sp.setValue(int(value))
+        sp.valueChanged.connect(self._update_cfg)
+        return sp
+
+    def _build_inputs(self, text: str = "Input", count: int = 1):
+        count = max(1, int(count))
+
         self._layout.addWidget(pyqt_w.QLabel("Inputs:", self))
 
-        self._layout.addWidget(pyqt_w.QLabel(text, self))
+        for i in range(count):
+            label = text if count == 1 else f"{text} {i + 1}:"
+            self._layout.addWidget(pyqt_w.QLabel(label, self))
 
-        sp = pyqt_w.QSpinBox(self)
-        sp.setRange(0, 999999)
-        sp.setValue(0)
-        sp.valueChanged.connect(self._update_cfg)
-        self._input_spin.append(sp)
-        self._layout.addWidget(sp)
+            sp = self._make_spin(minimum=1, maximum=999999, value=0)
+            self._input_spin.append(sp)
+            self._layout.addWidget(sp)
 
         self._layout.addStretch(1)
         self._update_cfg()
 
-    def _build_donut(self):
-        self._layout.addWidget(pyqt_w.QLabel("Donuts To Make", self))
+    def _build_donut(self, flavor:str = "Sour"):
+        opts = (const.TEXT.get("DONUT_POWER_OPTIONS") or {})
+        powers = opts.get(flavor) or []
 
-        sp = pyqt_w.QSpinBox(self)
-        sp.setRange(0, 999999)
-        sp.setValue(0)
-        sp.valueChanged.connect(self._update_cfg)
-        self._input_spin.append(sp)
-        self._layout.addWidget(sp)
+        if not powers:
+            powers = ["(no powers configured)"]
+
+        self._layout.addWidget(pyqt_w.QLabel("Donuts To Make:", self))
+        self._donut_count = self._make_spin(minimum=1, maximum=999999, value=0)
+        self._layout.addWidget(self._donut_count)
 
         self._layout.addWidget(pyqt_w.QLabel("Power 1:", self))
         self.donut_power1 = pyqt_w.QComboBox(self)
-        self.donut_power1.addItems(const.TEXT["DONUT_POWER_OPTIONS"])
+        self.donut_power1.addItems(powers)
         self._layout.addWidget(self.donut_power1)
 
         self._layout.addWidget(pyqt_w.QLabel("Level:", self))
@@ -123,7 +138,7 @@ class DynamicRow(pyqt_w.QWidget):
 
         self._layout.addWidget(pyqt_w.QLabel("Power 2:", self))
         self.donut_power2 = pyqt_w.QComboBox(self)
-        self.donut_power2.addItems(const.TEXT["DONUT_POWER_OPTIONS"])
+        self.donut_power2.addItems(powers)
         self._layout.addWidget(self.donut_power2)
 
         self._layout.addWidget(pyqt_w.QLabel("Level:", self))
@@ -138,7 +153,7 @@ class DynamicRow(pyqt_w.QWidget):
         self.donut_power2.currentIndexChanged.connect(self._update_cfg)
         self.donut_lvl2.currentIndexChanged.connect(self._update_cfg)
 
-        # Defaults must match your exact option strings
+        # Defaults must match exact option strings
         self.donut_power1.setCurrentText("Item Power: Berries")
         self.donut_lvl1.setCurrentText("3")
         self.donut_power2.setCurrentText("Big Haul Power")
@@ -146,10 +161,36 @@ class DynamicRow(pyqt_w.QWidget):
 
         self._update_cfg()
 
+    def _build_fossil_swsh(self):
+        c = self.const
+
+        self._layout.addWidget(pyqt_w.QLabel("Fossils To Revive:", self))
+        self._fossil_count = self._make_spin(minimum=1, maximum=999999, value=0)
+        self._layout.addWidget(self._fossil_count)
+
+        self._layout.addWidget(pyqt_w.QLabel("Fossil 1:", self))
+        self.fossil1 = pyqt_w.QComboBox(self)
+        self.fossil1.addItems(c.TEXT["FOSSILS_SWSH"]["FOSSIL1"])
+        self._layout.addWidget(self.fossil1)
+
+        self._layout.addWidget(pyqt_w.QLabel("Fossil 2:", self))
+        self.fossil2 = pyqt_w.QComboBox(self)
+        self.fossil2.addItems(c.TEXT["FOSSILS_SWSH"]["FOSSIL2"])
+        self._layout.addWidget(self.fossil2)
+
+        self._layout.addStretch(1)
+
+        self.fossil1.currentIndexChanged.connect(self._update_cfg)
+        self.fossil2.currentIndexChanged.connect(self._update_cfg)
+
+        self._update_cfg()
+
     def _update_cfg(self):
         if self._active == "donut":
             self._cfg = {
                 "mode": "donut",
+                "flavor": getattr(self, '_donut_flavor', "Sour"),
+                "count": int(self._donut_count.value()) if self._donut_count else 0,
                 "power1": self.donut_power1.currentText(),
                 "lvl1": self.parse_level_range(self.donut_lvl1.currentText()),
                 "power2": self.donut_power2.currentText(),
@@ -164,25 +205,46 @@ class DynamicRow(pyqt_w.QWidget):
             }
             return
 
-        self._cfg = {}
+        if self._active == "fossil_swsh":
+            self._cfg = {
+                "mode": "fossil_swsh",
+                "count": int(self._fossil_count.value()) if self._fossil_count else 0,
+                "fossil1": self.fossil1.currentText(),
+                "fossil2": self.fossil2.currentText(),
+            }
+            return
 
+        self._cfg = {}
 
     def get_cfg(self) -> dict | None:
         return dict(self._cfg) if self._cfg else None
 
-    def set_program(self, text: str, number: int = 0):
+    def set_program(self, text: str, number: int = 0, input_count: int = 1):
+        """
+        number:
+          0 = none
+          1 = generic input row (spinboxes)
+          2 = donut row
+          3 = fossil swsh row
+        """
         self._clear()
 
         if number == 1:
             self.setVisible(True)
             self._active = "input"
-            self._build_inputs(text)
+            self._build_inputs(text, count=input_count)
             return
 
-        elif number == 2:
+        if number == 2:
             self.setVisible(True)
             self._active = "donut"
-            self._build_donut()
+            self._build_donut(text)
+            return
+
+        if number == 3:
+            self.setVisible(True)
+            self._active = "fossil_swsh"
+            self._build_fossil_swsh()
             return
 
         self.setVisible(False)
@@ -263,11 +325,31 @@ class SWSHTab(pyqt_w.QWidget):
         self.sej.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds", "state"])
         self.sej.setProperty("db", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
         self.sej.clicked.connect(lambda _:
-                                (self._set_program_info(Static_Encounter_SWSH),
+                                (self._set_program_info("Static_Encounter_SWSH"),
                                 self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1)))
+
+        self.fr = pyqt_w.QPushButton("Fossil Reviver", self)
+        self.fr.setCheckable(True)
+        self.group.addButton(self.fr)
+        self.fr.setProperty("tracks", ["actions", "resets", "shinies", "playtime_seconds", "state"])
+        self.fr.setProperty("db", ["actions", "resets", "shinies", "playtime_seconds", "state"])
+        self.fr.clicked.connect(lambda _:
+                                (self._set_program_info("Fossil_Reviver_SWSH"),
+                                 self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 3, 0)))
+        
+        self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
+        self.r.setCheckable(True)
+        self.group.addButton(self.r)
+        self.r.setProperty("tracks", ["playtime_seconds", "state"])
+        self.r.setProperty("db", ["playtime_seconds", "state"])
+        self.r.clicked.connect(lambda _:
+                               (self._set_program_info("Pokemon_Releaser_SWSH"),
+                               self.program_selected.emit("SWSH", self.r, "Pokemon_Releaser_SWSH", 1, 0)))
 
         layout.addWidget(self.ser)
         layout.addWidget(self.sej)
+        layout.addWidget(self.fr)
+        layout.addWidget(self.r)
         layout.addStretch(1)
 
         self.info_img = pyqt_w.QLabel(self)
@@ -431,7 +513,7 @@ class SVTab(pyqt_w.QWidget):
         self.group.addButton(self.pr)
         self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
         self.pr.clicked.connect(lambda _:
-                                (self._set_program_info("Static_Encounter_BDSP"),
+                                (self._set_program_info("Pokemon_Releaser_SV"),
                                  self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 1, 0)))
 
         layout.addWidget(self.pr)
@@ -449,7 +531,7 @@ class SVTab(pyqt_w.QWidget):
         layout.addWidget(self.info_text)
 
 class LZATab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, str)  # game, btn, program, temp_row, number, flavor
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -472,25 +554,55 @@ class LZATab(pyqt_w.QWidget):
         self.group.setExclusive(True)
 
         # donut maker - sour
-        self.dms = pyqt_w.QPushButton("Donut Maker - Sour", self)
-        self.dms.setCheckable(True)
-        self.group.addButton(self.dms)
-        self.dms.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
-        self.dms.clicked.connect(lambda _:
-                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("LZA", self.dms, "Donut_Checker_Berry", 2, 1)))
+        self.dmsour = pyqt_w.QPushButton("Donut Maker - Sour", self)
+        self.dmsour.setCheckable(True)
+        self.group.addButton(self.dmsour)
+        self.dmsour.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmsour.clicked.connect(lambda _:
+                                 (self._set_program_info("Donut_Checker"),
+                                  self.program_selected.emit("LZA", self.dmsour, "Donut_Checker", 2, 1, "Sour")))
 
         # donut maker - sweet
-        self.dmw = pyqt_w.QPushButton("Donut Maker - Sweet", self)
-        self.dmw.setCheckable(True)
-        self.group.addButton(self.dmw)
-        self.dmw.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
-        self.dmw.clicked.connect(lambda _:
-                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("LZA", self.dmw, "Donut_Checker_Shiny", 2, 2)))
+        self.dmsweet = pyqt_w.QPushButton("Donut Maker - Sweet", self)
+        self.dmsweet.setCheckable(True)
+        self.group.addButton(self.dmsweet)
+        self.dmsweet.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmsweet.clicked.connect(lambda _:
+                                 (self._set_program_info("Donut_Checker"),
+                                  self.program_selected.emit("LZA", self.dmsweet, "Donut_Checker", 2, 2, "Sweet")))
         
-        layout.addWidget(self.dms)
-        layout.addWidget(self.dmw)
+        # donut maker - spicy
+        self.dmspicy = pyqt_w.QPushButton("Donut Maker - Spicy", self)
+        self.dmspicy.setCheckable(True)
+        self.group.addButton(self.dmspicy)
+        self.dmspicy.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmspicy.clicked.connect(lambda _:
+                                 (self._set_program_info("Donut_Checker"),
+                                  self.program_selected.emit("LZA", self.dmspicy, "Donut_Checker", 2, 3, "Spicy")))
+        # donut maker - bitter
+        self.dmbitter = pyqt_w.QPushButton("Donut Maker - Bitter", self)
+        self.dmbitter.setCheckable(True)
+        self.group.addButton(self.dmbitter)
+        self.dmbitter.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmbitter.clicked.connect(lambda _:
+                                 (self._set_program_info("Donut_Checker"),
+                                  self.program_selected.emit("LZA", self.dmbitter, "Donut_Checker", 2, 4, "Bitter")))
+
+        # donut maker - fresh
+        self.dmfresh = pyqt_w.QPushButton("Donut Maker - Fresh", self)
+        self.dmfresh.setCheckable(True)
+        self.group.addButton(self.dmfresh)
+        self.dmfresh.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmfresh.clicked.connect(lambda _:
+                                 (self._set_program_info("Donut_Checker"),
+                                  self.program_selected.emit("LZA", self.dmfresh, "Donut_Checker", 2, 5, "Fresh")))
+
+
+        layout.addWidget(self.dmsour)
+        layout.addWidget(self.dmsweet)
+        layout.addWidget(self.dmspicy)
+        layout.addWidget(self.dmbitter)
+        layout.addWidget(self.dmfresh)
         layout.addStretch(1)
 
         self.info_img = pyqt_w.QLabel(self)
@@ -799,7 +911,6 @@ class GUI(pyqt_w.QWidget):
         temp_row_usage: int = 0,
         number: int = 0,
         text: str = "Input",
-        _: bool = False,
     ) -> None:
         self.game = game
         self.program = program
@@ -808,35 +919,38 @@ class GUI(pyqt_w.QWidget):
         self.numberinput = int(number)
 
         self.dynamic_row.set_program(text=text, number=self.temp_row_usage)
-        self.image.donut_cfg = self.dynamic_row.get_cfg()
+        self.image.cfg = self.dynamic_row.get_cfg()
 
     def start_scripts(self) -> None:
         self._apply_devices()
+
         cap_idx = int(self.capture_index.value())
-        mcu_port = self.mcu_port.currentData() or ""
+        mcu_port = (self.mcu_port.currentData() or "").strip()
 
         self.settings.setValue("capture_index", cap_idx)
         self.settings.setValue("mcu_port", mcu_port)
 
-        extras = self.dynamic_row.get_cfg()  # may be None
-        self.image.donut_cfg = extras if extras and extras.get("mode") == "donut" else None
+        extras = self.dynamic_row.get_cfg() or {}
 
-        input_value = 0
-        if extras and extras.get("mode") == "input":
-            input_value = int(extras.get("value", 0))
+        runs = int(self.run_spin.value()) if hasattr(self, "run_spin") else 1
+        profile = int(self.profile_spin.value()) if hasattr(self, "profile_spin") else 1
 
-        self.Command_queue.put({"cmd": "SET_DEVICES", "capture_index": cap_idx, "mcu_port": mcu_port})
+        self.Command_queue.put({
+            "cmd": "SET_DEVICES",
+            "capture_index": cap_idx,
+            "mcu_port": mcu_port,
+        })
 
-        self.Command_queue.put(
-            {
-                "cmd": "SET_PROGRAM",
-                "game": self.game,
-                "program": self.program,
-                "number": self.numberinput,
-                "running": True,
-                "runs": input_value,
-            }
-        )
+        self.Command_queue.put({
+            "cmd": "SET_PROGRAM",
+            "game": self.game,
+            "program": self.program,
+            "number": int(self.numberinput),
+            "runs": runs,
+            "profile": profile,
+            "cfg": extras,
+        })
+
         self.running = True
         self.paused = False
         self.run_last_t = monotonic()

@@ -58,7 +58,6 @@ class Debug:
 
         return frame
 
-
     def log(self, *parts) -> None:
         if self.enabled:
             print(f"[DEBUG] {' '.join(map(str, parts))}")

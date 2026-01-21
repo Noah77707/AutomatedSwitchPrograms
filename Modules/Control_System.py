@@ -31,6 +31,7 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
+    ('SWSH', "Fossil_Reviver_SWSH"): Fossil_Reviver_SWSH,
     ('SWSH', 'Pokemon_Releaser_SWSH'): Pokemon_Releaser_SWSH,
 
     # BDSP
@@ -46,8 +47,7 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('SV', 'Pokemon_Releaser_SV'): Pokemon_Releaser_SV,
     
     # LZA
-    ('LZA', 'Donut_Checker_Berry'): Donut_Checker,
-    ('LZA', 'Donut_Checker_Shiny'): Donut_Checker,
+    ('LZA', 'Donut_Checker'): Donut_Checker,
 
 
 }
@@ -116,7 +116,6 @@ def controller_control(
     image: Image_Processing
 ) -> None:
     
-    
     initialize_database()
     ensure_stats(image)
 
@@ -160,9 +159,10 @@ def controller_control(
                 image.game = msg.get('game')
                 image.program = msg.get('program')
                 input = msg.get('number')
-                
+                            
                 image.run = int(msg.get('runs', 1))
                 image.profile = int(msg.get('profile', 1))
+                image.cfg = msg.get("cfg") or {}
 
                 state = None
                 running = True
@@ -173,12 +173,6 @@ def controller_control(
             elif cmd == 'STOP' or image.state == "PROGRAM_FINISHED":
                 add_program_deltas(image.game,
                                     image.program,
-                                    actions_delta=int(getattr(image.database_component, "actions", 0)),
-                                    action_hits_delta=int(getattr(image.database_component, "action_hits", 0)),
-                                    resets_delta=int(getattr(image.database_component, "resets", 0)),
-                                    eggs_collected_delta=int(getattr(image.database_component, "eggs_collected", 0)),
-                                    eggs_hatched_delta=int(getattr(image.database_component, "eggs_hatched", 0)),
-                                    pokemon_released_delta=int(getattr(image.database_component, "pokemon_released", 0)),
                                     playtime_seconds_delta=int(getattr(image.database_component, "playtime_seconds", 0)),
                             )
                 image.database_component = RunStats()

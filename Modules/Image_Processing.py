@@ -4,7 +4,7 @@ import numpy as np
 import PyQt6.QtGui as pyqt_g
 from pytesseract import pytesseract as pt
 from typing import Tuple, Union, Dict, Optional, Sequence
-from time import time, sleep
+from time import time, sleep, monotonic
 import re, json
 
 import Constants as const
@@ -23,8 +23,6 @@ class Image_Processing():
         self._cap = None
         self._pending_capture_index = None
         
-
-        self.frame_id = 0
         self.original_image = None
         self.state = None
         self.phase = None
@@ -39,7 +37,7 @@ class Image_Processing():
 
         self.egg_count = 0
         self.egg_phase = 0
-        self.donut_cfg = []
+        self.cfg = []
         
         self.generic_state = None
         self.generic_count = 0
@@ -56,6 +54,7 @@ class Image_Processing():
         else:
             self.original_image = image
 
+# these three functions are for the capture cards. These allow the user to change the card to whatever they are using
     def request_capture_index(self, idx: int) -> None:
         with self._cap_lock:
             self._pending_capture_index = int(idx)
@@ -94,63 +93,18 @@ class Image_Processing():
         self._cap = cap
         self._capture_index = new_index
 
-    def check_pixel_colors(
-            self,
-            position: Tuple[int, int],
-            color: Tuple[int, int, int],
-            threshold: int = 10,
-            frame: Optional[np.ndarray] = None
-    ) -> bool:
-        
-        if frame is None:
-            frame = getattr(self, 'original_image', None)
-        if frame is None:
-            return False
-        
-        height, width = frame.shape[:2]        
-        x, y = position
-        if not (0 <= x < width and 0 <= y < height):
-            return False
-        
-        pixel = frame[y, x]
-        diffs = [abs(int(pixel[c]) - color[c]) for c in range(3)]
-        return not any(d > threshold for d in diffs)
+    def wait_new_frame(self, *, last_id: int | None = None, timeout_s: float = 0.35, sleep_s: float = 0.002) -> int | None:
+        start = monotonic()
+        if last_id is None:
+            last_id = int(getattr(self, "frame_id", 0))
 
-    def debug_pixel(image, pos, expected):
-        frame = image.original_image
-        if frame is None:
-            print("No frame")
-            return
-        x, y = pos
-        b, g, r = frame[y, x]
-        eb, eg, er = expected
-        print(
-            f"pos={pos} pixel=({b},{g},{r}) expected=({eb},{eg},{er}) "
-            f"diff=({b-eb},{g-eg},{r-er})"
-    )
+        while monotonic() - start < timeout_s:
+            fid = int(getattr(self, "frame_id", 0))
+            if fid != last_id:
+                return fid
+            sleep(sleep_s)
 
-    def is_sparkle_visible(self, roi, v_thres, s_max, min_bright_ratio: float) -> bool:
-        frame = getattr(self, 'original_image', None)
-        x, y, w, h = roi
-        h_img, w_img = frame.shape[:2]
-        if w <= 0 or h <= 0:
-            return False
-        if not (0 <= x < w_img and 0 <= y < h_img):
-            return False
-
-        x2 = min(x + w, w_img)
-        y2 = min(y + h, h_img)
-        if x2 <= x or y2 <= y:
-            return False
-
-        crop = frame[y:y2, x:x2]
-        hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV)
-
-        mask = cv.inRange(hsv, (0, 0, v_thres), (180, s_max, 255))
-
-        bright = cv.countNonZero(mask)
-        ratio = bright / mask.size
-        return ratio >= min_bright_ratio
+        return None
 
 class Text:
     @staticmethod
@@ -276,7 +230,7 @@ class Text:
         if not isinstance(patterns, list):
             # fallback: look for module-level TEXT if you imported it
             try:
-                patterns = TEXT["PATTERNS"]  # type: ignore[name-defined]
+                patterns = const.TEXT["PATTERNS"]  # type: ignore[name-defined]
             except Exception:
                 patterns = [
                     r"\bwild\s+(.+?)\s+appeared\b",
@@ -303,3 +257,4 @@ class Text:
         if stable:
             return Text.stable_ocr_line(image, roi, key=key, stable_frames=2, min_len=1)
         return Text.ocr_line(image, roi, psm=psm)
+

@@ -2,6 +2,7 @@ import time
 import serial
 
 class Controller:
+
     def __init__(self, port: str | None = None, baud: int = 115200):
         self.baud = int(baud)
         self.ser: serial.Serial | None = None
@@ -79,12 +80,12 @@ class Controller:
         if center:
             self.send(f"STICK {which} 128 128")
 
-    def dpad(self, dir: int, duration_s: float = 0.0):
+    def dpad(self, dir: int, duration_s: float = 0.05):
         self.send(f"HAT {int(dir)}")
         if duration_s > 0:
             time.sleep(duration_s)
             self.send("HAT 8")
-
+    
     def dpad_down(self, dir: int):
         self.send(f"HAT HOLD {int(dir)}")
 

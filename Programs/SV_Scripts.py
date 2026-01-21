@@ -81,7 +81,7 @@ def Pokemon_Releaser_SV(image: Image_Processing, ctrl: Controller, state: str | 
         ctrl.dpad(2, 0.05); sleep(0.33)
         ctrl.dpad(4, 0.05); sleep(0.33)
         ctrl.tap(BTN_A)
-        if check_state(image, "SV", "box_screen"):
+        if check_state(image, "SV", "screens", "box_screen"):
             return return_states(image, "IN_BOX")
         
     elif image.state == "IN_BOX":

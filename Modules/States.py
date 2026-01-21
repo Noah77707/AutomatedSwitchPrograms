@@ -15,6 +15,67 @@ from .Image_Processing import Image_Processing
 state_timer = 0
 LM_CACHE: dict[tuple[str, str], TemplateLandmark] = {}
 
+def return_phase(image: Image_Processing, phase: str) -> str:
+    if image.phase != phase:
+        image.phase = phase
+    return phase
+
+def return_states(image: Image_Processing, state: str) -> str:
+    if image.state != state:
+        image.state = state
+        image.debugger._state = state
+    return state
+
+def check_state(image, game: str, *path: str) -> bool:
+    frame = getattr(image, "original_image", None)
+    if frame is None:
+        return False
+
+    states = const.GAME_STATES.get(game)
+    cfg = states
+    for key in path:
+        cfg = cfg.get(key)
+        if cfg is None:
+            return False
+
+    color = cfg["color"]
+    positions = cfg["positions"]
+    tol = int(cfg.get("tol", 10))
+
+    h, w = frame.shape[:2]
+    for (x, y) in positions:
+        if x < 0 or y < 0 or x >= w or y >= h:
+            return False
+        b, g, r = frame[y, x]
+        if not _color_close((int(b), int(g), int(r)), color, tol):
+            return False
+    return True
+
+def split_state(s: str | None) -> tuple[str, str | None]:
+    if not s:
+        return (None, None)
+    if "|" not in s:
+        return (s, None)
+    phase, sub = s.split("|", 1)
+    return (phase, sub if sub != "None" else None)
+
+def join_state(phase: str, sub: str | None) -> str:
+    return f"{phase}|{sub if sub is not None else 'None'}"
+
+def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_frames: int = 2) -> bool:
+    t0 = monotonic()
+    streak = 0
+    while monotonic() - t0 < timeout:
+        if check_state(image, game, name):
+            streak += 1
+            if streak >= min_frames:
+                return True
+        else:
+            streak = 0
+        sleep(0.02)
+    return False
+
+
 def _crop(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
     """Safe ROI crop. Returns empty array if invalid."""
     if frame is None:
@@ -163,42 +224,6 @@ def _color_close(bgr: Tuple[int,int,int], target: Tuple[int,int,int], tol: int) 
     return (abs(bgr[0] - target[0]) <= tol and
             abs(bgr[1] - target[1]) <= tol and
             abs(bgr[2] - target[2]) <= tol)
-
-def check_state(image, game: str, *path: str) -> bool:
-    frame = getattr(image, "original_image", None)
-    if frame is None:
-        return False
-
-    states = const.GAME_STATES.get(game)
-    cfg = states
-    for key in path:
-        cfg = cfg.get(key)
-        if cfg is None:
-            return False
-
-    color = cfg["color"]
-    positions = cfg["positions"]
-    tol = int(cfg.get("tol", 10))
-
-    h, w = frame.shape[:2]
-    for (x, y) in positions:
-        if x < 0 or y < 0 or x >= w or y >= h:
-            return False
-        b, g, r = frame[y, x]
-        if not _color_close((int(b), int(g), int(r)), color, tol):
-            return False
-    return True
-# The player can split states. This is mainly used to programs that run othjer programs. I.E. automated_egg for BDSP
-def split_state(s: str | None) -> tuple[str, str | None]:
-    if not s:
-        return (None, None)
-    if "|" not in s:
-        return (s, None)
-    phase, sub = s.split("|", 1)
-    return (phase, sub if sub != "None" else None)
-
-def join_state(phase: str, sub: str | None) -> str:
-    return f"{phase}|{sub if sub is not None else 'None'}"
 # checks if a landmark/template is in a specified roi. This is used to make reliable macros due to the inprecise microcontroller 
 def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[int, int, int, int], threshold: float = 0.90) -> float:
     frame = getattr(image, 'original_image', None)
