@@ -109,74 +109,79 @@ def add_program_deltas(
     game: str,
     program: str,
     *,
+    runs_delta: int = 0,
+    resets_delta: int = 0,
+    encounters_delta: int = 0,
     actions_delta: int = 0,
     action_hits_delta: int = 0,
-    resets_delta: int = 0,
     eggs_collected_delta: int = 0,
     eggs_hatched_delta: int = 0,
+    pokemon_encountered_delta: int = 0,
+    pokemon_caught_delta: int = 0,
     pokemon_released_delta: int = 0,
+    pokemon_skipped_delta: int = 0,
+    shinies_delta: int = 0,
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
     if not game or not program:
         raise ValueError("game and program are required")
-    if any(d < 0 for d in (
-        actions_delta, action_hits_delta, resets_delta,
-        eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
-        playtime_seconds_delta
-    )):
+
+    deltas = (
+        runs_delta, resets_delta, encounters_delta,
+        actions_delta, action_hits_delta,
+        eggs_collected_delta, eggs_hatched_delta,
+        pokemon_encountered_delta, pokemon_caught_delta,
+        pokemon_released_delta, pokemon_skipped_delta,
+        shinies_delta, playtime_seconds_delta,
+    )
+    if any(d < 0 for d in deltas):
         raise ValueError("deltas must be >= 0")
-    if all(d == 0 for d in (
-        actions_delta, action_hits_delta, resets_delta,
-        eggs_collected_delta, eggs_hatched_delta, pokemon_released_delta,
-        playtime_seconds_delta
-    )):
+    if all(d == 0 for d in deltas):
         return
 
     ensure_program_row(game, program, db_file=db_file)
 
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
-        cur.execute("""
+        cur.execute(
+            """
             UPDATE program_stats
             SET
+                runs = runs + ?,
+                resets = resets + ?,
+                encounters = encounters + ?,
                 actions = actions + ?,
                 action_hits = action_hits + ?,
-                resets = resets + ?,
                 eggs_collected = eggs_collected + ?,
                 eggs_hatched = eggs_hatched + ?,
+                pokemon_encountered = pokemon_encountered + ?,
+                pokemon_caught = pokemon_caught + ?,
                 pokemon_released = pokemon_released + ?,
+                pokemon_skipped = pokemon_skipped + ?,
+                shinies = shinies + ?,
                 playtime_seconds = playtime_seconds + ?,
                 updated_at = datetime('now')
             WHERE game = ? AND program = ?
-        """, (
-            int(actions_delta),
-            int(action_hits_delta),
-            int(resets_delta),
-            int(eggs_collected_delta),
-            int(eggs_hatched_delta),
-            int(pokemon_released_delta),
-            int(playtime_seconds_delta),
-            game, program
-        ))
-        conn.commit()
-
-def finish_program_run(
-    game: str,
-    program: str,
-    *,
-    db_file: str = DATABASE_PATH,
-) -> None:
-    """Increment runs by 1 at end of a run (works for all programs)."""
-    ensure_program_row(game, program, db_file=db_file)
-    with sqlite3.connect(db_file, timeout=5) as conn:
-        cur = conn.cursor()
-        cur.execute("""
-            UPDATE program_stats
-            SET runs = runs + 1,
-                updated_at = datetime('now')
-            WHERE game = ? AND program = ?
-        """, (game, program))
+            """,
+            (
+                int(runs_delta),
+                int(resets_delta),
+                int(encounters_delta),
+                int(actions_delta),
+                int(action_hits_delta),
+                int(eggs_collected_delta),
+                int(eggs_hatched_delta),
+                int(pokemon_encountered_delta),
+                int(pokemon_caught_delta),
+                int(pokemon_released_delta),
+                int(pokemon_skipped_delta),
+                int(shinies_delta),
+                int(playtime_seconds_delta),
+                game,
+                program,
+            ),
+        )
         conn.commit()
 
 def add_pokemon_delta(

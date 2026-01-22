@@ -1,7 +1,8 @@
-from dataclasses import dataclass
-from typing import Tuple
+from dataclasses import dataclass, field
+from typing import Tuple, Optional, Any
 import numpy as np
 import cv2 as cv
+import threading
 
 ROI = Tuple[int, int, int, int]
 
@@ -12,6 +13,41 @@ class TemplateLandmark:
     threshold: float = 0.75
     hits_required: int = 3
     method: int = cv.TM_CCOEFF_NORMED
+
+@dataclass(frozen=True)
+class FramePacket:
+    frame: np.ndarray
+    fid: int
+    cap_index: int
+    epoch: int
+
+@dataclass
+class CaptureState:
+    lock: threading.Lock = field(default_factory=threading.Lock, init=False, repr=False)
+    cap: Any | None = None
+
+    capture_index: int = -1
+    capture_status: str = "idle"   # "idle" | "ok" | "fail"\
+    capture_status_index: Optional[object] = None      # last index tested
+    capture_status_msg: str = ""
+    capture_epoch: int = 0
+
+    requested_index: int = -1
+    request_epoch: int = 0
+
+    active_index: int = -1
+    active_epoch: int = 0
+
+    pending_index: Optional[int] = None
+    pending_epoch: int = 0
+
+    status: str = ""
+    status_msg: str = ""
+
+    last_cap_fid: int = -1
+
+
+
 
 @dataclass
 class RunStats:

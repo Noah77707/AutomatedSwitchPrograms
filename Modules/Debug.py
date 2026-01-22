@@ -1,6 +1,7 @@
 import cv2 as cv
 from dataclasses import dataclass
 from typing import Iterable
+from time import monotonic
 
 @dataclass(frozen=True)
 class DebugROI:
@@ -61,3 +62,11 @@ class Debug:
     def log(self, *parts) -> None:
         if self.enabled:
             print(f"[DEBUG] {' '.join(map(str, parts))}")
+
+    def log_throttled(dbg, key: str, *parts, interval_s: float = 0.5):
+        tkey = f"_log_t_{key}"
+        now = monotonic()
+        last = getattr(dbg, tkey, 0.0)
+        if now - last >= interval_s:
+            setattr(dbg, tkey, now)
+            dbg.log(*parts)

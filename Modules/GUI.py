@@ -636,6 +636,7 @@ class GUI(pyqt_w.QWidget):
         self.Image_queue = Image_queue
         self.Command_queue = Command_queue
         self.image = image
+        self.shutdown_event = shutdown_event
         self.settings = pyqt_c.QSettings("YourApp", "AutoSwitchPrograms")
 
         self.game = ""
@@ -650,9 +651,13 @@ class GUI(pyqt_w.QWidget):
         self.run_seconds = 0.0
         self.run_last_t = None
 
-        self.stats_timer = pyqt_c.QTimer(self)
-        self.stats_timer.timeout.connect(self.stat_timer)
-        self.stats_timer.start(1000)
+        self._last_video_frame_id = -1
+        self._last_ui_frame_id = -1
+        self._last_label_size = None
+        self._db_totals_cache = {}
+        self._db_totals_t = 0.0
+        self._keep_rgb = None  # keeps numpy rgb alive for QImage safety
+        self._keep_qimg = None
 
         self.setWindowTitle("Auto Switch Programs")
         main_layout = pyqt_w.QHBoxLayout(self)
@@ -798,9 +803,14 @@ class GUI(pyqt_w.QWidget):
         main_layout.addLayout(left_panel, 1)
         main_layout.addLayout(right_panel, 0)
 
-        self.timer = pyqt_c.QTimer(self)
-        self.timer.timeout.connect(lambda: self.update_GUI(shutdown_event))
-        self.timer.start(33)
+        self.ui_timer = pyqt_c.QTimer(self)
+        self.ui_timer.timeout.connect(self.update_GUI)
+        self.ui_timer.timeout.connect(self.stat_timer)
+        self.ui_timer.start(100)
+
+        self.video_timer = pyqt_c.QTimer(self)
+        self.video_timer.timeout.connect(self.update_video)
+        self.video_timer.start(33)
 
         # ---------- CAPTURE CARD AND MCU UPDATE ----------
         pyqt_c.QTimer.singleShot(0, lambda: self.Command_queue.put({
@@ -812,43 +822,88 @@ class GUI(pyqt_w.QWidget):
 
         self.show()
 
-    def update_GUI(self, shutdown_event: Event) -> None:
+    def update_GUI(self) -> None:
         try:
-            if shutdown_event.is_set():
+            if self.shutdown_event.is_set():
+                self.ui_timer.stop()
                 self.close()
                 return
 
-            frame = getattr(self.image, "original_image", None)
+            # GUI-only updates. No cvtColor. No pixmaps. No frame operations.
+            rs = getattr(self.image, "database_component", None)
+            if rs is not None:
+                self.items["stats_label"].setText(self.update_stats())
+
+            self.items["current_state_label"].setText(
+                f"{self.game} / {self.program} | state: {getattr(self.image, 'state', None)}"
+            )
+
+            rs = getattr(self.image, "database_component", None)
+            if rs is not None:
+                self.items["stats_label"].setText(self.update_stats())
+
+        except Exception:
+            traceback.print_exc()
+
+    def update_video(self) -> None:
+        try:
+            if self.shutdown_event.is_set():
+                self.video_timer.stop()
+                return
+
+            img = self.image
+            if img is None:
+                return
+
+            # Grab snapshot of current published frame without doing capture reads here
+            with img._lock:
+                fid = int(getattr(img, "frame_id", 0))
+                frame = getattr(img, "original_image", None)
+
             if frame is None:
                 return
 
-            fid = getattr(self.image, "frame_id", None)
-            if not hasattr(self, "_last_gui_frame_id"):
-                self._last_gui_frame_id = -1
-            if fid is not None and fid == self._last_gui_frame_id:
+            if fid == self._last_video_frame_id:
                 return
-            if fid is not None:
-                self._last_gui_frame_id = fid
+            self._last_video_frame_id = fid
 
-            frame_to_show = frame
-            if getattr(self.image, "debugger", None) is not None:
-                frame_to_show = self.image.debugger.draw(frame.copy(), getattr(self.image, "state", None))
+            dbg = getattr(img, "debugger", None)
+            if dbg is not None and dbg.enabled:
+                frame_to_show = dbg.draw(frame.copy(), getattr(img, "state", None))
+            else:
+                frame_to_show = frame
 
-            frame_rgb = cv.cvtColor(frame_to_show, cv.COLOR_BGR2RGB)
-            h, w, ch = frame_rgb.shape
+            h, w, ch = frame_to_show.shape
+
+            # Avoid cvtColor: use BGR directly
+            self._keep_rgb = frame_to_show  # keep buffer alive
+
             bytes_per_line = ch * w
+            qimg = pyqt_g.QImage(
+                frame_to_show.data,
+                w,
+                h,
+                bytes_per_line,
+                pyqt_g.QImage.Format.Format_BGR888,
+            )
 
-            qimg = pyqt_g.QImage(frame_rgb.data, w, h, bytes_per_line, pyqt_g.QImage.Format.Format_RGB888)
             pix = pyqt_g.QPixmap.fromImage(qimg)
 
-            if (self.items["switch_capture_label"].width(), self.items["switch_capture_label"].height()) != (w, h):
+            label = self.items.get("switch_capture_label")
+            if label is None:
+                return
+
+            # Scaling is expensive. If you can, make capture w/h match label to avoid this.
+            if (label.width(), label.height()) != (w, h):
                 pix = pix.scaled(
-                    self.items["switch_capture_label"].width(),
-                    self.items["switch_capture_label"].height(),
+                    label.width(),
+                    label.height(),
                     pyqt_c.Qt.AspectRatioMode.KeepAspectRatio,
                     pyqt_c.Qt.TransformationMode.FastTransformation,
                 )
-            self.items["switch_capture_label"].setPixmap(pix)
+
+            label.setPixmap(pix)
+
         except Exception:
             traceback.print_exc()
 
@@ -856,8 +911,13 @@ class GUI(pyqt_w.QWidget):
         s = getattr(self.image, "database_component", None)
         if not s:
             return ""
+        
+        now = monotonic()
+        if now - self._db_totals_t >= 1.0:
+            self._db_totals_cache = get_program_totals(str(self.game), str(self.program)) or {}
+            self._db_totals_t = now
 
-        db = get_program_totals(str(self.game), str(self.program)) or {}
+        db = self._db_totals_cache
         parts = []
         parts.append(f"program: {self.program}")
 
@@ -873,7 +933,7 @@ class GUI(pyqt_w.QWidget):
             elif key == "state":
                 parts.append(f"state: {getattr(self.image, 'state', None)}")
             else:
-                parts.append(f"{key}: {val} (total {db_val})")
+                parts.append(f"{key}: {val} (total {db_val + val})")
 
         return " | ".join(parts)
 

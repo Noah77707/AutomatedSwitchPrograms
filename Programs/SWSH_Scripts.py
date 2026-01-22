@@ -33,13 +33,10 @@ def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> N
         menu = const.GAME_STATES[game]["menu"]
 
         for name, cfg in menu.items():
-            if not isinstance(cfg, dict):
+            if not isinstance(cfg, dict) or "index" not in cfg:
                 continue
-            if "index" not in cfg:
-                continue  # skips "menu_screen" and anything else without index
             if check_state(image, game, "menu", name):
                 return int(cfg["index"])
-
         return None
 
     menu = const.SWSH_STATES["menu"]
@@ -222,9 +219,7 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         raw = (raw or "").strip()
         if raw:
             image.database_component.pokemon_name = raw
-            add_pokemon_delta("SWSH", "Fossil_Reviver_SWSH", raw, encountered_delta=1)
             image.database_component.pokemon_encountered += 1
-            add_program_deltas("SWSH", "Fossil_Reviver_SWSH", actions_delta=1)
             image.database_component.actions += 1
             ctrl.tap(BTN_A)
             image.debugger.clear()
@@ -258,7 +253,6 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         return return_states(image, "PARTY_SCREEN")
 
     elif image.state == "PARTY_SCREEN":
-        image.debugger.clear
         if check_state(image, "SWSH", "screens", "party_screen"):
             ctrl.tap(BTN_R)
             return return_states(image, 'IN_BOX')
@@ -307,7 +301,6 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
                 ctrl.tap(BTN_X, 0.05, 1.5)
                 ctrl.tap(BTN_A, 0.05, 1.5)
                 image.database_component.resets += 1
-                add_program_deltas(image.game, image.program, resets_delta=1)
                 return return_states(image, "PAIRING")
 
     return return_states(image, image.state)

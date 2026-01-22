@@ -3,7 +3,7 @@ from threading import Event, Thread
 
 from Modules.Controller import Controller
 from Modules.GUI import App, GUI
-from Modules.Control_System import start_control_video, controller_control, frame_pump, check_threads
+from Modules.Control_System import start_control_video, controller_control, check_threads
 from Modules.Image_Processing import Image_Processing, Text
 
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
         threads.append({
             'function': 'control_system',
             'thread': Thread(target=lambda:
-                             start_control_video(0, Switch_Controller, Image_queue, shutdown_event, stop_event, image),
+                             start_control_video(-1, Switch_Controller, Image_queue, shutdown_event, stop_event, image),
                              daemon= True
                             )
         })
@@ -33,11 +33,6 @@ if __name__ == "__main__":
             'function': 'controller_control',
             'thread': Thread(target=lambda: controller_control(Switch_Controller, Command_queue, shutdown_event, stop_event, image),
                               daemon= True)
-        })
-
-        threads.append({
-            "function": "frame_pump",
-            "thread": Thread(target=lambda: frame_pump(Image_queue, shutdown_event, image), daemon=True)
         })
 
         threads.append({

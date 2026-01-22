@@ -15,15 +15,10 @@ pt.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 class Image_Processing():
     def __init__(self, image: Union[str, np.ndarray] = ''):
-        self.capture_index = 0
-        self.capture_status = "idle"   # "idle" | "ok" | "fail"\
-        self.capture_status_index = None      # last index tested
-        self.capture_status_msg = ""
-        self._cap_lock = threading.Lock()
-        self._cap = None
-        self._pending_capture_index = None
-        
+        self._lock = threading.Lock()
+
         self.original_image = None
+        self.frame_id = 0
         self.state = None
         self.phase = None
         self.playing = False
@@ -34,6 +29,8 @@ class Image_Processing():
         self.program = None
 
         self.debugger = Debug(enabled=False)
+        self.database_components = RunStats()
+        self.capture = CaptureState()
 
         self.egg_count = 0
         self.egg_phase = 0
@@ -50,29 +47,68 @@ class Image_Processing():
         self.last_frame_id = 0
 
         if isinstance(image, str):
-            self.original_image = cv.imread(image, cv.IMREAD_UNCHANGED)
+            path = image.strip()
+            if path:
+                self.original_image = cv.imread(path, cv.IMREAD_UNCHANGED)
+            else:
+                self.original_image = None
+        elif image is None:
+            self.original_image = None
         else:
             self.original_image = image
 
+    def attach_capture(self, cap):
+        self.capture.cap = cap
+        self.original_image = None
+        self.frame_id = 0
+
+    def pull_frame(self) -> bool:
+        """
+        Pull latest frame from capture into image.* fields.
+        Returns True if a NEW frame arrived.
+        """
+        if self.capture.cap is None:
+            return False
+
+        frame, fid = self.capture.cap.read_latest()
+        if frame is None:
+            return False
+
+        if fid == self.frame_id:
+            return False
+
+        self.original_image = frame
+        self.frame_id = fid
+        return True
+
 # these three functions are for the capture cards. These allow the user to change the card to whatever they are using
     def request_capture_index(self, idx: int) -> None:
-        with self._cap_lock:
-            self._pending_capture_index = int(idx)
-        self.capture_status = "pending"
-        self.capture_status_msg = f"Switching capture to index {int(idx)}..."
+        idx = int(idx)
+        with self.capture.lock:
+            cur = int(getattr(self.capture, "capture_index", -1))
+            pend = getattr(self.capture, "pending_index", None)
+
+            # No-op if already active or already pending
+            if idx == cur or pend == idx:
+                return
+
+            self.capture.pending_index = idx
+
+        self.capture.capture_status = "pending"
+        self.capture.capture_status_msg = f"Switching capture to index {idx}..."
         
     def consume_pending_capture_index(self) -> int | None:
-        with self._cap_lock:
-            idx = self._pending_capture_index
-            self._pending_capture_index = None
+        with self.capture.lock:
+            idx = self.capture.pending_index
+            self.capture.pending_index = None
             return idx
 
     def _reopen_capture_if_needed(self) -> None:
-        with self._cap_lock:
-            pending = self._pending_capture_index
-            if pending is None or pending == self._capture_index:
+        with self.capture.lock:
+            pending = self.capture.pending_index
+            if pending is None or pending == self.capture.capture_index:
                 return
-            self._pending_capture_index = None
+            self.capture.pending_index = None
             new_index = pending
 
         # do IO outside lock
@@ -90,8 +126,8 @@ class Image_Processing():
             # keep old index unchanged if failed
             return
 
-        self._cap = cap
-        self._capture_index = new_index
+        self.capture.cap = cap
+        self.capture.capture_index = new_index
 
     def wait_new_frame(self, *, last_id: int | None = None, timeout_s: float = 0.35, sleep_s: float = 0.002) -> int | None:
         start = monotonic()

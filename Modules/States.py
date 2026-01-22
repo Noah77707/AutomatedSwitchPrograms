@@ -51,6 +51,14 @@ def check_state(image, game: str, *path: str) -> bool:
             return False
     return True
 
+def wait_state(image, game: str, timeout_s: float, *path: str) -> bool:
+    t0 = monotonic()
+    while monotonic() - t0 < timeout_s:
+        if check_state(image, game, *path):
+            return True
+        sleep(0.01)
+    return False
+
 def split_state(s: str | None) -> tuple[str, str | None]:
     if not s:
         return (None, None)
@@ -73,6 +81,15 @@ def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_fra
         else:
             streak = 0
         sleep(0.02)
+    return False
+# wait_new_frame probably shouldn't be here, but I want it to keep the calls simple.
+def wait_new_frame(image, last_id: int, timeout_s: float = 1.0) -> bool:
+    t0 = monotonic()
+    while monotonic() - t0 < timeout_s:
+        fid = getattr(image, "frame_id", 0)
+        if fid != last_id:
+            return True
+        sleep(0.002)
     return False
 
 

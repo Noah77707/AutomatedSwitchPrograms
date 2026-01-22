@@ -225,11 +225,10 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
     image.debugger.set_rois_for_state((200, 120, 200, 200), (0, 0, 255))
     image.debugger.set_rois_for_state(const.BDSP_STATES['text']['text_box']['roi'], (255, 0, 0))
     count = image.run * 30
-    # Start of the state program
+
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
         image.state = Start_BDSP(image, ctrl, image.state)
     
-    # sees that its ingame, and then will open up the boxes
     elif image.state == 'IN_GAME' or image.state == 'PROGRAM':
         if not check_state(image, 'GENERIC', 'black_screen'):
             sleep(2)
@@ -246,8 +245,6 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             ctrl.tap(BTN_Y, 0.1, 0.1)
             image.state = 'IN_BOX1'
         
-    # the generic count counts if you already hatched eggs. if zero, it doesnt have any party pokemon to put in the box
-    # if its not zero, it will return the hatched eggs to their correct spot
     elif image.state == 'IN_BOX1':
         sleep(0.17)
         if not image.generic_count == 0:
@@ -255,7 +252,6 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         image.generic_count = 0
         image.state = 'IN_BOX2'
     
-    # changes to the next box if all eggs have been hatched
     elif image.state == 'IN_BOX2':
         if image.egg_phase == 6:
             ctrl.tap(BTN_R)
@@ -263,21 +259,18 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         sleep(0.25)
         image.state = 'IN_BOX3'
     
-    # grabs the eggs, then increments the counter for how many egg columns have been grabbed
     elif image.state == 'IN_BOX3':
         grab_egg(ctrl, image, 'BDSP')
         image.egg_phase += 1
         sleep(0.75)
         image.state = 'IN_BOX4'
     
-    # returns to overworld
     elif image.state == 'IN_BOX4':
         if not check_state(image, 'BDSP', "in_game", 'poketch'):
             ctrl.tap(BTN_B)
             return image.state
         image.state = 'WALKING1'
     
-    # walks down, and checks to see if there is a textbox for if the egg is hatching
     elif image.state == 'WALKING':
         ctrl.down(BTN_B)
         for _ in range(20):
@@ -288,7 +281,6 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
                 ctrl.dpad(4, 0.13)
         image.state = 'WALKING1'
     
-    # walks up to a specific landmark, and checks to see if there is a textbox for if the egg is hatching
     elif image.state == 'WALKING1':
         ctrl.down(BTN_B)
         if check_state(image, 'BDSP', "text", 'text_box'):
@@ -298,7 +290,6 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         if back_to_start:
             image.state = 'WALKING'
         
-    # if the textbox pops up, it starts the egg hatching state
     elif image.state == 'HATCHING':
         if not hasattr(image, 'generic_bool'):
             image.generic_bool = False
@@ -310,11 +301,11 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         # looks for the text 'hatched from the egg!' to increment the hatched egg
         if check_state(image, 'BDSP', "text", 'text_box'):
             hit, score = match_text_fragment(image, hatched, const.BDSP_STATES['text']['text_box']['roi'], sqdiff_max= 0.2)
-            Debug.log('sqdiff:', score)
+            image.debugger.log('sqdiff:', score)
             sleep(0.02); ctrl.tap(BTN_A)
 
         if hit and not image.generic_bool:
-            Debug.log('hit')
+            image.debugger.log('hit')
             image.database_component.eggs_hatched += 1
             image.egg_count += 1
             image.generic_count += 1
@@ -322,7 +313,8 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
 
         if not hit:
             image.generic_bool = False
-        # thisd checks if it has hatched all the eggs in the party
+        # this checks if it has hatched all the eggs in the party by seeing if the poketch comes onscreen.
+        # The poketch only comes on screen when control is returned to the player
         if check_state(image, 'BDSP', "in_game", 'poketch'):
             if image.egg_count == count:
                 image.state = 'HATCHING_FINISHED'
