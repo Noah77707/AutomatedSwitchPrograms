@@ -88,12 +88,12 @@ SWSH_STATES = {
             ]
         },
         "box_screen": {
-            "color": (255, 255, 254),
+            "color": (62, 249, 184),
             "positions": [
-                (90, 93),
-                (448, 76),
-                (555, 654),
-                (605, 643)],
+                (73, 53),
+                (209, 52),
+                (16, 52)
+                ],
             
         },
         "menu_screen": {
@@ -345,11 +345,87 @@ BDSP_STATES = {
         },
     },
     "menu": {
-
+        "pokedex": {
+            "index": 0,
+            "color": (55, 62, 199),
+            "rois": [],
+            "positions": [
+                (340, 146),
+                (316, 166),
+                (303, 154)
+            ]},
+        "pokemon": {
+            "index": 1,
+            "color": (60, 136, 225),
+            "rois": [],
+            "positions": [
+                (506, 153),
+                (510, 135),
+                (537, 123)
+            ]
+            },
+        "bag": {
+            "index": 2,
+            "color": (244, 244, 244),
+            "rois": [],
+            "positions": [
+                (730, 122),
+                (720, 140),
+                (751, 120)
+            ]
+            },
+        "trainer card" : {
+            "index": 3,
+            "color": (106, 110, 100),
+            "rois": [],
+            "positions": [
+                (973, 129),
+                (980, 142),
+                (985, 162)
+            ]
+            },
+        "town map": {
+            "index": 4,
+            "color": (42, 98, 217),
+            "rois": [],
+            "positions": [
+                (297, 310),
+                (309, 292),
+                (327, 295)
+            ]
+            },
+        "ball capsules": {
+            "index": 5,
+            "color": (218, 195, 203),
+            "rois": [],
+            "positions": [
+                (557, 343),
+                (529, 353),
+                (558, 321)
+            ]
+            },
+        "options": {
+            "index": 6,
+            "color": (226, 195, 120),
+            "rois": [],
+            "positions": [
+                (738, 335),
+                (756, 332),
+                (746, 322)
+            ]
+        },
+        "mystery gift": {
+            "index": 7,
+            "color": (50, 72, 186),
+            "rois": [],
+            "positions": [
+                (935, 314),
+                (950, 306),
+                (963, 299)
+            ]
+        },
     },
-    "bag": {
-
-    },
+    "bag": {},
     # program specific
     "Egg": {
         "hatchery_pokecenter": {
@@ -404,10 +480,10 @@ SV_STATES = {
         "menu_screen": {
             "color": (252, 252, 252),
             "positions": [
-                (626, 683),
+                (1020, 124),
+                (1012, 134),
                 (989, 687),
-                (1187, 686),
-                (1197, 697)
+                (977, 696)
             ],
         },
     },
@@ -445,8 +521,13 @@ SV_STATES = {
             ]
         },
         "shiny_symbol": {
-            "path": "Media/SV_Images/Shiny_Symbol.png",
-            "roi": (1106, 58, 121, 34)
+            "color": (255, 255, 255),
+            # "path": "Media/SV_Images/Shiny_Symbol.png",
+            "roi": (1106, 58, 121, 34),
+            "positions": [
+                (1138, 78),
+                (1147, 69)
+            ]
         },
         "box_highlighted": {
             # box 1 is 602, 143. box 2 is 682, 143. box 9 is 602, 223. box roi is 80x80
@@ -470,11 +551,136 @@ SV_STATES = {
         },
     },
     "menu": {
+        "pokemon1": {
+            "index": 0,
+            "color": (13, 212, 244),
+            "rois": [(327, 110, 60, 25)],
+            "positions": [
+                (356, 112),
+                (397, 111)
+            ]
+            },
+        "pokemon2": {
+            "index": 1,
+            "color": (13, 212, 244),
+            "rois": [(327, 192, 60, 25)],
+            "positions": [
+                (363, 196),
+                (395, 198)
+            ]
+            },
+        "pokemon3": {
+            "index": 2,
+            "color": (13, 212, 244),
+            "rois": [(327, 274, 60, 25)],
+            "positions": [
+                (364, 279),
+                (396, 279)
+            ]
+            },
+        "pokemon4": {
+            "index": 3,
+            "color": (13, 212, 244),
+            "rois": [(327, 356, 60, 25)],
+            "positions": [
+                (349, 365),
+                (397, 364)
+            ]
+            },
+        "pokemon5": {            
+            "index": 4,
+            "color": (13, 212, 244),
+            "rois": [(327, 438, 60, 25)],
+            "positions": [
+                (349, 447),
+                (393, 448)
+            ]
+            },
+        "pokemon6": {            
+            "index": 5,
+            "color": (13, 212, 244),
+            "rois": [(327, 520, 60, 25)],
+            "positions": [
+                (350, 532),
+                (395, 533)
+            ]
+            },
+        "ride": {            
+            "index": 6,
+            "color": (13, 212, 244),
+            "rois": [],
+            "positions": [
+                (297, 646),
+                (391, 647)
+            ]
+            },
+        "bag": {           
+            "index": 7,
+            "color": (13, 212, 244),
+            "rois": [(890, 164, 328, 48)],
+            "positions": [
+                (995, 182),
+                (996, 205)
+            ]
+            },
+        "boxes": {            
+            "index": 8,
+            "color": (13, 212, 244),
+            "rois": [(890, 216, 328, 48)],
+            "positions": [
+                (1009, 233),
+                (1008, 250)
+            ]
+            },
+        "picnic": {            
+            "index": 9,
+            "color": (13, 212, 244),
+            "rois": [(890, 268, 328, 48)],
+            "positions": [
+                (1012, 286),
+                (1011, 302)
+            ]
+            },
+        "portal": {           
+            "index": 10,
+            "color": (13, 212, 244),
+            "rois": [(890, 320, 328, 48)],
+            "positions": [
+                (994, 338),
+                (994, 356)
+            ]
+            },
+        "options": {           
+            "index": 11,
+            "color": (13, 212, 244),
+            "rois": [(890, 372, 328, 48)],
+            "positions": [
+                (954, 389),
+                (1027, 408)
+            ]
+            },
+        "save": {            
+            "index": 12,
+            "color": (13, 212, 244),
+            "rois": [(890, 216, 328, 48)],
+            "positions": [
+                (992, 445),
+                (996, 468)
+            ]
+            },
+        "content": {           
+            "index": 13,
+            "color": (13, 212, 244),
+            "rois": [(890, 424, 328, 48)],
+            "positions": [
+                (1051, 615),
+                (1051, 635)
+            ]
+            },
     },
     "bag": {
 
     },
-
 }
 
 LZA_STATES = {
@@ -656,12 +862,12 @@ TEXT = {
     ],
     "FOSSILS_SWSH": {
         "FOSSIL1": [
-        "Fossilized Bird",
-        "Fossilized Fish"
+            "Fossilized Bird",
+            "Fossilized Fish"
         ],
         "FOSSIL2": [
-        "Fossilized Drake",
-        "Fossilized Dino"
+            "Fossilized Drake",
+            "Fossilized Dino"
         ]
     },
     "PATTERNS": [

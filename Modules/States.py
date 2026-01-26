@@ -51,13 +51,52 @@ def check_state(image, game: str, *path: str) -> bool:
             return False
     return True
 
-def wait_state(image, game: str, timeout_s: float, *path: str) -> bool:
+def wait_state(
+    image,
+    game: str,
+    check_if_not: bool,
+    timeout_s: float,
+    *path: str,
+    stable_frames: int = 2,
+    poll_sleep: float = 0.002,
+) -> bool:
+    """
+    check_if_not=True  -> wait until NOT check_state(...)
+    check_if_not=False -> wait until check_state(...)
+    Condition must be true for `stable_frames` *new frames* in a row.
+    """
     t0 = monotonic()
+    streak = 0
+    last_fid = int(getattr(image, "frame_id", 0))
+
     while monotonic() - t0 < timeout_s:
-        if check_state(image, game, *path):
-            return True
-        sleep(0.01)
+        if hasattr(image, "wait_new_frame"):
+            image.wait_new_frame(last_id=last_fid, timeout_s=min(0.35, timeout_s))
+        fid = int(getattr(image, "frame_id", 0))
+        if fid == last_fid:
+            sleep(poll_sleep)
+            continue
+        last_fid = fid
+
+        frame = getattr(image, "original_image", None)
+        if frame is None:
+            streak = 0
+            continue
+
+        ok = check_state(image, game, *path)
+        cond = (not ok) if check_if_not else ok
+
+        if cond:
+            streak += 1
+            if streak >= stable_frames:
+                return True
+        else:
+            streak = 0
+
+        sleep(poll_sleep)
+
     return False
+
 
 def split_state(s: str | None) -> tuple[str, str | None]:
     if not s:
@@ -69,29 +108,6 @@ def split_state(s: str | None) -> tuple[str, str | None]:
 
 def join_state(phase: str, sub: str | None) -> str:
     return f"{phase}|{sub if sub is not None else 'None'}"
-
-def wait_for_state(image, game: str, name: str, *, timeout: float = 0.3, min_frames: int = 2) -> bool:
-    t0 = monotonic()
-    streak = 0
-    while monotonic() - t0 < timeout:
-        if check_state(image, game, name):
-            streak += 1
-            if streak >= min_frames:
-                return True
-        else:
-            streak = 0
-        sleep(0.02)
-    return False
-# wait_new_frame probably shouldn't be here, but I want it to keep the calls simple.
-def wait_new_frame(image, last_id: int, timeout_s: float = 1.0) -> bool:
-    t0 = monotonic()
-    while monotonic() - t0 < timeout_s:
-        fid = getattr(image, "frame_id", 0)
-        if fid != last_id:
-            return True
-        sleep(0.002)
-    return False
-
 
 def _crop(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
     """Safe ROI crop. Returns empty array if invalid."""

@@ -24,7 +24,7 @@ if __name__ == "__main__":
         threads.append({
             'function': 'control_system',
             'thread': Thread(target=lambda:
-                             start_control_video(-1, Switch_Controller, Image_queue, shutdown_event, stop_event, image),
+                             start_control_video(-1, Image_queue, shutdown_event, stop_event, image),
                              daemon= True
                             )
         })
@@ -46,7 +46,7 @@ if __name__ == "__main__":
             thread['thread'].start()
 
         GUI_App = App()
-        GUI(Image_queue, Command_queue, shutdown_event, image)
+        GUI(Command_queue, shutdown_event, image)
         GUI_App.exec()
 
         shutdown_event.set()

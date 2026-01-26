@@ -100,13 +100,13 @@ class DynamicRow(pyqt_w.QWidget):
     def _build_inputs(self, text: str = "Input", count: int = 1):
         count = max(1, int(count))
 
-        self._layout.addWidget(pyqt_w.QLabel("Inputs:", self))
+        self._layout.addWidget(pyqt_w.QLabel(text, self))
 
         for i in range(count):
             label = text if count == 1 else f"{text} {i + 1}:"
             self._layout.addWidget(pyqt_w.QLabel(label, self))
 
-            sp = self._make_spin(minimum=1, maximum=999999, value=0)
+            sp = self._make_spin(minimum=1, maximum=999999, value=1)
             self._input_spin.append(sp)
             self._layout.addWidget(sp)
 
@@ -165,7 +165,7 @@ class DynamicRow(pyqt_w.QWidget):
         c = self.const
 
         self._layout.addWidget(pyqt_w.QLabel("Fossils To Revive:", self))
-        self._fossil_count = self._make_spin(minimum=1, maximum=999999, value=0)
+        self._fossil_count = self._make_spin(minimum=1, maximum=999999, value=1)
         self._layout.addWidget(self._fossil_count)
 
         self._layout.addWidget(pyqt_w.QLabel("Fossil 1:", self))
@@ -340,8 +340,8 @@ class SWSHTab(pyqt_w.QWidget):
         self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.r.setCheckable(True)
         self.group.addButton(self.r)
-        self.r.setProperty("tracks", ["playtime_seconds", "state"])
-        self.r.setProperty("db", ["playtime_seconds", "state"])
+        self.r.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
+        self.r.setProperty("db", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
         self.r.clicked.connect(lambda _:
                                (self._set_program_info("Pokemon_Releaser_SWSH"),
                                self.program_selected.emit("SWSH", self.r, "Pokemon_Releaser_SWSH", 1, 0)))
@@ -626,14 +626,12 @@ class ProgramInfo(pyqt_w.QWidget):
 class GUI(pyqt_w.QWidget):
     def __init__(
         self,
-        Image_queue: Queue,
         Command_queue: Queue,
         shutdown_event: Event,
         image: Image_Processing,
     ) -> None:
         super().__init__()
 
-        self.Image_queue = Image_queue
         self.Command_queue = Command_queue
         self.image = image
         self.shutdown_event = shutdown_event
@@ -646,11 +644,8 @@ class GUI(pyqt_w.QWidget):
         self.numberinput = 0
         self.userprofile = 1
         self.debug = False
-        self.running = False
-        self.paused = False
-        self.run_seconds = 0.0
-        self.run_last_t = None
-
+        self.run = Running()
+        
         self._last_video_frame_id = -1
         self._last_ui_frame_id = -1
         self._last_label_size = None
@@ -855,22 +850,28 @@ class GUI(pyqt_w.QWidget):
             if img is None:
                 return
 
-            # Grab snapshot of current published frame without doing capture reads here
             with img._lock:
                 fid = int(getattr(img, "frame_id", 0))
                 frame = getattr(img, "original_image", None)
+                cur_state = getattr(img, "state", None)
 
             if frame is None:
                 return
 
-            if fid == self._last_video_frame_id:
+            if not hasattr(self, "_last_video_state"):
+               self._last_video_state = cur_state
+               
+            if fid == self._last_video_frame_id and cur_state == self._last_video_state:
                 return
+
             self._last_video_frame_id = fid
+            self._last_video_state = cur_state
 
             dbg = getattr(img, "debugger", None)
-            if dbg is not None and dbg.enabled:
+            if dbg is not None and dbg.enabled and dbg._state == cur_state:
                 frame_to_show = dbg.draw(frame.copy(), getattr(img, "state", None))
             else:
+                img.debugger.clear()
                 frame_to_show = frame
 
             h, w, ch = frame_to_show.shape
@@ -926,7 +927,7 @@ class GUI(pyqt_w.QWidget):
             db_val = db.get(key, 0)
 
             if key == "playtime_seconds":
-                parts.append(f"run time: {format_hms(int(val))}")
+                parts.append(f"run_time: {format_hms(int(val))}")
                 parts.append(f"total_time: {format_hms(int(db_val + val))}")
             elif key == "phase":
                 parts.append(f"phase: {getattr(self.image, 'phase', None)}")
@@ -939,18 +940,18 @@ class GUI(pyqt_w.QWidget):
 
     def stat_timer(self):
         try:
-            if self.running and not self.paused:
+            if self.run.running and not self.run.paused:
                 now = monotonic()
-                if self.run_last_t is None:
-                    self.run_last_t = now
+                if self.run.run_last_t == 0.0:
+                    self.run.run_last_t = now
                 else:
-                    dt = now - self.run_last_t
-                    self.run_last_t = now
+                    dt = now - self.run.run_last_t
+                    self.run.run_last_t = now
                     if dt > 0:
-                        self.run_seconds += dt
-                        whole = int(self.run_seconds)
+                        self.run.run_seconds += dt
+                        whole = int(self.run.run_seconds)
                         if whole > 0:
-                            self.run_seconds -= whole
+                            self.run.run_seconds -= whole
                             database = getattr(self.image, "database_component", None)
                             if database is not None:
                                 database.playtime_seconds += whole
@@ -1011,32 +1012,32 @@ class GUI(pyqt_w.QWidget):
             "cfg": extras,
         })
 
-        self.running = True
-        self.paused = False
-        self.run_last_t = monotonic()
-        self.run_seconds = 0.0
+        self.run.running = True
+        self.run.paused = False
+        self.run.run_last_t = monotonic()
+        self.run.run_seconds = 0.0
 
     def pause_scripts(self) -> None:
-        if not self.running:
+        if not self.run.running:
             return
 
-        if not self.paused:
+        if not self.run.paused:
             self.Command_queue.put({"cmd": "PAUSE"})
-            self.paused = True
-            self.run_last_t = None
+            self.run.paused = True
+            self.run.run_last_t = 0.0
             self.pause_button.setText("Resume Program")
         else:
             self.Command_queue.put({"cmd": "RESUME"})
-            self.paused = False
-            self.run_last_t = monotonic()
+            self.run.paused = False
+            self.run.run_last_t = monotonic()
             self.pause_button.setText("Pause Program")
 
     def stop_scripts(self) -> None:
         self.Command_queue.put({"cmd": "STOP"})
-        self.running = False
-        self.paused = False
-        self.run_last_t = None
-        self.run_seconds = 0.0
+        self.run.running = False
+        self.run.paused = False
+        self.run.run_last_t = 0.0
+        self.run.run_seconds = 0.0
 
     def update_debug(self) -> None:
         dbg = getattr(self.image, "debugger", None)

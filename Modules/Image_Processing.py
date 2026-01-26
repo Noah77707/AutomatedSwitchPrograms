@@ -28,8 +28,8 @@ class Image_Processing():
         self.game = None
         self.program = None
 
-        self.debugger = Debug(enabled=False)
-        self.database_components = RunStats()
+        self.debugger = Debug()
+        self.database_component = RunStats()
         self.capture = CaptureState()
 
         self.egg_count = 0
@@ -294,3 +294,17 @@ class Text:
             return Text.stable_ocr_line(image, roi, key=key, stable_frames=2, min_len=1)
         return Text.ocr_line(image, roi, psm=psm)
 
+    def read_lines(image, rois, key: str, stable_frames: int = 2, min_len: int = 4) -> list[str] | None:
+        lines = []
+        for idx, roi in enumerate(rois):
+            line = Text.stable_ocr_line(
+                image, roi,
+                key=f"{key}{idx}",
+                stable_frames= stable_frames,
+                min_len= min_len
+            )
+            if not line:
+                return None
+            
+            lines.append(line)
+        return lines

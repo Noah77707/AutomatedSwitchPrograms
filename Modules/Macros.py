@@ -25,47 +25,61 @@ BTN_HOME = 12
 BTN_CAPTURE = 13
 
 def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
+    """
+    Should work for SWSH, BDSP, LA, and SV.\n
+    LZA has a shiny symbol roi check instead of a state check.\n
+    so this wont work for it currently.
+    """
     def _slot_flags(image: Image_Processing, game: str) -> tuple[bool, bool, bool]:
-        """All relevant pokemon releaser states."""
         has_pokemon = check_state(image, game, "pokemon", "pokemon_in_box")
-        has_shiny = check_state(image, game, "pokemon", "shiny_symbol")
-        has_egg = check_state(image, game, "pokemon", "egg_in_box")
+        has_shiny   = check_state(image, game, "pokemon", "shiny_symbol")
+        has_egg     = check_state(image, game, "pokemon", "egg_in_box")
         return has_pokemon, has_shiny, has_egg
 
-    def _release_pokemon(ctrl: Controller):
-        """
-        Releases the selected pokemon
-        Should work for SWSH, BDSP, SV
-        """
-        ctrl.tap(BTN_A, 0.05, 0.3)
+    def _release_pokemon(ctrl: Controller, game: str, row: int = 0, col: int = 0):
+        ctrl.tap(BTN_A, 0.05, 0.5)
+        ctrl.dpad(0); sleep(0.2)
+        ctrl.dpad(0); sleep(0.2)
+        ctrl.tap(BTN_A, 0.05, 1.5)
         ctrl.dpad(0); sleep(0.1)
-        ctrl.dpad(0); sleep(0.1)
-        ctrl.tap(BTN_A, 0.05, 0.15)
-        ctrl.dpad(0); sleep(0.1)
-        ctrl.tap(BTN_A, 0.05, 0.45)
-        ctrl.tap(BTN_A, 0.05, 0.15)
+        ctrl.tap(BTN_A, 0.05, 1.0)
+        ctrl.tap(BTN_A, 0.05, 0.1)
 
     cols, rows = 6, 5
 
-    for box in range(int(box_amount)):
+    for box_i in range(int(box_amount)):
         row = 0
         col = 0
-        
         for _ in range(rows * cols):
-            image.wait_new_frame()
+            image.debugger.log(row, col)
+            if hasattr(image, "wait_new_frame"):
+                image.wait_new_frame(timeout_s=0.35)
+
             has_pokemon, has_shiny, has_egg = _slot_flags(image, game)
 
             if has_pokemon and (not has_shiny) and (not has_egg):
-                _release_pokemon(ctrl)
+                _release_pokemon(ctrl, game)
+
+                cleared = wait_state(
+                    image, game, True, 3.0, "pokemon", "pokemon_in_box",
+                    stable_frames=10
+                )
+
+                if not cleared:
+                    ctrl.tap(BTN_A, 0.05, 0.4)
+                    cleared = wait_state(
+                        image, game, True, 2.0, "pokemon", "pokemon_in_box",
+                        stable_frames=8
+                    )
+
                 image.database_component.pokemon_released += 1
             else:
                 image.database_component.pokemon_skipped += 1
 
             if not (row == rows - 1 and col == cols - 1):
-                row, col = box_grid_advance(ctrl, row, col)
-        next_box(ctrl)
-
-    return "PROGRAM_FINISHED"
+                row, col = box_grid_advance(ctrl, row, col, sleep_time=0.33)
+        next_box(ctrl); sleep(0.33)
+    return return_states(image, "PROGRAM_FINISHED")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
     image.debugger.set_rois_for_state('PAIRING', [const.GENERIC_STATES['playing']['roi']], (0, 255, 0))
@@ -105,6 +119,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
         if score >= lm.threshold:
             ctrl.tap(BTN_A)
             image.playing = True
+            image.debugger.clear()
             image.state= 'IN_GAME'
         else:
             ctrl.tap(BTN_A, 0.05, 1)
@@ -113,6 +128,7 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
                     ctrl.dpad(2, 0.05); sleep(0.3)
                 image.profile_set = True
             ctrl.tap(BTN_A, 0.05, 0.75)
+            image.debugger.clear()
             image.state= 'START_SCREEN'
         return image.state
 
@@ -135,7 +151,6 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
     else:
         if hasattr(image, "playing_checked"):
             image.playing_checked = False
-
 
     return image.state
  
@@ -221,9 +236,9 @@ def box_grid_advance(ctrl, row: int, col: int, cols: int = 6, rows: int = 5, sle
 
 def next_box(ctrl) -> None:
     for _ in range(4):
-        ctrl.dpad(0, 0.05); sleep(0.17)
+        ctrl.dpad(0, 0.1); sleep(0.33)
     for _ in range(5):
-        ctrl.dpad(6, 0.05); sleep(0.17)
+        ctrl.dpad(6, 0.1); sleep(0.33)
     sleep(0.17)
     ctrl.tap(BTN_R)
 
@@ -349,19 +364,3 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
     joined = " | ".join(lines).lower()
     return all(k.lower() in joined for k in keywords)
-
-def read_lines(image, rois, stable_frames: int = 2, min_len: int = 4) -> list[str] | None:
-    lines = []
-    for idx, roi in enumerate(rois):
-        line = Text.stable_ocr_line(
-            image, roi,
-            key=f"donut_line_{idx}",
-            stable_frames= stable_frames,
-            min_len= min_len
-        )
-        if not line:
-            return None
-        
-        lines.append(line)
-    return lines
-        

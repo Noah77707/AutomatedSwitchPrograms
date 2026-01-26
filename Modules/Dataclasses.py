@@ -46,9 +46,6 @@ class CaptureState:
 
     last_cap_fid: int = -1
 
-
-
-
 @dataclass
 class RunStats:
     pokemon_name: str = None
@@ -69,6 +66,9 @@ class RunStats:
     shinies: int = 0
     playtime_seconds: int = 0
 
-def ensure_stats(image):
-    if not hasattr(image, 'database_component'):
-        image.database_component = RunStats()
+@dataclass
+class Running:
+    running: bool = False
+    paused: bool = False
+    run_last_t:float = 0.0
+    run_seconds:float = 0.0

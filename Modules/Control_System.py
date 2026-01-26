@@ -136,7 +136,6 @@ def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None
 
 def start_control_video(
     Device_Index,
-    controller,
     Image_Queue,
     Shutdown_event,
     stop_event,
@@ -357,7 +356,7 @@ def controller_control(
                 paused = False
                 state = None
                 image.state = None
-
+                
             elif cmd == "PAUSE":
                 paused = True
 
@@ -384,13 +383,11 @@ def controller_control(
         state = step_fn(image, ctrl, state, input)
 
         if getattr(image, "state", None) == "PROGRAM_FINISHED":
-            flush_runstats_to_db(image)
-            image.database_component = RunStats()
+            Command_queue.put({"cmd": "STOP"})
             running = False
             paused = False
             state = None
             image.state = None
-
     try:
         ctrl.close()
     except Exception:
