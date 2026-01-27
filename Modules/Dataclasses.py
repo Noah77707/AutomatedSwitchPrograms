@@ -72,3 +72,11 @@ class Running:
     paused: bool = False
     run_last_t:float = 0.0
     run_seconds:float = 0.0
+
+@dataclass
+class ReleasePokemon:
+    box_amount: int = 1
+    box_i: int = 0
+    row: int = 0
+    col: int = 0
+    

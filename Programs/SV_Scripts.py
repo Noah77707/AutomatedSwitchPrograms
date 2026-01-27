@@ -98,10 +98,9 @@ def Pokemon_Releaser_SV(image: Image_Processing, ctrl: Controller, state: str | 
         image.debugger.set_rois_for_state("IN_MENU", all_rois, (0, 0, 0))
         sleep(2)
         Menu_Navigation(ctrl, image, "boxes")
-        ctrl.tap(BTN_A); sleep(1.75)
+        ctrl.tap(BTN_A); sleep(2.5)
         image.debugger.clear()
         return return_states(image, "IN_BOX")
     
     elif image.state == "IN_BOX":
         return release_pokemon(ctrl, image, "SV", image.cfg["inputs"][0])
-        

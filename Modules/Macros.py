@@ -24,7 +24,7 @@ BTN_RSTICK = 11
 BTN_HOME = 12
 BTN_CAPTURE = 13
 
-def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int) -> str:
+def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int, row: int = 0, col: int = 0) -> str:
     """
     Should work for SWSH, BDSP, LA, and SV.\n
     LZA has a shiny symbol roi check instead of a state check.\n
@@ -36,7 +36,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
         has_egg     = check_state(image, game, "pokemon", "egg_in_box")
         return has_pokemon, has_shiny, has_egg
 
-    def _release_pokemon(ctrl: Controller, game: str, row: int = 0, col: int = 0):
+    def _release_pokemon(ctrl: Controller, game: str):
         ctrl.tap(BTN_A, 0.05, 0.5)
         ctrl.dpad(0); sleep(0.2)
         ctrl.dpad(0); sleep(0.2)
@@ -79,6 +79,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
             if not (row == rows - 1 and col == cols - 1):
                 row, col = box_grid_advance(ctrl, row, col, sleep_time=0.33)
         next_box(ctrl); sleep(0.33)
+        
     return return_states(image, "PROGRAM_FINISHED")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
@@ -264,7 +265,7 @@ def put_egg(ctrl, image, game: str) -> None:
 
         if check_state(image, game, "pokemon_in_box"):  # gate: only if something is there
             # confirm shiny over a few frames so one bad frame doesn't miss
-            shiny = wait_for_state(image, game, "shiny_symbol", timeout=0.25, min_frames=2)
+            shiny = wait_state(image, game, False, 0.25, "pokemon", "shiny_symbol")
             if shiny:
                 image.shiny += 1
 
