@@ -1,15 +1,12 @@
 from Modules.Dataclasses import *
 
-ORIGINAL_FRAME_SIZE = (1920, 1080)
-BOT_FRAME_SIZE = (1100, 570)
 MAIN_FRAME_SIZE = (1280, 720)
-SPAWN_POSITION = (300, 200)
 
 # state checks are where the checked states are stored.
 # checked states are states that contain information to colors and pixels for a wanted state
-# the porgram willl uses these to check if the pixels specified are withing 7 unit so color to the specified color
+# the porgram willl uses these to check if the pixels specified are within 7-10 unit so color to the specified color
 # I.E. if the color is 56, 56, 56. then 59, 50, 54 will pass, and 67, 12, 255 will fail
-
+# You can also change the amount range of the pixel colors with the toi when calling check_State
 GENERIC_STATES = {
     "pairing_screen": {
         "color": (209, 209, 209),
@@ -538,6 +535,13 @@ SV_STATES = {
                 (610, 215)
             ]
         },
+        "add_markings": {
+            "color": (255, 255, 254),
+            "positions": [
+                (383, 377),
+                (714, 373)
+            ]
+        },
     },
     "text": {
         "text_box": {
@@ -547,6 +551,13 @@ SV_STATES = {
                 (954, 648)
             ]
         },
+        "text_arrow": {
+            "color": (252, 252, 252),
+            "positions": [
+                (930, 621),
+                (937, 621)
+            ]
+        }
     },
     "menu": {
         "pokemon1": {
@@ -910,24 +921,4 @@ TEXT = {
                           "Bitter: Babiri, Charti\n"
                           "Fresh: Colbur, Payapa", "image": "N/A"},
     },
-}
-
-COLOR_ON_SCREEN = {
-    "top_left": (50, MAIN_FRAME_SIZE[1] - 50),
-    "center_left": (50, MAIN_FRAME_SIZE[1] // 2 - 25),
-    "bottom_left": (50, 25),
-    "center": (MAIN_FRAME_SIZE[0] // 2 - 25, MAIN_FRAME_SIZE[1] // 2 - 25),
-    "top_right": (MAIN_FRAME_SIZE[0] - 50, MAIN_FRAME_SIZE[1] - 50),
-    "center_right": (MAIN_FRAME_SIZE[0] -50, MAIN_FRAME_SIZE[1] // 2 - 25),
-    "bottom_right": (MAIN_FRAME_SIZE[0] - 50, 25),
-
-    "home_screen": (int(MAIN_FRAME_SIZE[0] // 48 * 1), int(MAIN_FRAME_SIZE[1] // 8 * 7)),
-    "health_bar": (int(MAIN_FRAME_SIZE[0] // 96 * 1), int(MAIN_FRAME_SIZE[1] // 16 * 1.6)),
-
-    "column_height": 25,
-    "small_column_height": 15,
-
-    "black": (5,5,5),
-    "white": (250, 250, 250),
-    "home_color": (237, 237, 237)
 }

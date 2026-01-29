@@ -15,11 +15,6 @@ from .Image_Processing import Image_Processing
 state_timer = 0
 LM_CACHE: dict[tuple[str, str], TemplateLandmark] = {}
 
-def return_phase(image: Image_Processing, phase: str) -> str:
-    if image.phase != phase:
-        image.phase = phase
-    return phase
-
 def return_states(image: Image_Processing, state: str) -> str:
     if image.state != state:
         image.state = state
@@ -97,17 +92,18 @@ def wait_state(
 
     return False
 
-
 def split_state(s: str | None) -> tuple[str, str | None]:
     if not s:
         return (None, None)
     if "|" not in s:
         return (s, None)
-    phase, sub = s.split("|", 1)
-    return (phase, sub if sub != "None" else None)
+    state, sub = s.split("|", 1)
+    return (state, sub if sub != "None" else None)
 
-def join_state(phase: str, sub: str | None) -> str:
-    return f"{phase}|{sub if sub is not None else 'None'}"
+def join_state(state: str, sub: str | None) -> str:
+    return f"{state}|{sub if sub is not None else 'None'}"
+
+# Will move later
 
 def _crop(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
     """Safe ROI crop. Returns empty array if invalid."""
@@ -279,7 +275,6 @@ def is_in_area(image: Image_Processing, compared_to_image_path: str, roi: Tuple[
 
     res = cv.matchTemplate(crop, ref, cv.TM_CCOEFF_NORMED)
     _, maxv, _, _ = cv.minMaxLoc(res)
-    print(maxv)
     return float(maxv)
 # this uses the TemplateLandmark and returns the information first. It doesn't do the same job as get_tpl
 def detect_template(frame_bgr: np.ndarray, lm: TemplateLandmark) -> float:

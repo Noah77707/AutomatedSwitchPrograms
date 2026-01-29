@@ -31,6 +31,8 @@ class Image_Processing():
         self.debugger = Debug()
         self.database_component = RunStats()
         self.capture = CaptureState()
+        self.box = Box()
+        self.egg = Egg()
 
         self.egg_count = 0
         self.egg_phase = 0

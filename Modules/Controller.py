@@ -74,12 +74,28 @@ class Controller:
         self.up(idx)
 
     def stick(self, which: str, x: int, y: int, duration_s: float = 0.0, center: bool = True):
+        """
+        X, Y: 0, 0 = Left, Down
+        X, Y: 256, 256 = Right, Up
+        """
         self.send(f"STICK {which} {int(x)} {int(y)}")
         if duration_s > 0:
             time.sleep(duration_s)
         if center:
             self.send(f"STICK {which} 128 128")
 
+    def stick_up(self, which: str, duration_s: float = 0.0, center: bool = True):
+        self.stick(which, "128", "0", duration_s, center)
+    
+    def stick_down(self, which: str, duration_s: float = 0.0, center: bool = True):
+        self.stick(which, "128", "256", duration_s, center)
+    
+    def stick_left(self, which: str, duration_s: float = 0.0, center: bool = True):
+        self.stick(which, "0", "128", duration_s, center)
+    
+    def stick_right(self, which: str, duration_s: float = 0.0, center: bool = True):
+        self.stick(which, "256", "128", duration_s, center)
+    
     def dpad(self, dir: int, duration_s: float = 0.05):
         self.send(f"HAT {int(dir)}")
         if duration_s > 0:

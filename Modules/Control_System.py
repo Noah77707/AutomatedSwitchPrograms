@@ -382,12 +382,6 @@ def controller_control(
 
         state = step_fn(image, ctrl, state, input)
 
-        if getattr(image, "state", None) == "PROGRAM_FINISHED":
-            Command_queue.put({"cmd": "STOP"})
-            running = False
-            paused = False
-            state = None
-            image.state = None
     try:
         ctrl.close()
     except Exception:

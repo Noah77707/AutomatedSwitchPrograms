@@ -350,15 +350,14 @@ def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str 
     elif image.state == "PARTY_SCREEN":
         if check_state(image, "SWSH", "screens", "party_screen"):
             ctrl.tap(BTN_R)
-            return return_states(image, "IN_BOX")
+            return return_states(image, "LOADING_BOXES")
 
-    elif image.state == "IN_BOX":
+    elif image.state == "LOADING_BOXES":
         if check_state(image, "SWSH", "screens", "box_screen"):
-            return return_states(image, "IN_BOX2")
+            return return_states(image, "IN_BOX")
         return image.state
 
-    elif image.state == "IN_BOX2":
-        boxes = image.cfg["inputs"][0]
-        return release_pokemon(ctrl, image, "SWSH", boxes)
+    elif image.state in ("IN_BOX", "GO_THROUGH_BOX", "NEXT_BOX"):
+        return release_pokemon(ctrl, image)
         
     return image.state

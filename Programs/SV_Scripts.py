@@ -60,8 +60,8 @@ def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> N
     if cur is None:
         return
     
-    def col(i: int) -> int: return 0 if i < 7 else 1
-    def row(i: int) -> int: return i % 7
+    def row(i: int) -> int: return 0 if i < 7 else 1
+    def col(i: int) -> int: return i % 7
 
     if col(cur) != col(target_position):
         ctrl.dpad(2 if col(cur) < col(target_position) else 6, 0.05)
@@ -86,6 +86,7 @@ def Pokemon_Releaser_SV(image: Image_Processing, ctrl: Controller, state: str | 
         return return_states(image, Start_SV(image, ctrl, image.state))
 
     elif image.state == 'IN_GAME':
+        image.box.box_amount = image.cfg["inputs"][0]
         sleep(1)
         ctrl.tap(BTN_X, 0.05, 0.5)
         return return_states(image, "IN_MENU")
@@ -102,5 +103,7 @@ def Pokemon_Releaser_SV(image: Image_Processing, ctrl: Controller, state: str | 
         image.debugger.clear()
         return return_states(image, "IN_BOX")
     
-    elif image.state == "IN_BOX":
-        return release_pokemon(ctrl, image, "SV", image.cfg["inputs"][0])
+    elif image.state in ("IN_BOX", "GO_THROUGH_BOX", "NEXT_BOX"):
+        return release_pokemon(ctrl, image)
+
+    return image.state

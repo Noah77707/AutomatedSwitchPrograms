@@ -24,11 +24,31 @@ BTN_RSTICK = 11
 BTN_HOME = 12
 BTN_CAPTURE = 13
 
-def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_amount: int, row: int = 0, col: int = 0) -> str:
+def box_grid_advance(ctrl, row: int, col: int, cols: int = 6, rows: int = 5, sleep_time: int = 0.05) -> tuple[int, int]:
+    if col < cols - 1:
+        ctrl.stick_right("L", 0.17); sleep(sleep_time)
+        return row, col + 1
+
+    if row < rows - 1:
+        ctrl.stick_down("L", 0.17); sleep(sleep_time)
+        for _ in range(cols - 1):
+            ctrl.stick_left("L", 0.17); sleep(sleep_time)
+        return row + 1, 0
+
+    return row, col
+
+def next_box(ctrl) -> None:
+    for _ in range(4):
+        ctrl.stick_up("L", 0.17); sleep(0.33)
+    for _ in range(5):
+        ctrl.stick_left("L", 0.17); sleep(0.33)
+    sleep(0.17)
+    ctrl.tap(BTN_R)
+
+def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
     """
     Should work for SWSH, BDSP, LA, and SV.\n
     LZA has a shiny symbol roi check instead of a state check.\n
-    so this wont work for it currently.
     """
     def _slot_flags(image: Image_Processing, game: str) -> tuple[bool, bool, bool]:
         has_pokemon = check_state(image, game, "pokemon", "pokemon_in_box")
@@ -37,50 +57,61 @@ def release_pokemon(ctrl: Controller, image: Image_Processing, game: str, box_am
         return has_pokemon, has_shiny, has_egg
 
     def _release_pokemon(ctrl: Controller, game: str):
-        ctrl.tap(BTN_A, 0.05, 0.5)
-        ctrl.dpad(0); sleep(0.2)
-        ctrl.dpad(0); sleep(0.2)
-        ctrl.tap(BTN_A, 0.05, 1.5)
-        ctrl.dpad(0); sleep(0.1)
-        ctrl.tap(BTN_A, 0.05, 1.0)
-        ctrl.tap(BTN_A, 0.05, 0.1)
+        ctrl.tap(BTN_A)
+        wait_state(image, image.game, False, 0.1, "text", "text_arrow")
+        ctrl.stick_up("L", 0.17); sleep(0.2)
+        ctrl.stick_up("L", 0.17); sleep(0.2)
+        ctrl.tap(BTN_A); sleep(0.2)
+        wait_state(image, image.game, False, 0.1, "text", "text_arrow")
+        ctrl.stick_up("L", 0.17); sleep(0.2)
+        ctrl.tap(BTN_A); sleep(0.1)
+        wait_state(image, image.game, False, 0.1, "text", "text_arrow")
+        ctrl.tap(BTN_A)
 
-    cols, rows = 6, 5
+    if image.state == "IN_BOX":
+        if image.box.box_i < image.box.box_amount:
+            image.debugger.log(image.box.box_amount)
+            return return_states(image, "GO_THROUGH_BOX")
+        else:
+            return return_states(image, "PROGRAM_FINISHED")
+        
+    elif image.state == "GO_THROUGH_BOX":
+        image.debugger.log(image.box.row, image.box.col)
+        if hasattr(image, "wait_new_frame"):
+            image.wait_new_frame(timeout_s=0.35)
+        
+        has_pokemon, has_shiny, has_egg = _slot_flags(image, image.game)
+        
+        if has_pokemon and (not has_shiny) and (not has_egg):
+            _release_pokemon(ctrl, image.game) 
+            
+            cleared = wait_state(
+                image, image.game, True, 3.0, "pokemon", "pokemon_in_box",
+                stable_frames=10
+            )
 
-    for box_i in range(int(box_amount)):
-        row = 0
-        col = 0
-        for _ in range(rows * cols):
-            image.debugger.log(row, col)
-            if hasattr(image, "wait_new_frame"):
-                image.wait_new_frame(timeout_s=0.35)
-
-            has_pokemon, has_shiny, has_egg = _slot_flags(image, game)
-
-            if has_pokemon and (not has_shiny) and (not has_egg):
-                _release_pokemon(ctrl, game)
-
+            if not cleared:
+                ctrl.tap(BTN_A, 0.05, 0.4)
                 cleared = wait_state(
-                    image, game, True, 3.0, "pokemon", "pokemon_in_box",
-                    stable_frames=10
+                    image, image.game, True, 2.0, "pokemon", "pokemon_in_box",
+                    stable_frames=8
                 )
 
-                if not cleared:
-                    ctrl.tap(BTN_A, 0.05, 0.4)
-                    cleared = wait_state(
-                        image, game, True, 2.0, "pokemon", "pokemon_in_box",
-                        stable_frames=8
-                    )
+            image.database_component.pokemon_released += 1
+        else:
+            image.database_component.pokemon_skipped += 1
 
-                image.database_component.pokemon_released += 1
-            else:
-                image.database_component.pokemon_skipped += 1
-
-            if not (row == rows - 1 and col == cols - 1):
-                row, col = box_grid_advance(ctrl, row, col, sleep_time=0.33)
+        if not (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
+            image.box.row, image.box.col = box_grid_advance(ctrl, image.box.row, image.box.col, sleep_time=0.33)
+            return image.state
+        else:
+            return return_states(image, "NEXT_BOX")
+    
+    elif image.state == "NEXT_BOX":
+        image.box.row = image.box.col = 0
+        image.box.box_i += 1
         next_box(ctrl); sleep(0.33)
-        
-    return return_states(image, "PROGRAM_FINISHED")
+        return return_states(image, "IN_BOX")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
     image.debugger.set_rois_for_state('PAIRING', [const.GENERIC_STATES['playing']['roi']], (0, 255, 0))
@@ -205,7 +236,7 @@ def mash_a_while_textbox(
         if watch_state and check_state(image, game, watch_state):
             saw_watch = True
         
-        visible = check_state(image, game, "text_box")
+        visible = check_state(image, game, "text", "text_box")
 
         if visible:
             gone_streak = 0
@@ -221,27 +252,6 @@ def mash_a_while_textbox(
             sleep(0.1)
 
     return saw_watch
-
-def box_grid_advance(ctrl, row: int, col: int, cols: int = 6, rows: int = 5, sleep_time: int = 0.05) -> tuple[int, int]:
-    if col < cols - 1:
-        ctrl.dpad(2, 0.05); sleep(sleep_time)
-        return row, col + 1
-
-    if row < rows - 1:
-        ctrl.dpad(4, 0.05); sleep(sleep_time)
-        for _ in range(cols - 1):
-            ctrl.dpad(6, 0.05); sleep(sleep_time)
-        return row + 1, 0
-
-    return row, col
-
-def next_box(ctrl) -> None:
-    for _ in range(4):
-        ctrl.dpad(0, 0.1); sleep(0.33)
-    for _ in range(5):
-        ctrl.dpad(6, 0.1); sleep(0.33)
-    sleep(0.17)
-    ctrl.tap(BTN_R)
 
 def grab_egg(ctrl, image, game: str) -> None:
     for _ in range(image.egg_phase):

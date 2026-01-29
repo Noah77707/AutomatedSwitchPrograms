@@ -74,9 +74,15 @@ class Running:
     run_seconds:float = 0.0
 
 @dataclass
-class ReleasePokemon:
+class Box:
     box_amount: int = 1
     box_i: int = 0
     row: int = 0
     col: int = 0
-    
+    rows: int = 5
+    cols: int = 6
+        
+@dataclass
+class Egg:
+    egg_count: int = 0
+    egg_phase: int = 0

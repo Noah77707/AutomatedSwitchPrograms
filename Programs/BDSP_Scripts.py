@@ -165,11 +165,18 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
     # Uses template matching to see if the daycare man is facing towards the left, which means he has an egg
     elif image.state == "CHECK_EGG":
         sleep(1.5)
-
+        debugRois = [
+            roi,
+            const.BDSP_STATES['text']['text_box']['roi']
+        ]
+        image.debugger.set_rois_for_state("CHECK_EGG", debugRois, (0, 0, 0))
         ctrl.down(BTN_B)
-        if is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms.png", roi = roi, threshold= 0.65) > 0.67 or is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms2.png", roi = roi, threshold= 0.65) > 0.67 and image.egg_phase == 0:
+        
+        vmax1 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms.png", roi = roi, threshold= 0.65)
+        vmax2 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms2.png", roi = roi, threshold= 0.65)
+        if vmax1 > 0.67 or vmax2 > 0.67 and image.egg_phase == 0:
             for _ in range(4):
-                ctrl.dpad(6, 0.14)
+                ctrl.dpad(6, 0.14); sleep(0.17)
             sleep(0.2)
             ctrl.tap(BTN_A)
             # mashes the text box until the egg screen appears. if it does, then it increments the egg counter
@@ -186,17 +193,18 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             ctrl.down(BTN_B)
 
         image.state = "WALKING"
-
     # walks up for a random amount of spaces. Due to the controller being able to drop input or hold them longer than intended, its not that reliable
     elif image.state == "WALKING":
+        image.debugger.clear()
+        image.debugger.set_rois_for_state("WALKING", [(240, 160, 180, 180)], (0, 0, 0))
         ctrl.down(BTN_B)
         for _ in range(15):
             ctrl.dpad(0, 0.13)
         image.egg_phase = 1
-        image.state = "WALKING1"
-    
+        image.state = "WALKING1" 
     # walks down. uses template matching to see if the daycare sign is in the correct place to position the character correctly.
     elif image.state == "WALKING1":
+        image.debugger.set_rois_for_state("WALKING1", [(240, 160, 180, 180)], (0, 0, 0))
         walk_until_landmark_dpad(ctrl, image, dpad_dir= 4, lm= landmark)
         image.egg_phase = 0
         ctrl.up(BTN_B)
@@ -298,13 +306,21 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         hit = False
         score = 1.0
         # looks for the text "hatched from the egg!" to increment the hatched egg
-        if check_state(image, "BDSP", "text", "text_box"):
+        
+        if check_state(image, "BDSP", "text", "text_box"):          
             hit, score = match_text_fragment(image, hatched, const.BDSP_STATES["text"]["text_box"]["roi"], sqdiff_max= 0.2)
             image.debugger.log("sqdiff:", score)
             sleep(0.02); ctrl.tap(BTN_A)
 
         if hit and not image.generic_bool:
             image.debugger.log("hit")
+            
+            # commented oout code below will be changed to a name collector.
+            
+            # image.debugger.set_rois_for_state("GET_NAME", const.SWSH_STATES["text"]["sent_to_box"]["rois"], (0, 0, 0))
+            # raw = Text.recognize_text(image, const.SWSH_STATES["text"]["sent_to_box"]["rois"][0])
+            # raw = (raw or "").strip()
+
             image.database_component.eggs_hatched += 1
             image.egg_count += 1
             image.generic_count += 1
@@ -326,35 +342,35 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
 
     return image.state
 
-def Automated_Egg_BDSP(image: Image_Processing, ctrl: Controller, phase: str | None, input: int) -> str:
-    phase, sub = split_state(image.generic_state)
+def Automated_Egg_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
+    state, sub = split_state(image.generic_state)
 
-    if phase is None:
-        phase, sub = "PAIRING", None
+    if state is None:
+        state, sub = "PAIRING", None
 
-    elif phase == "PAIRING":
+    elif state == "PAIRING":
         sub = Start_BDSP(image, ctrl, sub)
         if sub == "IN_GAME":
-            phase, sub = "COLLECT", "PROGRAM"
+            state, sub = "COLLECT", "PROGRAM"
     
-    elif phase == "COLLECT":
+    elif state == "COLLECT":
         sub = Egg_Collector_BDSP(image, ctrl, sub)
         if sub == "COLLECTOR_FINISHED":
-            phase, sub = "HATCH", "PROGRAM"
+            state, sub = "HATCH", "PROGRAM"
 
-    elif phase == "HATCH":
+    elif state == "HATCH":
         sub = Egg_Hatcher_BDSP(image, ctrl, sub)
         if sub == "HATCHING_FINISHED":
-            phase, sub = "RELEASE", "PROGRAM"
+            state, sub = "RELEASE", "PROGRAM"
     
-    elif phase == "RELEASE":
+    elif state == "RELEASE":
         sub = Pokemon_Releaser_BDSP(image, ctrl, sub)
         if sub == "RELEASER_FINISHED":
-            phase, sub = "FINISHED", "PROGRAM"
+            state, sub = "FINISHED", "PROGRAM"
 
-    image.phase = phase
-    image.generic_state = join_state(phase, sub)
-    return phase
+    image.state = state
+    image.generic_state = join_state(state, sub)
+    return state
 
 def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
@@ -367,11 +383,13 @@ def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str 
             ctrl.tap(BTN_X, 0.05, 0.45)
             ctrl.tap(BTN_A, 0.05, 1.2)
             ctrl.tap(BTN_R, 0.05, 1.2)
-            image.state = "IN_BOX"
+            image.state = "IN_BOX_SCREEN"
         
-    elif image.state == "IN_BOX":
+    elif image.state == "IN_BOX_SCREEN":
         if check_state(image, "BDSP", "screens", "box_screen"):
-            release_pokemon(ctrl, image, "BDSP", image.run)
-            image.state = "PROGRAM_FINISHED"
-            
+            return return_states(image, "IN_BOX")
+ 
+    elif image.state in ("IN_BOX", "GO_THROUGH_BOX", "NEXT_BOX"):
+        return release_pokemon(ctrl, image)
+           
     return image.state

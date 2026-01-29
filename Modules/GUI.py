@@ -270,7 +270,7 @@ class HomeTab(pyqt_w.QWidget):
         layout.addWidget(pyqt_w.QLabel("HOME programs"))
 
         self.btn_ar = pyqt_w.QPushButton("Push A Repeatedly")
-        self.btn_ar.setProperty("tracks", ['actions', "playtime_seconds", "state"])
+        self.btn_ar.setProperty("tracks", ['actions', "playtime_seconds"])
         self.btn_ar.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_ar, "Press_A_Repeatadly", 0, 0))
 
         self.btn_cct = pyqt_w.QPushButton("Controller Connection Test", self)
@@ -312,8 +312,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.ser = pyqt_w.QPushButton("Static Encounter - Regi", self)
         self.ser.setCheckable(True)
         self.group.addButton(self.ser)
-        self.ser.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds", "state"])
-        self.ser.setProperty("db", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
+        self.ser.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
         self.ser.clicked.connect(lambda _:
                                  (self._set_program_info("Static_Encounter_SWSH"),
                                  self.program_selected.emit("SWSH", self.ser, "Static_Encounter_SWSH", 0, 0)))
@@ -322,8 +321,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.sej = pyqt_w.QPushButton("Static Encounter - Sword of Justice", self)
         self.sej.setCheckable(True)
         self.group.addButton(self.sej)
-        self.sej.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds", "state"])
-        self.sej.setProperty("db", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
+        self.sej.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
         self.sej.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_SWSH"),
                                 self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1)))
@@ -331,8 +329,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.fr = pyqt_w.QPushButton("Fossil Reviver", self)
         self.fr.setCheckable(True)
         self.group.addButton(self.fr)
-        self.fr.setProperty("tracks", ["actions", "resets", "shinies", "playtime_seconds", "state"])
-        self.fr.setProperty("db", ["actions", "resets", "shinies", "playtime_seconds", "state"])
+        self.fr.setProperty("tracks", ["actions", "resets", "shinies", "playtime_seconds"])
         self.fr.clicked.connect(lambda _:
                                 (self._set_program_info("Fossil_Reviver_SWSH"),
                                  self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 3, 0)))
@@ -340,8 +337,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.r.setCheckable(True)
         self.group.addButton(self.r)
-        self.r.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
-        self.r.setProperty("db", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
+        self.r.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.r.clicked.connect(lambda _:
                                (self._set_program_info("Pokemon_Releaser_SWSH"),
                                self.program_selected.emit("SWSH", self.r, "Pokemon_Releaser_SWSH", 1, 0)))
@@ -399,7 +395,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ec = pyqt_w.QPushButton("Egg Collector", self)
         self.ec.setCheckable(True)
         self.group.addButton(self.ec)
-        self.ec.setProperty("tracks", ["eggs_collected", "shinies", "playtime_seconds", "state"])
+        self.ec.setProperty("tracks", ["eggs_collected", "shinies", "playtime_seconds"])
         self.ec.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_BDSP"),
                                   self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0)))
@@ -408,7 +404,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds", "state"])
+        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
                                   self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0)))
@@ -417,7 +413,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
         self.ae.setCheckable(True)
         self.group.addButton(self.ae)
-        self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase", "state"])
+        self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
         self.ae.clicked.connect(lambda _:
                                 (self._set_program_info("Automated_Egg_BDSP"),
                                   self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0)))
@@ -426,7 +422,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.pr.setCheckable(True)
         self.group.addButton(self.pr)
-        self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
+        self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_BDSP"),
                                   self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0)))
@@ -511,7 +507,7 @@ class SVTab(pyqt_w.QWidget):
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.pr.setCheckable(True)
         self.group.addButton(self.pr)
-        self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds", "state"])
+        self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_SV"),
                                  self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 1, 0)))
@@ -557,7 +553,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmsour = pyqt_w.QPushButton("Donut Maker - Sour", self)
         self.dmsour.setCheckable(True)
         self.group.addButton(self.dmsour)
-        self.dmsour.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmsour.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmsour.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
                                   self.program_selected.emit("LZA", self.dmsour, "Donut_Checker", 2, 1, "Sour")))
@@ -566,7 +562,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmsweet = pyqt_w.QPushButton("Donut Maker - Sweet", self)
         self.dmsweet.setCheckable(True)
         self.group.addButton(self.dmsweet)
-        self.dmsweet.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmsweet.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmsweet.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
                                   self.program_selected.emit("LZA", self.dmsweet, "Donut_Checker", 2, 2, "Sweet")))
@@ -575,7 +571,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmspicy = pyqt_w.QPushButton("Donut Maker - Spicy", self)
         self.dmspicy.setCheckable(True)
         self.group.addButton(self.dmspicy)
-        self.dmspicy.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmspicy.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmspicy.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
                                   self.program_selected.emit("LZA", self.dmspicy, "Donut_Checker", 2, 3, "Spicy")))
@@ -583,7 +579,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmbitter = pyqt_w.QPushButton("Donut Maker - Bitter", self)
         self.dmbitter.setCheckable(True)
         self.group.addButton(self.dmbitter)
-        self.dmbitter.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmbitter.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmbitter.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
                                   self.program_selected.emit("LZA", self.dmbitter, "Donut_Checker", 2, 4, "Bitter")))
@@ -592,7 +588,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmfresh = pyqt_w.QPushButton("Donut Maker - Fresh", self)
         self.dmfresh.setCheckable(True)
         self.group.addButton(self.dmfresh)
-        self.dmfresh.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds", "state"])
+        self.dmfresh.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmfresh.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
                                   self.program_selected.emit("LZA", self.dmfresh, "Donut_Checker", 2, 5, "Fresh")))
@@ -659,7 +655,6 @@ class GUI(pyqt_w.QWidget):
 
         self.items = {
             "switch_capture_label": pyqt_w.QLabel(self),
-            "start_stop_button": pyqt_w.QPushButton(self),
             "current_state_label": pyqt_w.QLabel(self),
             "stats_label": pyqt_w.QLabel(self),
         }
@@ -748,7 +743,7 @@ class GUI(pyqt_w.QWidget):
         # ---------- PROGRAM BUTTONS ----------
         self.debug_button = pyqt_w.QPushButton("Debug On", self)
         self.debug_button.clicked.connect(self.update_debug)
-
+        
         self.screenshot_button = pyqt_w.QPushButton("Save Screenshot", self)
         self.screenshot_button.clicked.connect(self.on_screenshot_clicked)
 
@@ -771,7 +766,11 @@ class GUI(pyqt_w.QWidget):
         port_row.addWidget(self.mcu_refresh)
 
         info_row = pyqt_w.QHBoxLayout()
-        info_row.addWidget(self.items["stats_label"])
+        info_row.addWidget(self.items["current_state_label"])
+        self.items["current_state_label"].setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        
+        info2_row = pyqt_w.QHBoxLayout()
+        info2_row.addWidget(self.items["stats_label"])
         self.items["stats_label"].setText(self.update_stats())
         self.items["stats_label"].setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
 
@@ -790,6 +789,7 @@ class GUI(pyqt_w.QWidget):
         right_panel.addLayout(port_row)
         right_panel.addWidget(self.items["switch_capture_label"])
         right_panel.addLayout(info_row)
+        right_panel.addLayout(info2_row)
         right_panel.addWidget(self.dynamic_row)
         right_panel.addLayout(button_row_program)
         right_panel.addLayout(button_row_debug)
@@ -824,19 +824,24 @@ class GUI(pyqt_w.QWidget):
                 self.close()
                 return
 
+            if self.run.running and getattr(self.image, "state", None) == "PROGRAM_FINISHED":
+                self.stop_scripts()
+                return
+            
             # GUI-only updates. No cvtColor. No pixmaps. No frame operations.
             rs = getattr(self.image, "database_component", None)
             if rs is not None:
                 self.items["stats_label"].setText(self.update_stats())
-
-            self.items["current_state_label"].setText(
-                f"{self.game} / {self.program} | state: {getattr(self.image, 'state', None)}"
-            )
+            
+            if self.program != "":
+                self.items["current_state_label"].setText(
+                    f"Game: {self.game} | Program: {self.program} | state: {getattr(self.image, 'state', None)}"
+                )
 
             rs = getattr(self.image, "database_component", None)
             if rs is not None:
                 self.items["stats_label"].setText(self.update_stats())
-
+                        
         except Exception:
             traceback.print_exc()
 
@@ -920,7 +925,6 @@ class GUI(pyqt_w.QWidget):
 
         db = self._db_totals_cache
         parts = []
-        parts.append(f"program: {self.program}")
 
         for key in self.tracks:
             val = getattr(s, key, 0)
@@ -929,10 +933,6 @@ class GUI(pyqt_w.QWidget):
             if key == "playtime_seconds":
                 parts.append(f"run_time: {format_hms(int(val))}")
                 parts.append(f"total_time: {format_hms(int(db_val + val))}")
-            elif key == "phase":
-                parts.append(f"phase: {getattr(self.image, 'phase', None)}")
-            elif key == "state":
-                parts.append(f"state: {getattr(self.image, 'state', None)}")
             else:
                 parts.append(f"{key}: {val} (total {db_val + val})")
 
@@ -1034,10 +1034,14 @@ class GUI(pyqt_w.QWidget):
 
     def stop_scripts(self) -> None:
         self.Command_queue.put({"cmd": "STOP"})
+        
         self.run.running = False
         self.run.paused = False
         self.run.run_last_t = 0.0
         self.run.run_seconds = 0.0
+        
+        if hasattr(self, "pause_button"):
+            self.pause_button.setText("Pause Program")
 
     def update_debug(self) -> None:
         dbg = getattr(self.image, "debugger", None)
