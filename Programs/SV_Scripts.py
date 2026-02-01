@@ -82,11 +82,11 @@ def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> N
         cur = nxt
 
 def Pokemon_Releaser_SV(image: Image_Processing, ctrl: Controller, state: str | None, number: int | None) -> str:
+    image.box.box_amount = image.cfg["inputs"][0]
     if image.state in (None, 'PAIRING', 'HOME_SCREEN', 'START_SCREEN'):
         return return_states(image, Start_SV(image, ctrl, image.state))
 
     elif image.state == 'IN_GAME':
-        image.box.box_amount = image.cfg["inputs"][0]
         sleep(1)
         ctrl.tap(BTN_X, 0.05, 0.5)
         return return_states(image, "IN_MENU")

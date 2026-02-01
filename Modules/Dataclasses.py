@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
-from typing import Tuple, Optional, Any
+from typing import Tuple, Optional, List, Any
 import numpy as np
 import cv2 as cv
 import threading
 
 ROI = Tuple[int, int, int, int]
+COORD = Tuple[int, int]
 
 @dataclass
 class TemplateLandmark:
@@ -81,8 +82,34 @@ class Box:
     col: int = 0
     rows: int = 5
     cols: int = 6
+    current_row: int = 0
+    current_col: int = 0
+    cfg: List[COORD] = field(default_factory=list)
         
 @dataclass
 class Egg:
     egg_count: int = 0
     egg_phase: int = 0
+  
+@dataclass 
+class SparkleDetectorCfg:
+    roi_rel: Tuple[float, float, float, float] = (0.20, 0.18, 0.6, 0.62)
+    
+    roi_size: Tuple[int, int] = (320, 180)
+    
+    bright_percentile: float = 99.3
+    bright_floor: int = 190  # never go below this
+
+    open_iters: int = 1
+    close_iters: int = 1
+    kernel_size: int = 3
+    
+    min_area: int = 6
+    max_area: int = 1800
+
+    window_frames: int = 10
+    hits_required: int = 3
+    cooldown_frames: int = 25
+    
+    abs_score_min: float = 0.0008
+    mad_k: float = 7.0

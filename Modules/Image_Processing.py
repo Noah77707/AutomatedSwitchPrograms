@@ -2,6 +2,9 @@ import os, sys, threading
 import cv2 as cv
 import numpy as np
 import PyQt6.QtGui as pyqt_g
+from skimage import measure
+from imutils import contours
+from collections import deque
 from pytesseract import pytesseract as pt
 from typing import Tuple, Union, Dict, Optional, Sequence
 from time import time, sleep, monotonic
@@ -257,18 +260,15 @@ class Text:
         return " ".join(p[:1].upper() + p[1:].lower() for p in parts)
 
     @staticmethod
-    def recognize_text(image, roi) -> str:
-        # OCR the ROI (single line) and extract candidate name using shared patterns
+    def recognize_pokemon(image, roi) -> str:
         line = Text.ocr_line(image, roi, psm=7)
         if not line:
             return ""
 
-        # Expect patterns in constants.TEXT["PATTERNS"]
         patterns = getattr(image, "pokemon_text_patterns", None)
         if not isinstance(patterns, list):
-            # fallback: look for module-level TEXT if you imported it
             try:
-                patterns = const.TEXT["PATTERNS"]  # type: ignore[name-defined]
+                patterns = const.TEXT["PATTERNS"]
             except Exception:
                 patterns = [
                     r"\bwild\s+(.+?)\s+appeared\b",
@@ -281,7 +281,7 @@ class Text:
         raw_name = Text.extract_name(line, patterns)
         if not raw_name:
             return ""
-
+        
         name_set = getattr(image, "pokemon_name_set", None)
         if isinstance(name_set, set):
             key = Text.canonicalize_with_set(raw_name, name_set)   # slug or compact
@@ -295,6 +295,77 @@ class Text:
         if stable:
             return Text.stable_ocr_line(image, roi, key=key, stable_frames=2, min_len=1)
         return Text.ocr_line(image, roi, psm=psm)
+
+    @staticmethod
+    def clean_box_name(raw: str) -> str:
+        s = (raw or "").strip()
+        # common ocr junk
+        s = s.replace("’", "'").replace("`", "'")
+        # remove gender symbols
+        s = re.sub(r"[♀♂]", "", s)
+        s = re.sub(r"[\*\?_¢”\"“´`]", "", s)
+        s = re.sub(r"\s+", " ", s).strip()
+
+        s = re.sub(r"\s+\d+$", "", s).strip()
+
+        s = re.sub(r"[^A-Za-z\s\-']", "", s)
+        s = re.sub(r"\s+", " ", s).strip()
+
+        if len(s) < 3:
+            return ""
+        if s.upper() in {"TE", "TV", "TI", "TIE", "THE"}:
+            return ""
+
+        return s
+        
+    @staticmethod
+    def _snap_to_name_set(s: str, name_set: set[str]) -> str:
+        """
+        Try to map OCR string to a valid pokemon in name_set.
+        If not found, try trimming trailing tokens like 'S', 'Co', etc,
+        but ONLY accept a trim if it becomes a valid name in the set.
+        """
+        s = (s or "").strip()
+        if not s:
+            return ""
+
+        slug = Text.normalize_ocr_name(s)
+        if slug in name_set:
+            return Text.display_capitalize(slug)
+        compact = slug.replace("-", "")
+        if compact in name_set:
+            return Text.display_capitalize(compact)
+
+        parts = s.split()
+        if len(parts) >= 2:
+            for k in (1, 2):
+                trimmed = " ".join(parts[:-k]).strip()
+                if not trimmed:
+                    continue
+                slug2 = Text.normalize_ocr_name(trimmed)
+                if slug2 in name_set:
+                    return Text.display_capitalize(slug2)
+                compact2 = slug2.replace("-", "")
+                if compact2 in name_set:
+                    return Text.display_capitalize(compact2)
+
+        return ""
+
+    @staticmethod
+    def recognize_box_name(image, roi) -> str:
+        line = Text.ocr_line(image, roi, psm=7)
+        line = Text.clean_box_name(line)
+        if not line:
+            return ""
+
+        name_set = getattr(image, "pokemon_name_set", None)
+        if isinstance(name_set, set):
+            snapped = Text._snap_to_name_set(line, name_set)
+            if snapped:
+                return snapped
+            return "" 
+
+        return line
 
     def read_lines(image, rois, key: str, stable_frames: int = 2, min_len: int = 4) -> list[str] | None:
         lines = []
@@ -310,3 +381,36 @@ class Text:
             
             lines.append(line)
         return lines
+
+class SparkleDetector:
+    def __init__(self, cfg: SparkleDetectorCfg | None = None):
+        self.cfg = cfg or SparkleDetectorCfg()
+        self._scores = deque(maxlen=self.cfg.window_frames)
+        self._hits = deque(maxlen=self.cfg.window_frames)
+        self._cooldown = 0
+        self._last_frame_id: Optional[int] = None
+        
+        self.last_score = 0.0
+        
+    def _roi_from_rel(shape, rel):
+        H, W = shape[:2]
+        rx, ry, rw, rh = rel
+        x = int(rx * W); y = int(ry * H)
+        w = int(rw * W); h = int(rh * H)
+        x = max(0, min(x, W - 1))
+        y = max(0, min(y, H - 1))
+        w = max(1, min(w, W - x))
+        h = max(1, min(h, H - y))
+        return x, y, w, h
+
+    def _mad(a: np.ndarray) -> float:
+        m = float(np.median(a))
+        return float(np.median(np.abs(a - m))) + 1e-9
+    # def ImageProcesses(self, image: Image_Processing):
+    #     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    #     blur = cv.GaussianBlur(gray, (11, 11), 0)
+    #     thresh = cv.threshold(blur, 200, 255, cv.THRESH_BINARY)[1]
+    #     thresh = cv.erode(thresh, None, iterations=2)
+    #     thresh = cv.dilate(thresh, None, iterations=4)
+    #     labels = measure.label(thresh, neightbors = 8, background=0)
+    #     mask = np.zeros(thresh.shape, dtype="uint8")

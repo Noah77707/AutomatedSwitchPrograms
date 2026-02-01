@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Iterable
 from time import monotonic
 import threading
+from .Dataclasses import *
 
 @dataclass(frozen=True)
 class DebugROI:
@@ -73,3 +74,4 @@ class Debug:
     def log(self, *parts) -> None:
         if self.enabled:
             print(f"[DEBUG] {' '.join(map(str, parts))}")
+    

@@ -3,6 +3,7 @@ import sys
 import time
 from time import monotonic, sleep
 import serial
+from enum import Enum
 from .Controller import Controller
 from .Image_Processing import Image_Processing, Text
 from .States import *
@@ -39,9 +40,9 @@ def box_grid_advance(ctrl, row: int, col: int, cols: int = 6, rows: int = 5, sle
 
 def next_box(ctrl) -> None:
     for _ in range(4):
-        ctrl.stick_up("L", 0.17); sleep(0.33)
+        ctrl.stick_up("L", 0.17); sleep(0.17)
     for _ in range(5):
-        ctrl.stick_left("L", 0.17); sleep(0.33)
+        ctrl.stick_left("L", 0.17); sleep(0.17)
     sleep(0.17)
     ctrl.tap(BTN_R)
 
@@ -102,7 +103,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
             image.database_component.pokemon_skipped += 1
 
         if not (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
-            image.box.row, image.box.col = box_grid_advance(ctrl, image.box.row, image.box.col, sleep_time=0.33)
+            image.box.row, image.box.col = box_grid_advance(ctrl, image.box.row, image.box.col, sleep_time=0.17)
             return image.state
         else:
             return return_states(image, "NEXT_BOX")
@@ -110,7 +111,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
     elif image.state == "NEXT_BOX":
         image.box.row = image.box.col = 0
         image.box.box_i += 1
-        next_box(ctrl); sleep(0.33)
+        next_box(ctrl); sleep(0.17)
         return return_states(image, "IN_BOX")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
@@ -152,17 +153,12 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
             ctrl.tap(BTN_A)
             image.playing = True
             image.debugger.clear()
-            image.state= 'IN_GAME'
+            return return_states(image, 'IN_GAME')
         else:
             ctrl.tap(BTN_A, 0.05, 1)
-            if image.profile_set == False:
-                for _ in range(image.profile - 1):
-                    ctrl.dpad(2, 0.05); sleep(0.3)
-                image.profile_set = True
             ctrl.tap(BTN_A, 0.05, 0.75)
             image.debugger.clear()
-            image.state= 'START_SCREEN'
-        return image.state
+            return return_states(image, "START_SCREEN")
 
     elif check_state(image, 'GENERIC', 'home_screen') and not check_state(image, 'GENERIC', 'controller_connected'):
         ctrl.tap(BTN_B)
@@ -173,11 +169,10 @@ def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: 
         ctrl.tap(BTN_B)
         ctrl.tap(BTN_B)
         ctrl.tap(BTN_HOME, 0.05, 0.4)
-        ctrl.dpad(4, 0.2)
+        ctrl.stick_down("L", 0.2); sleep(0.05)
         for _ in range(5):
-           sleep(0.07)
-           ctrl.dpad(2, 0.05)
-        ctrl.tap(BTN_A, 0.05, 1)
+            ctrl.stick_right("L", 0.2); sleep(0.05)
+        ctrl.tap(BTN_A, 0.05, 2)
         image.state= 'PAIRING'
     
     else:
@@ -198,16 +193,16 @@ def bdsp_start_screens_macro(ctrl: Controller, image: Image_Processing, state = 
     if image.state == 'HOME_SCREEN':
         if check_state(image, 'GENERIC', 'home_screen'):
             mash_a_while_textbox(ctrl, image, 'BDSP')
-            return 'START_SCREEN'
+            return return_states(image, 'START_SCREEN')
 
     elif image.state == 'START_SCREEN':
-        if not check_state(image, 'GENERIC', 'black_screen') and not check_state(image, 'BDSP', 'title_screen'):
+        if not check_state(image, 'GENERIC', 'black_screen') and not check_state(image, 'BDSP', "screens", 'title_screen'):
             ctrl.tap(BTN_A, 0.05, 0.95)
-            return 'START_SCREEN'
-        if check_state(image, 'BDSP', 'title_screen'):
+            return return_states(image, 'START_SCREEN')
+        if check_state(image, 'BDSP', "screens", 'title_screen'):
             sleep(1)
             ctrl.tap(BTN_A)
-            return 'IN_GAME'
+            return return_states(image, 'IN_GAME')
         
     return image.state
 
@@ -253,41 +248,48 @@ def mash_a_while_textbox(
 
     return saw_watch
 
-def grab_egg(ctrl, image, game: str) -> None:
-    for _ in range(image.egg_phase):
-        ctrl.dpad(2, 0.05); sleep(0.17)
-    ctrl.tap(BTN_A, 0.05, 0.17)
-    for _ in range(5):
-        ctrl.dpad(4, 0.05); sleep(0.17)
-    ctrl.tap(BTN_A, 0.05, 0.17)
-    for _ in range(image.egg_phase+1):
-        ctrl.dpad(6, 0.05); sleep(0.17)
-    ctrl.dpad(4, 0.05); sleep(0.17)
+def grab_pokemon(ctrl, image):
+    image.box.cfg.append([image.box.current_row, image.box.current_col])
     ctrl.tap(BTN_A)
-
-def put_egg(ctrl, image, game: str) -> None:
-    ctrl.dpad(6, 0.05); sleep(0.17)
-    ctrl.dpad(4, 0.05); sleep(0.17)
-    ctrl.tap(BTN_A, 0.05, 0.17)
-
+    
+    for _ in range(image.box.current_col):
+        ctrl.stick_left("L", 0.05); sleep(0.33)
+    for _ in range(image.box.current_row):
+        ctrl.stick_up("L", 0.05); sleep(0.33)
+        
+    ctrl.stick_left("L", 0.05); sleep(0.33)
     for _ in range(5):
-        sleep(0.10)  # let highlight + symbol render
+        ctrl.stick_down("L", 0.05); sleep(0.33)
+    ctrl.tap(BTN_A, 0.05, 0.75)
+    for _ in range(5):
+        ctrl.stick_up("L", 0.05); sleep(0.33)
+    ctrl.stick_right("L", 0.05); sleep(0.33)
+    
+    for _ in range(image.box.current_col):
+        ctrl.stick_right("L", 0.05); sleep(0.33)
+    for _ in range(image.box.current_row):
+        ctrl.stick_down("L", 0.05); sleep(0.33)
 
-        if check_state(image, game, "pokemon_in_box"):  # gate: only if something is there
-            # confirm shiny over a few frames so one bad frame doesn't miss
-            shiny = wait_state(image, game, False, 0.25, "pokemon", "shiny_symbol")
-            if shiny:
-                image.shiny += 1
+def put_pokemon(ctrl, image):
+    row, col = image.box.cfg.pop(0)
+    
+    ctrl.stick_left("L", 0.05); sleep(0.33)
+    ctrl.stick_down("L", 0.05); sleep(0.33)
+    
+    ctrl.tap(BTN_A)
+    ctrl.stick_up("L", 0.05); sleep(0.33)
+    ctrl.stick_right("L", 0.05); sleep(0.33)
+    for _ in range(col):
+        ctrl.stick_right("L", 0.05); sleep(0.33)
+    for _ in range(row):
+        ctrl.stick_down("L", 0.05); sleep(0.33)
+    ctrl.tap(BTN_A)
+    for _ in range(col):
+        ctrl.stick_left("L", 0.05); sleep(0.33)
+    for _ in range(row):
+        ctrl.stick_up("L", 0.05); sleep(0.33)
+    image.debugger.log(row, col)
 
-        ctrl.dpad(4, 0.05); sleep(0.17)
-
-    ctrl.tap(BTN_A, 0.05, 0.17)
-    ctrl.dpad(0, 0.05); sleep(0.17)
-    for _ in range(image.egg_phase):
-        ctrl.dpad(2, 0.05); sleep(0.17)
-    ctrl.tap(BTN_A, 0.05, 0.17)
-    for _ in range(max(0, image.egg_phase - 1)):
-        ctrl.dpad(6, 0.05); sleep(0.17)
 # time range is the amount of frames between the first battle textbox and the second battle textbox
 # this finds the shiny due to the shiny animation adding a lot more frames inbetween both text boxes
 def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, stable_frames: int = 2):
@@ -329,7 +331,7 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
 
     # While first textbox is visible: capture name when stable (no fixed delay)
     if text_visible and image.generic_bool and image.generic_count == 1 and not image.name_captured:
-        raw = Text.recognize_text(image, roi)
+        raw = Text.recognize_pokemon(image, roi)
         raw = (raw or "").strip()
 
         # ignore trivial garbage
@@ -361,17 +363,12 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
         image.name_captured = False
         image.database_component.pokemon_encountered += 1
 
-        add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, encountered_delta=1)
         if dt < time_range_max:
             image.database_component.resets += 1
-            add_program_deltas(image.game, image.program, resets_delta=1)
             image.state = "NOT_SHINY"
         else:
             image.database_component.shinies += 1
-            add_pokemon_delta(image.game, image.program, image.database_component.pokemon_name, shinies_delta=1)
             image.state = "FOUND_SHINY"
 
     return image.state
 
-    joined = " | ".join(lines).lower()
-    return all(k.lower() in joined for k in keywords)

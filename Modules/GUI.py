@@ -100,8 +100,6 @@ class DynamicRow(pyqt_w.QWidget):
     def _build_inputs(self, text: str = "Input", count: int = 1):
         count = max(1, int(count))
 
-        self._layout.addWidget(pyqt_w.QLabel(text, self))
-
         for i in range(count):
             label = text if count == 1 else f"{text} {i + 1}:"
             self._layout.addWidget(pyqt_w.QLabel(label, self))
@@ -360,7 +358,7 @@ class SWSHTab(pyqt_w.QWidget):
         layout.addWidget(self.info_text)
 
 class BDSPTab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, str)  # game, btn, program, temp_row, number
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -389,25 +387,26 @@ class BDSPTab(pyqt_w.QWidget):
         self.se.setProperty("tracks", [])
         self.se.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("BDSP", self.se, "Static_Encounter_BDSP", 0, 0)))
+                                  self.program_selected.emit("BDSP", self.se, "Static_Encounter_BDSP", 0, 0, "")))
 
         # egg collector
         self.ec = pyqt_w.QPushButton("Egg Collector", self)
         self.ec.setCheckable(True)
         self.group.addButton(self.ec)
-        self.ec.setProperty("tracks", ["eggs_collected", "shinies", "playtime_seconds"])
+        self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
         self.ec.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0)))
+                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0, "Boxes of eggs")))
 
         # egg hatcher
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("tracks", ["eggs_hatched", "playtime_seconds"])
+        self.eh.setProperty("db", ["eggs_hatched", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
-                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0)))
+                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, "Boxes of eggs:")))
 
         # automated egg
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
@@ -416,7 +415,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
         self.ae.clicked.connect(lambda _:
                                 (self._set_program_info("Automated_Egg_BDSP"),
-                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0)))
+                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, "Boxes of eggs")))
 
         # pokemon releaser
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
@@ -425,7 +424,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_BDSP"),
-                                  self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0)))
+                                  self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0, "Boxes of pokemon")))
 
         layout.addWidget(self.se)
         layout.addWidget(self.ec)
@@ -983,8 +982,6 @@ class GUI(pyqt_w.QWidget):
         self.image.cfg = self.dynamic_row.get_cfg()
 
     def start_scripts(self) -> None:
-        self._apply_devices()
-
         cap_idx = int(self.capture_index.value())
         mcu_port = (self.mcu_port.currentData() or "").strip()
 
@@ -996,11 +993,7 @@ class GUI(pyqt_w.QWidget):
         runs = int(self.run_spin.value()) if hasattr(self, "run_spin") else 1
         profile = int(self.profile_spin.value()) if hasattr(self, "profile_spin") else 1
 
-        self.Command_queue.put({
-            "cmd": "SET_DEVICES",
-            "capture_index": cap_idx,
-            "mcu_port": mcu_port,
-        })
+        self._apply_devices()
 
         self.Command_queue.put({
             "cmd": "SET_PROGRAM",

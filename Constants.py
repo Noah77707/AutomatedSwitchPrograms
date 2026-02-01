@@ -309,6 +309,22 @@ BDSP_STATES = {
             "color": (238, 230, 158),
             "positions": [(837, 84), (358, 87)],
         },
+        "menu_screen": {
+            "color": (244, 244, 244),
+            "positions": [
+                (617, 231),
+                (666, 260),
+                (651, 235)
+            ]
+        },
+        "party_screen": {
+            "color": (206, 141, 89),
+            "positions": [
+                (306, 6),
+                (436, 9),
+                (375, 6)
+            ]
+        }
     },
     "in_game": {
         "poketch": {
@@ -319,10 +335,20 @@ BDSP_STATES = {
     "pokemon": {
         "pokemon_in_box": {
             "color": (182, 162, 100),
-            "positions": [(983, 166), (997, 195)],
+            "rois": [
+                (918, 16, 201, 39),
+                # (999, 63, 177, 37)
+            ],
+            "positions": [
+                (983, 166), 
+                (997, 195)
+            ],
         },
         "egg_in_box": {
             "color": (234, 234, 234),
+            "rois": [                
+                (918, 16, 201, 39)
+            ],
             "positions": [(986, 166), (995, 166)],
         },
         "shiny_symbol": {
@@ -337,7 +363,7 @@ BDSP_STATES = {
     "text": {
         "text_box": {
             "color": (250, 251, 251),
-            "roi": (268, 591, 757, 107),
+            "rois": [(268, 591, 757, 107)],
             "positions": [(781, 595), (273, 611), (1019, 593), (1021, 695)],
         },
     },
@@ -421,6 +447,10 @@ BDSP_STATES = {
                 (963, 299)
             ]
         },
+    },
+    "box": {
+        # "party":
+            
     },
     "bag": {},
     # program specific
@@ -903,9 +933,9 @@ TEXT = {
 
         # BDSP
         "Static_Encounter_BDSP": {"text": "N/A", "image": "N/A"},
-        "Egg_Collector_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work. The count is by box, so inputting 1 will be 30 egs, 2 is 60, etc.", "image": "N/A"},
-        "Egg_Hatcher_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work. The count is by box, so inputting 1 will be 30 egs, 2 is 60, etc.", "image": "N/A"},
-        "Automated_Egg_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work. The count is by box, so inputting 1 will be 30 egs, 2 is 60, etc.", "image": "N/A"},
+        "Egg_Collector_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work.", "image": "N/A"},
+        "Egg_Hatcher_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work.", "image": "N/A"},
+        "Automated_Egg_BDSP": {"text": "Stand 4 tiles to the right from the daycare man. This position is the only one that will work.", "image": "N/A"},
         "Pokemon_Releaser_BDSP": {"text": "N/A", "image": "N/A"},
 
         # LA

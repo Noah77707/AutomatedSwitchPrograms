@@ -219,7 +219,7 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         
     elif image.state == "GET_NAME":
         image.debugger.set_rois_for_state("GET_NAME", const.SWSH_STATES["text"]["sent_to_box"]["rois"], (0, 0, 0))
-        raw = Text.recognize_text(image, const.SWSH_STATES["text"]["sent_to_box"]["rois"][0])
+        raw = Text.recognize_pokemon(image, const.SWSH_STATES["text"]["sent_to_box"]["rois"][0])
         raw = (raw or "").strip()
         if raw:
             image.database_component.pokemon_name = raw
@@ -276,7 +276,7 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         target_count = int(cfg.get("count", 0))
 
         if check_state(image, "SWSH", "pokemon", "shiny_symbol"):
-            add_pokemon_delta("SWSH", "Fossil_Reviver_SWSH", image.database_component.pokemon_name, shinies_delta=1)
+            image.database_component.shinies += 1
             return return_states(image, "PROGRAM_FINISHED")
         else:
             image.debugger.log("NOT SHINY")
@@ -322,6 +322,7 @@ def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | Non
         return return_states(image, Start_SWSH(image, ctrl, image.state))
 
 def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
+    image.box.box_amount = image.cfg["inputs"][0]
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
         

@@ -95,6 +95,7 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
             encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
             caught_delta=int(getattr(rs, "pokemon_caught", 0)),
             shinies_delta=int(getattr(rs, "shinies", 0)),
+            eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
         )
 
     image.database_component = RunStats()

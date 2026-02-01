@@ -10,7 +10,7 @@ from pytesseract import pytesseract as pt
 from .Dataclasses import *
 from .Window_Capture import *
 
-from .Image_Processing import Image_Processing
+from .Image_Processing import Image_Processing, Text
 
 state_timer = 0
 LM_CACHE: dict[tuple[str, str], TemplateLandmark] = {}
@@ -103,6 +103,30 @@ def split_state(s: str | None) -> tuple[str, str | None]:
 def join_state(state: str, sub: str | None) -> str:
     return f"{state}|{sub if sub is not None else 'None'}"
 
+def get_box_slot_kind(image, game: str) -> tuple[str, str]:
+    """ 
+    Returns (kind, name)
+    kind: "empty", "egg", "pokemon", "shiny"
+    name: name
+    """
+    name_rois = const.GAME_STATES[game]["pokemon"]["pokemon_in_box"]["rois"] 
+    best = ""
+    for roi in name_rois:
+        raw = Text.recognize_box_name(image, roi)
+        raw = (raw or "").strip()
+        if raw:
+            best = raw
+            break
+        
+    if not best:
+        return "empty", ""
+    
+    if best.lower() == "egg":
+        return "egg", "Egg"
+    
+    is_shiny = check_state(image, game, "pokemon", "shiny_symbol")
+    return ("shiny" if is_shiny else "pokemon"), best
+
 # Will move later
 
 def _crop(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
@@ -125,129 +149,6 @@ def _crop(frame: np.ndarray, roi: Tuple[int, int, int, int]) -> np.ndarray:
 
     return frame[y1:y2, x1:x2]
 
-def roi_mean_v(frame_bgr: np.ndarray, roi: Tuple[int, int, int, int]) -> float:
-    """Mean HSV Value (brightness) for ROI. Higher = brighter."""
-    crop = _crop(frame_bgr, roi)
-    if crop.size == 0:
-        return 0.0
-    hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV) if crop.ndim == 3 else crop
-    if hsv.ndim == 3:
-        v = hsv[:, :, 2]
-        return float(np.mean(v))
-    # If caller passed gray by mistake, treat it as brightness
-    return float(np.mean(hsv))
-
-def roi_edge_density(
-    frame_bgr: np.ndarray,
-    roi: Tuple[int, int, int, int],
-    canny1: int = 60,
-    canny2: int = 160,
-) -> float:
-    """
-    Edge density in ROI: count(edges)/pixels.
-    Useful to reject big white washes (pokeball flash) which often have low edges,
-    vs sparkle particles which have more high-frequency edges.
-    """
-    crop = _crop(frame_bgr, roi)
-    if crop.size == 0:
-        return 0.0
-
-    gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY) if crop.ndim == 3 else crop
-    edges = cv.Canny(gray, canny1, canny2)
-    return float(np.count_nonzero(edges)) / float(edges.size)
-
-def sparkle_mask(
-    frame_bgr: np.ndarray,
-    roi: Tuple[int, int, int, int],
-    v_thres: int,
-    s_max: int,
-    open_ksize: int = 3,
-    close_ksize: int = 3,
-) -> np.ndarray:
-    """
-    Returns a binary mask (uint8 0/255) of bright, low-saturation pixels in ROI.
-    You can countNonZero(mask) or compute ratio.
-    """
-    crop = _crop(frame_bgr, roi)
-    if crop.size == 0:
-        return np.zeros((0, 0), dtype=np.uint8)
-
-    hsv = cv.cvtColor(crop, cv.COLOR_BGR2HSV) if crop.ndim == 3 else None
-    if hsv is None:
-        return np.zeros((0, 0), dtype=np.uint8)
-
-    mask = cv.inRange(hsv, (0, 0, int(v_thres)), (180, int(s_max), 255))
-
-    if open_ksize and open_ksize > 1:
-        k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (open_ksize, open_ksize))
-        mask = cv.morphologyEx(mask, cv.MORPH_OPEN, k, iterations=1)
-
-    if close_ksize and close_ksize > 1:
-        k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (close_ksize, close_ksize))
-        mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, k, iterations=1)
-
-    return mask
-
-def sparkle_score_from_mask(mask: np.ndarray,
-                             min_blob_area: int,
-                             max_blob_area: int,
-                             max_big_component_ratio: float) -> Tuple[bool, dict]:
-    m = cv.morphologyEx(mask, cv.MORPH_OPEN, np.ones((3, 3), np.uint8), iterations=1)
-
-    num_labels, labels, stats, centroids = cv.connectedComponentsWithStats(m, connectivity=8)
-    # stats: [label, x, y, w, h, area] but OpenCV uses columns:
-    # stats[i] = [x, y, w, h, area]
-
-    if num_labels <= 1:
-        return False, {"reason": "no_components"}
-
-    areas = stats[1:, cv.CC_STAT_AREA].astype(np.int32)  # exclude background
-    total_on = int(np.sum(areas))
-    if total_on <= 0:
-        return False, {"reason": "no_pixels"}
-
-    biggest = int(np.max(areas)) if areas.size else 0
-    biggest_ratio = biggest / float(total_on)
-
-    # Reject large-contiguous flash
-    if biggest_ratio >= float(max_big_component_ratio):
-        return False, {"reason": "big_component", "biggest_ratio": biggest_ratio, "total_on": total_on}
-
-    # Count "sparkle-sized" components
-    good = 0
-    for a in areas:
-        if int(min_blob_area) <= int(a) <= int(max_blob_area):
-            good += 1
-
-    # Require at least a few blobs
-    ok = good >= 4
-    return ok, {"good_blobs": good, "biggest_ratio": biggest_ratio, "total_on": total_on}
-
-def wait_for_roi_condition(
-        image: Image_Processing,
-        roi: Tuple[int, int, int, int],
-        predicate,
-        timeout: float = 2.0,
-        min_frames: int = 3,
-        ) -> bool:
-    start = monotonic()
-    good = 0
-
-    # runs while time is 
-    while monotonic() - start < timeout:
-        frame = getattr(image, 'original_image', None)
-        if frame is None:
-            sleep(0.01)
-            continue
-        # This sees if consecutive frames are high enough for the shiny sparkle
-        if predicate(frame, roi):
-            good += 1
-            if good >= min_frames:
-                return True
-        else:
-            good = 0
-        sleep(0.01)
-    return False
 # this passes everything to the check_iamge_position_colors. It mainly makes everything more readable
 def _color_close(bgr: Tuple[int,int,int], target: Tuple[int,int,int], tol: int) -> bool:
     return (abs(bgr[0] - target[0]) <= tol and
