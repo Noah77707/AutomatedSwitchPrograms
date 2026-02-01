@@ -248,6 +248,42 @@ class DynamicRow(pyqt_w.QWidget):
         self.setVisible(False)
         self._active = None
 
+class TestTab(pyqt_w.QWidget):
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    
+    def _set_program_info(self, program: str):
+        text, img = ProgramInfo.get(program)
+        self.info_text.setText(text)
+
+        if img and img != "N/A":
+            pix = pyqt_g.QPixmap(img)
+            self.info_img.setPixmap(pix if not pix.isNull() else pyqt_g.QPixmap())
+        else:
+            self.info_img.clear()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        layout = pyqt_w.QVBoxLayout(self)
+        layout.addWidget(pyqt_w.QLabel("Test programs"))
+
+        self.btn_ar = pyqt_w.QPushButton("Push A Repeatedly")
+        self.btn_ar.setProperty("tracks", ['actions', "playtime_seconds"])
+        self.btn_ar.clicked.connect(lambda _: self.program_selected.emit("TEST", self.btn_ar, "Press_A_Repeatadly", 0, 0))
+
+        self.btn_cct = pyqt_w.QPushButton("Controller Connection Test", self)
+        self.btn_cct.setProperty("tracks", [])
+        self.btn_cct.clicked.connect(lambda _: self.program_selected.emit("TEST", self.btn_cct, "Connect_Controller_Test", 0, 0))
+
+        self.btn_rht = pyqt_w.QPushButton("Return Home Test", self)
+        self.btn_rht.setProperty("tracks", [])
+        self.btn_rht.clicked.connect(lambda _: self.program_selected.emit("TEST", self.btn_rht, "Return_Home_Test", 0, 0))
+
+        layout.addWidget(self.btn_cct)
+        layout.addWidget(self.btn_rht)
+        layout.addWidget(self.btn_ar)
+        layout.addStretch(1)
+
 class HomeTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
     
@@ -265,24 +301,31 @@ class HomeTab(pyqt_w.QWidget):
         super().__init__(parent)
 
         layout = pyqt_w.QVBoxLayout(self)
-        layout.addWidget(pyqt_w.QLabel("HOME programs"))
+        layout.addWidget(pyqt_w.QLabel("Home programs"))
+        
+        self.group = pyqt_w.QButtonGroup(self)
+        self.group.setExclusive(True)
 
-        self.btn_ar = pyqt_w.QPushButton("Push A Repeatedly")
-        self.btn_ar.setProperty("tracks", ['actions', "playtime_seconds"])
-        self.btn_ar.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_ar, "Press_A_Repeatadly", 0, 0))
-
-        self.btn_cct = pyqt_w.QPushButton("Controller Connection Test", self)
-        self.btn_cct.setProperty("tracks", [])
-        self.btn_cct.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_cct, "Connect_Controller_Test", 0, 0))
-
-        self.btn_rht = pyqt_w.QPushButton("Return Home Test", self)
-        self.btn_rht.setProperty("tracks", [])
-        self.btn_rht.clicked.connect(lambda _: self.program_selected.emit("HOME", self.btn_rht, "Return_Home_Test", 0, 0))
-
-        layout.addWidget(self.btn_cct)
-        layout.addWidget(self.btn_rht)
-        layout.addWidget(self.btn_ar)
+        
+        
+        
+        
+        
+        
+        
+        
         layout.addStretch(1)
+
+        self.info_img = pyqt_w.QLabel(self)
+        self.info_img.setFixedHeight(140)
+        self.info_img.setAlignment(pyqt_c.Qt.AlignmentFlag.AlignCenter)
+        self.info_img.setScaledContents(True)
+
+        self.info_text = pyqt_w.QLabel(self)
+        self.info_text.setWordWrap(True)
+
+        layout.addWidget(self.info_img)
+        layout.addWidget(self.info_text)
 
 class SWSHTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
@@ -396,7 +439,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
         self.ec.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0, "Boxes of eggs")))
+                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0, "Number of eggs")))
 
         # egg hatcher
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
@@ -406,7 +449,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.eh.setProperty("db", ["eggs_hatched", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
-                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, "Boxes of eggs:")))
+                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, "Number of eggs:")))
 
         # automated egg
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
@@ -415,7 +458,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
         self.ae.clicked.connect(lambda _:
                                 (self._set_program_info("Automated_Egg_BDSP"),
-                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, "Boxes of eggs")))
+                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, "Number of eggs")))
 
         # pokemon releaser
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
@@ -669,7 +712,7 @@ class GUI(pyqt_w.QWidget):
         self.tabs.setMovable(True)
 
         # ---------- Tabs ----------
-        home_tab = HomeTab(self)
+        home_tab = TestTab(self)
         home_tab.program_selected.connect(self.update_script)
         self.tabs.addTab(home_tab, "HOME")
 

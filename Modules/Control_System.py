@@ -23,11 +23,13 @@ from queue import Queue, Empty
 ProgramFn = Callable[[object, Controller, str], str]
 
 PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
-    # Home
-    ('HOME', 'Connect_Controller_Test'): Connect_Controller_Test,
-    ('HOME', 'Return_Home_Test'): Return_Home_Test,
-    ('HOME', "Press_A_Repeatadly"): Press_A_Repeatadly,
+    # TEST
+    ('TEST', 'Connect_Controller_Test'): Connect_Controller_Test,
+    ('TEST', 'Return_Home_Test'): Return_Home_Test,
+    ('TEST', "Press_A_Repeatadly"): Press_A_Repeatadly,
 
+    # HOME
+    
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,

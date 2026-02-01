@@ -291,7 +291,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
                 )
             else:
                 image.box.current_col = image.box.current_row = 0
-                next_box(ctrl)
+                next_box(ctrl); sleep(1)
             image.debugger.log(image.box.current_row, image.box.current_col)
             return image.state
         return return_states(image, "IN_BOX4")
