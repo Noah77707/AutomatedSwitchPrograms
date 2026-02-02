@@ -453,6 +453,12 @@ BDSP_STATES = {
             
     },
     "bag": {},
+    "quick_select": [
+        (570, 52, 141, 139),
+        (750, 231, 141, 139),
+        (570, 420, 141, 139),
+        (390, 231, 141, 139),
+    ],
     # program specific
     "Egg": {
         "hatchery_pokecenter": {

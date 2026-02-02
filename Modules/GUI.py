@@ -445,8 +445,8 @@ class BDSPTab(pyqt_w.QWidget):
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["eggs_hatched", "playtime_seconds"])
-        self.eh.setProperty("db", ["eggs_hatched", "playtime_seconds"])
+        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("db", ["eggs_hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
                                   self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, "Number of eggs:")))

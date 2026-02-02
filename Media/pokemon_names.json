@@ -1,6 +1,5 @@
 {
   "names": [
-    "egg",
     "bulbasaur",
     "ivysaur",
     "venusaur",
@@ -1025,6 +1024,7 @@
     "iron-boulder",
     "iron-crown",
     "terapagos",
-    "pecharunt"
+    "pecharunt",
+    "egg"
   ]
 }

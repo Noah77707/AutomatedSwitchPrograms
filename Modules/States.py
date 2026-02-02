@@ -245,50 +245,6 @@ def _clahe_gray(img: np.ndarray) -> np.ndarray:
     clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return clahe.apply(gray)
 
-# these functinos make a text fragment more visible to the clahe program
-def prep_text(img_bgr_or_gray: np.ndarray) -> np.ndarray:
-    if img_bgr_or_gray.ndim == 3:
-        gray = cv.cvtColor(img_bgr_or_gray, cv.COLOR_BGR2GRAY)
-    else:
-        gray = img_bgr_or_gray
-
-    gray = cv.resize(gray, None, fx=2.0, fy=2.0, interpolation=cv.INTER_CUBIC)
-    gray = cv.GaussianBlur(gray, (3,3), 0)
-
-    # Invert so text becomes white blobs (usually text is dark)
-    bw = cv.threshold(gray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1]
-    return bw
-
-def has_enough_text(bw: np.ndarray, min_ratio: float = 0.01, max_ratio: float = 0.25) -> bool:
-    # ratio of "ink" pixels (white in inverted binary)
-    ink = float(np.count_nonzero(bw)) / bw.size
-    return (ink >= min_ratio) and (ink <= max_ratio)
-# this uses those text fragments to see if they are similar. 
-def match_text_fragment(
-    image: Image_Processing,
-    template_bgr_or_gray: np.ndarray,
-    roi: Tuple[int,int,int,int],
-    sqdiff_max: float = 0.20,
-) -> tuple[bool, float]:
-    
-    frame = image.original_image
-    if frame is None:
-        return False, 1.0
-
-    x,y,w,h = roi
-    crop = frame[y:y+h, x:x+w]
-    if crop.size == 0:
-        return False, 1.0
-
-    crop_bw = prep_text(crop)
-    if not has_enough_text(crop_bw):
-        return False, 1.0
-
-    tmpl_bw = prep_text(template_bgr_or_gray)
-
-    res = cv.matchTemplate(crop_bw, tmpl_bw, cv.TM_SQDIFF_NORMED)
-    minv, _, _, _ = cv.minMaxLoc(res)  # for SQDIFF, min is best
-    return (minv <= sqdiff_max), float(minv)
 # this has the player move until a specified landmark is in sight
 def walk_until_landmark_dpad(
     ctrl,
@@ -337,13 +293,6 @@ def walk_until_landmark_dpad(
 
     return False
 
-def find_keywords_in_texts(
-    texts: list[str],
-    keywords: list[str],
-) -> dict[str, bool]:
-    joined = " | ".join(texts)
-    return {k: (k.lower() in joined) for k in keywords}
-
 def is_row_selected(image: Image_Processing, roi, white_thres=240, ratio= 0.35):
     frame  = image.original_image
     x, y, w, h = roi
@@ -374,10 +323,11 @@ def match_label(frame_bgr, roi, template_gray, thresh=0.85) -> bool:
     _, maxv, _, _ = cv.minMaxLoc(res)
     return float(maxv) >= float(thresh)
 
-def match_any_slot(frame_bgr, rois, tpl_gray, threshold=0.78) -> tuple[bool, float]:
+def match_any_slot(frame_bgr, rois, tpl_gray, threshold=0.78, number= 1) -> tuple[bool, float]:
     for roi in rois:
         if match_label(frame_bgr, roi, tpl_gray, threshold):
-            return True
+            return True, number
+    number += 1
     return False
 # Important
 def get_tpl(image, path: str, flags=cv.IMREAD_GRAYSCALE):

@@ -75,6 +75,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         hits_required= 3
     )
 
+
     try:
         boxes = int(image.cfg['inputs'][0])
     except (TypeError, ValueError):
@@ -105,7 +106,6 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             else:
                 return return_states(image, "IN_BOX2")
 
-    # puts the extra pokemon in the party so eggs dont enter the party and lock the program up
     elif image.state == "IN_BOX1":
         ctrl.tap(BTN_L, 0.05, 1)
         ctrl.tap(BTN_A)
@@ -120,7 +120,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         ctrl.tap(BTN_R)
         image.generic_bool = True
         return return_states(image, "IN_BOX3")
-    # end function, puts the extra pokemon away befor going on to the egg hatcher program.
+
     elif image.state == "IN_BOX2":
         ctrl.tap(BTN_L, 0.05, 1)
         ctrl.dpad(6, 0.05); sleep(0.17)
@@ -160,34 +160,33 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
                 return return_states(image, "COLLECTOR_FINISHED")
         else:
             return return_states(image, "CHECK_EGG")
-    # Uses template matching to see if the daycare man is facing towards the left, which means he has an egg
+
     elif image.state == "CHECK_EGG":
         image.debugger.clear()
+        image.debugger.set_rois_for_state("CHECK_EGG", [const.BDSP_STATES["Egg"]["nursery_man"]], (0, 0, 0))
         sleep(1.5)
-        debugRois = [
-            roi,
-            const.BDSP_STATES['text']['text_box']['roi']
-        ]
-        image.debugger.set_rois_for_state("CHECK_EGG", debugRois, (0, 0, 0))
         ctrl.down(BTN_B)
         
         vmax1 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms.png", roi = roi, threshold= 0.65)
         vmax2 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms2.png", roi = roi, threshold= 0.65)
         if vmax1 > 0.67 or vmax2 > 0.67 and image.egg_phase == 0:
             for _ in range(4):
-                ctrl.dpad(6, 0.14); sleep(0.17)
+                ctrl.stick_left("L", 0.17); sleep(0.17)
             sleep(0.2)
             ctrl.tap(BTN_A)
-            saw_egg = mash_a_while_textbox(ctrl, image, "BDSP", press_interval= 0.35, gone_confirm= 15, watch_state= "egg_acquired")
-            if saw_egg:
+            text = Text.string_from_roi(image, const.BDSP_STATES['text']['text_box']['rois'][0], key= "get_egg", psm=6)
+            image.debugger.log(text)
+            if text.find("care") != -1:
                 image.egg_count += 1
                 image.database_component.eggs_collected += 1
+            mash_a_while_textbox(ctrl, image, "BDSP", press_interval= 0.35, gone_confirm= 15, watch_state= "egg_acquired")
+
             ctrl.up(BTN_B)
             walk_until_landmark_dpad(ctrl, image, dpad_dir= 2, lm= landmark, pause_s= 0.4)
             ctrl.down(BTN_B)
 
         return return_states(image, "WALKING")
-    # walks up for a random amount of spaces. Due to the controller being able to drop input or hold them longer than intended, its not that reliable
+
     elif image.state == "WALKING":
         image.debugger.set_rois_for_state("WALKING", [(240, 160, 180, 180)], (0, 0, 0))
         ctrl.down(BTN_B)
@@ -195,7 +194,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             ctrl.dpad(0, 0.13)
         image.egg_phase = 1
         return return_states(image, "WALKING1")
-    # walks down. uses template matching to see if the daycare sign is in the correct place to position the character correctly.
+
     elif image.state == "WALKING1":
         image.debugger.set_rois_for_state("WALKING1", [(240, 160, 180, 180)], (0, 0, 0))
         walk_until_landmark_dpad(ctrl, image, dpad_dir= 4, lm= landmark)
@@ -216,6 +215,9 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         threshold= 0.65,
         hits_required= 3
     )
+    if not hasattr(image, "bike"):
+        image.bike = cv.imread("Media/BDSP_Images/Bicycle.png", cv.IMREAD_GRAYSCALE)
+        image.bike_riding = False
     image.debugger.clear()
     count = image.cfg['inputs'][0]
 
@@ -276,6 +278,8 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             ctrl.tap(BTN_R)
             image.egg_phase = 0
         sleep(0.25)
+        if image.database_component.eggs_hatched == image.cfg['inputs'][0]:
+            return return_states(image, "PROGRAM_FINISHED")
         return return_states(image, "IN_BOX3")
     
     elif image.state == "IN_BOX3":
@@ -301,8 +305,27 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         if not check_state(image, "BDSP", "in_game", "poketch"):
             ctrl.tap(BTN_B)
             return image.state
-        return return_states(image, "WALKING1")
+        return return_states(image, "WALKING")
     
+    # elif image.state == "CHECK_BIKE":
+    #     if not image.bike_riding == True:
+    #         ctrl.tap(BTN_PLUS, 0.05, 1)
+    #         statement, index = match_any_slot(image.original_image, const.BDSP_STATES['quick_select'], image.bike)
+    #         if statement:
+    #             image.bike_riding = True
+    #             match index:
+    #                 case 1:
+    #                     ctrl.stick_up("L", 0.13)
+    #                 case 2:
+    #                     ctrl.stick_right("L", 0.13)
+    #                 case 3:
+    #                     ctrl.stick_down("L", 0.13)
+    #                 case 4:
+    #                     ctrl.stick_left("L", 0.13)    
+    #         image.debugger.log(statement)
+    #     else:
+    #         return return_states(image, "WALKING")
+
     elif image.state == "WALKING":
         ctrl.down(BTN_B)
         for _ in range(20):

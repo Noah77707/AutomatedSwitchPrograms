@@ -27,13 +27,13 @@ BTN_CAPTURE = 13
 
 def box_grid_advance(ctrl, row: int, col: int, cols: int = 6, rows: int = 5, sleep_time: int = 0.05) -> tuple[int, int]:
     if col < cols - 1:
-        ctrl.stick_right("L", 0.17); sleep(sleep_time)
+        ctrl.stick_right("L", 0.1); sleep(sleep_time)
         return row, col + 1
 
     if row < rows - 1:
-        ctrl.stick_down("L", 0.17); sleep(sleep_time)
+        ctrl.stick_down("L", 0.1); sleep(sleep_time)
         for _ in range(cols - 1):
-            ctrl.stick_left("L", 0.17); sleep(sleep_time)
+            ctrl.stick_left("L", 0.1); sleep(sleep_time)
         return row + 1, 0
 
     return row, col
@@ -67,23 +67,24 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
         ctrl.stick_up("L", 0.17); sleep(0.2)
         ctrl.tap(BTN_A); sleep(0.1)
         wait_state(image, image.game, False, 0.1, "text", "text_arrow")
-        ctrl.tap(BTN_A)
+        sleep(0.2); ctrl.tap(BTN_A)
+        wait_state(image, image.game, True, 0.1, "text", "text_arrow")
 
     if image.state == "IN_BOX":
         if image.box.box_i < image.box.box_amount:
-            image.debugger.log(image.box.box_amount)
             return return_states(image, "GO_THROUGH_BOX")
         else:
             return return_states(image, "PROGRAM_FINISHED")
         
     elif image.state == "GO_THROUGH_BOX":
+        sleep(0.17)
         image.debugger.log(image.box.row, image.box.col)
         if hasattr(image, "wait_new_frame"):
             image.wait_new_frame(timeout_s=0.35)
         
-        has_pokemon, has_shiny, has_egg = _slot_flags(image, image.game)
-        
-        if has_pokemon and (not has_shiny) and (not has_egg):
+        kind, name = get_box_slot_kind(image, image.game)
+        image.debugger.log(kind, name)
+        if kind == "pokemon":
             _release_pokemon(ctrl, image.game) 
             
             cleared = wait_state(
@@ -99,6 +100,9 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
                 )
 
             image.database_component.pokemon_released += 1
+        elif kind == "shiny":
+            image.database_component.shinies += 1
+            image.database_component.pokemon_skipped += 1
         else:
             image.database_component.pokemon_skipped += 1
 
@@ -111,7 +115,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
     elif image.state == "NEXT_BOX":
         image.box.row = image.box.col = 0
         image.box.box_i += 1
-        next_box(ctrl); sleep(0.17)
+        next_box(ctrl); sleep(0.33)
         return return_states(image, "IN_BOX")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
@@ -271,11 +275,18 @@ def grab_pokemon(ctrl, image):
         ctrl.stick_down("L", 0.05); sleep(0.33)
 
 def put_pokemon(ctrl, image):
+    """
+    This is used to put the second pokemon in the party into a specific slot.
+    Currently only works for the second party slot.
+    """
     row, col = image.box.cfg.pop(0)
     
     ctrl.stick_left("L", 0.05); sleep(0.33)
     ctrl.stick_down("L", 0.05); sleep(0.33)
-    
+    kind, name = get_box_slot_kind(image, image.game)
+    image.debugger.log(kind, name)
+    if kind == "shiny":
+        image.database_component.shinies += 1
     ctrl.tap(BTN_A)
     ctrl.stick_up("L", 0.05); sleep(0.33)
     ctrl.stick_right("L", 0.05); sleep(0.33)
