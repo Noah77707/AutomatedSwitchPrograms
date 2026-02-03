@@ -11,6 +11,7 @@ from .Image_Processing import Image_Processing
 from .Controller import Controller
 from .Database import *
 from .Debug import *
+from Programs.TEST_Scripts import *
 from Programs.HOME_Scripts import *
 from Programs.SWSH_Scripts import *
 from Programs.BDSP_Scripts import *
@@ -29,6 +30,9 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('TEST', "Press_A_Repeatadly"): Press_A_Repeatadly,
 
     # HOME
+    ("HOME", "Sort_Home"): Sort_Home,
+    ("HOME", "Rename_Boxes"): Rename_Boxes,
+    ("HOME", "Sort_Specific_Pokemon_Types"): Sort_Specific_Pokemon_Types,
     
     # SWSH
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,

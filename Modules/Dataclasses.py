@@ -78,12 +78,11 @@ class Running:
 class Box:
     box_amount: int = 1
     box_i: int = 0
+    box_start: int = 0
     row: int = 0
     col: int = 0
     rows: int = 5
     cols: int = 6
-    current_row: int = 0
-    current_col: int = 0
     cfg: List[COORD] = field(default_factory=list)
         
 @dataclass

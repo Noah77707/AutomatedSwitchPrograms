@@ -250,7 +250,7 @@ def walk_until_landmark_dpad(
     ctrl,
     image,
     lm: TemplateLandmark,   # expects: lm.template_gray (np.ndarray), lm.roi, lm.threshold, lm.method
-    dpad_dir: int,
+    dir: int,
     game: str = None,
     state: str = None,
     hold_s: float = 0.10,
@@ -259,8 +259,8 @@ def walk_until_landmark_dpad(
     template_cache: Optional[dict[int, np.ndarray]] = None,  # key: id(lm)
 ) -> bool:
     """
-    Uses CLAHE-normalized grayscale template matching to reduce time-of-day sensitivity.
-    Returns True if found, False if max_steps reached.
+    directions:
+    0 is up, 2 is right, 4 is down, and 6 is left
     """
 
     cache_key = id(lm)
@@ -287,7 +287,7 @@ def walk_until_landmark_dpad(
                 if maxv >= lm.threshold:
                     return True
 
-        ctrl.dpad(dpad_dir, hold_s)
+        ctrl.dpad(dir, hold_s)
         if pause_s:
             sleep(pause_s)
 

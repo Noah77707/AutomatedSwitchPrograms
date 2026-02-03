@@ -49,6 +49,7 @@ QPushButton:checked {
 QPushButton:hover {
     background-color: #555;
 }
+
 """)
 
 class DynamicRow(pyqt_w.QWidget):
@@ -97,12 +98,21 @@ class DynamicRow(pyqt_w.QWidget):
         sp.valueChanged.connect(self._update_cfg)
         return sp
 
-    def _build_inputs(self, text: str = "Input", count: int = 1):
+    def _build_inputs(self, text: Sequence[str] = ("Input",), count: int = 1):
         count = max(1, int(count))
+        
+        base = (text[0] if text else "Input")
 
         for i in range(count):
-            label = text if count == 1 else f"{text} {i + 1}:"
-            self._layout.addWidget(pyqt_w.QLabel(label, self))
+            if len(text) >= count:
+                label_text = text[i]
+                
+            elif count > 1:
+                label_text = f"{base} {i + 1}"
+            else:
+                label_text = base
+                
+            self._layout.addWidget(pyqt_w.QLabel(label_text, self))
 
             sp = self._make_spin(minimum=1, maximum=999999, value=1)
             self._input_spin.append(sp)
@@ -217,29 +227,29 @@ class DynamicRow(pyqt_w.QWidget):
     def get_cfg(self) -> dict | None:
         return dict(self._cfg) if self._cfg else None
 
-    def set_program(self, text: str, number: int = 0, input_count: int = 1):
+    def set_program(self, text: tuple, number: int = 0, input_count: int = 1):
         """
         number:
           0 = none
           1 = generic input row (spinboxes)
-          2 = donut row
-          3 = fossil swsh row
+          100 = donut row
+          101 = fossil swsh row
         """
         self._clear()
 
-        if number == 1:
+        if number >= 1 and number < 100:
             self.setVisible(True)
             self._active = "input"
-            self._build_inputs(text, count=input_count)
+            self._build_inputs(text, count=number)
             return
 
-        if number == 2:
+        if number == 100:
             self.setVisible(True)
             self._active = "donut"
             self._build_donut(text)
             return
 
-        if number == 3:
+        if number == 101:
             self.setVisible(True)
             self._active = "fossil_swsh"
             self._build_fossil_swsh()
@@ -248,7 +258,7 @@ class DynamicRow(pyqt_w.QWidget):
         self.setVisible(False)
         self._active = None
 
-class TestTab(pyqt_w.QWidget):
+class TESTTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
     
     def _set_program_info(self, program: str):
@@ -284,8 +294,8 @@ class TestTab(pyqt_w.QWidget):
         layout.addWidget(self.btn_ar)
         layout.addStretch(1)
 
-class HomeTab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+class HOMETab(pyqt_w.QWidget):
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, tuple)  # game, btn, program, temp_row, number
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -306,14 +316,15 @@ class HomeTab(pyqt_w.QWidget):
         self.group = pyqt_w.QButtonGroup(self)
         self.group.setExclusive(True)
 
+        self.sh = pyqt_w.QPushButton("Home Sorter", self)
+        self.sh.setCheckable(True)
+        self.group.addButton(self.sh)
+        self.sh.setProperty("tracks", [])
+        self.sh.clicked.connect(lambda _:
+                                (self._set_program_info("Sort_Home"),
+                                  self.program_selected.emit("HOME", self.sh, "Sort_Home", 3, 0, ("First Box", "First Box to Sort", "Last Box to Sort"))))
         
-        
-        
-        
-        
-        
-        
-        
+        layout.addWidget(self.sh)
         layout.addStretch(1)
 
         self.info_img = pyqt_w.QLabel(self)
@@ -373,7 +384,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.fr.setProperty("tracks", ["actions", "resets", "shinies", "playtime_seconds"])
         self.fr.clicked.connect(lambda _:
                                 (self._set_program_info("Fossil_Reviver_SWSH"),
-                                 self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 3, 0)))
+                                 self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 101, 0)))
         
         self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.r.setCheckable(True)
@@ -399,9 +410,9 @@ class SWSHTab(pyqt_w.QWidget):
 
         layout.addWidget(self.info_img)
         layout.addWidget(self.info_text)
-
+        
 class BDSPTab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, str)  # game, btn, program, temp_row, number
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, tuple)  # game, btn, program, temp_row, number
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -430,7 +441,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.se.setProperty("tracks", [])
         self.se.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("BDSP", self.se, "Static_Encounter_BDSP", 0, 0, "")))
+                                  self.program_selected.emit("BDSP", self.se, "Static_Encounter_BDSP", 0, 0, ("",))))
 
         # egg collector
         self.ec = pyqt_w.QPushButton("Egg Collector", self)
@@ -439,7 +450,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
         self.ec.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_BDSP"),
-                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0, "Number of eggs")))
+                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_BDSP", 1, 0, ("Number of eggs",))))
 
         # egg hatcher
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
@@ -449,7 +460,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.eh.setProperty("db", ["eggs_hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
-                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, "Number of eggs:")))
+                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, ("Number of eggs:",))))
 
         # automated egg
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
@@ -458,7 +469,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
         self.ae.clicked.connect(lambda _:
                                 (self._set_program_info("Automated_Egg_BDSP"),
-                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, "Number of eggs")))
+                                  self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, ("Number of eggs",))))
 
         # pokemon releaser
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
@@ -467,7 +478,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_BDSP"),
-                                  self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0, "Boxes of pokemon")))
+                                  self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0, ("Boxes of pokemon",))))
 
         layout.addWidget(self.se)
         layout.addWidget(self.ec)
@@ -521,7 +532,7 @@ class LATab(pyqt_w.QWidget):
 
         layout.addWidget(self.info_img)
         layout.addWidget(self.info_text)
-
+        
 class SVTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
     
@@ -569,7 +580,7 @@ class SVTab(pyqt_w.QWidget):
         layout.addWidget(self.info_text)
 
 class LZATab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, str)  # game, btn, program, temp_row, number, flavor
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, tuple)  # game, btn, program, temp_row, number, flavor
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -598,7 +609,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmsour.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmsour.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
-                                  self.program_selected.emit("LZA", self.dmsour, "Donut_Checker", 2, 1, "Sour")))
+                                  self.program_selected.emit("LZA", self.dmsour, "Donut_Checker", 100, 1, ("Sour",))))
 
         # donut maker - sweet
         self.dmsweet = pyqt_w.QPushButton("Donut Maker - Sweet", self)
@@ -607,7 +618,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmsweet.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmsweet.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
-                                  self.program_selected.emit("LZA", self.dmsweet, "Donut_Checker", 2, 2, "Sweet")))
+                                  self.program_selected.emit("LZA", self.dmsweet, "Donut_Checker", 100, 2, ("Sweet",))))
         
         # donut maker - spicy
         self.dmspicy = pyqt_w.QPushButton("Donut Maker - Spicy", self)
@@ -616,7 +627,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmspicy.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmspicy.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
-                                  self.program_selected.emit("LZA", self.dmspicy, "Donut_Checker", 2, 3, "Spicy")))
+                                  self.program_selected.emit("LZA", self.dmspicy, "Donut_Checker", 100, 3, ("Spicy",))))
         # donut maker - bitter
         self.dmbitter = pyqt_w.QPushButton("Donut Maker - Bitter", self)
         self.dmbitter.setCheckable(True)
@@ -624,7 +635,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmbitter.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmbitter.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
-                                  self.program_selected.emit("LZA", self.dmbitter, "Donut_Checker", 2, 4, "Bitter")))
+                                  self.program_selected.emit("LZA", self.dmbitter, "Donut_Checker", 100, 4, ("Bitter",))))
 
         # donut maker - fresh
         self.dmfresh = pyqt_w.QPushButton("Donut Maker - Fresh", self)
@@ -633,7 +644,7 @@ class LZATab(pyqt_w.QWidget):
         self.dmfresh.setProperty("tracks", ["actions", "action_hits", "resets", "playtime_seconds"])
         self.dmfresh.clicked.connect(lambda _:
                                  (self._set_program_info("Donut_Checker"),
-                                  self.program_selected.emit("LZA", self.dmfresh, "Donut_Checker", 2, 5, "Fresh")))
+                                  self.program_selected.emit("LZA", self.dmfresh, "Donut_Checker", 100, 5, ("Fresh",))))
 
 
         layout.addWidget(self.dmsour)
@@ -712,7 +723,11 @@ class GUI(pyqt_w.QWidget):
         self.tabs.setMovable(True)
 
         # ---------- Tabs ----------
-        home_tab = TestTab(self)
+        test_tab = TESTTab(self)
+        test_tab.program_selected.connect(self.update_script)
+        self.tabs.addTab(test_tab, "TEST")
+        
+        home_tab = HOMETab(self)
         home_tab.program_selected.connect(self.update_script)
         self.tabs.addTab(home_tab, "HOME")
 
@@ -1013,7 +1028,7 @@ class GUI(pyqt_w.QWidget):
         program: str,
         temp_row_usage: int = 0,
         number: int = 0,
-        text: str = "Input",
+        text: tuple = ("Input",),
     ) -> None:
         self.game = game
         self.program = program

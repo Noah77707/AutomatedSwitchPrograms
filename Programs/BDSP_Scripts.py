@@ -75,7 +75,6 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         hits_required= 3
     )
 
-
     try:
         boxes = int(image.cfg['inputs'][0])
     except (TypeError, ValueError):
@@ -176,13 +175,13 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             ctrl.tap(BTN_A)
             text = Text.string_from_roi(image, const.BDSP_STATES['text']['text_box']['rois'][0], key= "get_egg", psm=6)
             image.debugger.log(text)
-            if text.find("care") != -1:
+            if text.find("we") != -1 or text.find("care") != -1:
                 image.egg_count += 1
                 image.database_component.eggs_collected += 1
             mash_a_while_textbox(ctrl, image, "BDSP", press_interval= 0.35, gone_confirm= 15, watch_state= "egg_acquired")
 
             ctrl.up(BTN_B)
-            walk_until_landmark_dpad(ctrl, image, dpad_dir= 2, lm= landmark, pause_s= 0.4)
+            walk_until_landmark_dpad(ctrl, image, dir= 2, lm= landmark, pause_s= 0.4)
             ctrl.down(BTN_B)
 
         return return_states(image, "WALKING")
@@ -197,7 +196,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
 
     elif image.state == "WALKING1":
         image.debugger.set_rois_for_state("WALKING1", [(240, 160, 180, 180)], (0, 0, 0))
-        walk_until_landmark_dpad(ctrl, image, dpad_dir= 4, lm= landmark)
+        walk_until_landmark_dpad(ctrl, image, dir= 4, lm= landmark)
         image.egg_phase = 0
         ctrl.up(BTN_B)
         return return_states(image, "IN_GAME")
@@ -220,7 +219,6 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         image.bike_riding = False
     image.debugger.clear()
     count = image.cfg['inputs'][0]
-
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_BDSP(image, ctrl, image.state))
     
@@ -284,24 +282,21 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
     
     elif image.state == "IN_BOX3":
         kind, name = get_box_slot_kind(image, image.game)
-        image.debugger.log(kind, name)
         if kind == "egg":
             grab_pokemon(ctrl, image)
-            image.debugger.log(image.box.cfg)
-        if len(image.box.cfg) != 5:
-            if not (image.box.current_row == image.box.rows - 1 and image.box.current_col == image.box.cols - 1):
-                image.box.current_row, image.box.current_col = box_grid_advance(
-                    ctrl, image.box.current_row, image.box.current_col, sleep_time=0.33
+        if len(image.box.cfg) != 5 or (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
+            if not (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
+                image.box.row, image.box.col = box_grid_advance(
+                    ctrl, image.box.row, image.box.col, sleep_time=0.33
                 )
-            else:
-                image.box.current_col = image.box.current_row = 0
-                next_box(ctrl); sleep(1)
-            image.debugger.log(image.box.current_row, image.box.current_col)
-            return image.state
+        else:
+            image.box.col = image.box.row = 0
+            next_box(ctrl); sleep(1)
+        image.debugger.log(kind, name, image.box.cfg, image.box.row, image.box.col)
         return return_states(image, "IN_BOX4")
     
     elif image.state == "IN_BOX4":
-        image.box.current_col = image.box.current_row = 0
+        image.box.col = image.box.row = 0
         if not check_state(image, "BDSP", "in_game", "poketch"):
             ctrl.tap(BTN_B)
             return image.state
@@ -340,7 +335,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         ctrl.down(BTN_B)
         if check_state(image, "BDSP", "text", "text_box"):
                 return return_states(image, "TEXT")
-        back_to_start = walk_until_landmark_dpad(ctrl, image, landmark, dpad_dir=0, max_steps=1)
+        back_to_start = walk_until_landmark_dpad(ctrl, image, landmark, dir==0, max_steps=1)
         if back_to_start:
             return return_states(image, "WALKING")
         
@@ -368,7 +363,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             if check_state(image, "BDSP", "in_game", "poketch"):
                 if image.egg_count == count:
                     return return_states(image, "HATCHING_FINISHED")
-                elif image.generic_count == 5 and image.egg_count > 0:
+                elif image.generic_count == len(image.box.cfg) and image.egg_count > 0:
                     image.generic_count = 0
                     return return_states(image, "IN_GAME")
                 return return_states(image, "WALKING1")
