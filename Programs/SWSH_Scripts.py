@@ -316,6 +316,62 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
     
     if check_state(image, "SWSH", "in_game", "in_game"):
         return return_states(image, "TALKING")
+    
+    # elif image.state == "IN_GAME":
+    #     image.debugger.clear()
+    #     if not hasattr(image, "egg_count"):
+    #         image.egg_count = 0
+    #     if not hasattr(image, "egg_phase"):
+    #         image.egg_phase = 0
+    #     # if this is true, then it will first put the pokemon away, and then it will finish up the collector
+    #     if int(image.egg_count) >= int(int(image.cfg['inputs'][0])):
+    #         # if image.generic_bool == False:
+    #         return return_states(image, "PROGRAM_FINISHED")
+    #         # else:
+    #         #     image.egg_count = 0
+    #         #     image.egg_phase = 0
+    #         #     return return_states(image, "COLLECTOR_FINISHED")
+    #     else:
+    #         return return_states(image, "CHECK_EGG")
+
+    # elif image.state == "CHECK_EGG":
+    #     image.debugger.clear()
+    #     image.debugger.set_rois_for_state("CHECK_EGG", [const.BDSP_STATES["Egg"]["nursery_man"]], (0, 0, 0))
+    #     sleep(1.5)
+    #     ctrl.down(BTN_B)
+        
+    #     vmax1 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms.png", , threshold= 0.65)
+    #     vmax2 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms2.png", , threshold= 0.65)
+    #     if vmax1 > 0.67 or vmax2 > 0.67 and image.egg_phase == 0:
+    #         for _ in range(4):
+    #             ctrl.stick_left("L", 0.17); sleep(0.17)
+    #         sleep(0.2); ctrl.tap(BTN_A); sleep(0.4)
+    #         text = Text.string_from_roi(image, const.BDSP_STATES['text']['text_box']['rois'][0], key= "get_egg", psm=6)
+    #         image.debugger.log(text)
+    #         if text.find("we") != -1 or text.find("care") != -1:
+    #             image.egg_count += 1
+    #             image.database_component.eggs_collected += 1
+    #         mash_a_while_textbox(ctrl, image, "BDSP", press_interval= 0.35, gone_confirm= 15, watch_state= "egg_acquired")
+
+    #     return return_states(image, "WALKING")
+
+    # elif image.state == "WALKING":
+    #     image.debugger.set_rois_for_state("WALKING", [(240, 160, 180, 180)], (0, 0, 0))
+    #     ctrl.tap(BTN_PLUS, 0.17, 0.33)
+    #     ctrl.stick_right("L", 0.17)
+    #     ctrl.tap(BTN_PLUS, 0.17, 0.33)
+    #     ctrl.stick_right("L", 3)
+    #     image.egg_phase = 1
+    #     return return_states(image, "WALKING1")
+
+    # elif image.state == "WALKING1":
+    #     image.debugger.set_rois_for_state("WALKING1", [(240, 160, 180, 180)], (0, 0, 0))
+    #     walk_until_landmark_dpad(ctrl, image, dir= 4, lm= landmark)
+    #     image.egg_phase = 0
+    #     ctrl.up(BTN_B)
+    #     return return_states(image, "IN_GAME")
+    
+    return image.state
 
 def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, number: int) -> str:
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):

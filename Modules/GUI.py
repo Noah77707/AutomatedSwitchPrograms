@@ -15,6 +15,7 @@ import PyQt6.QtGui as pyqt_g
 from .Image_Processing import Image_Processing
 from .Database import get_program_totals, format_hms
 
+from Programs.TEST_Scripts import *
 from Programs.HOME_Scripts import *
 from Programs.SWSH_Scripts import *
 from Programs.BDSP_Scripts import *
@@ -323,8 +324,26 @@ class HOMETab(pyqt_w.QWidget):
         self.sh.clicked.connect(lambda _:
                                 (self._set_program_info("Sort_Home"),
                                   self.program_selected.emit("HOME", self.sh, "Sort_Home", 3, 0, ("First Box", "First Box to Sort", "Last Box to Sort"))))
+                
+        self.rb = pyqt_w.QPushButton("Home Sorter", self)
+        self.rb.setCheckable(True)
+        self.group.addButton(self.rb)
+        self.rb.setProperty("tracks", [])
+        self.rb.clicked.connect(lambda _:
+                                (self._set_program_info("Rename_Boxes"),
+                                  self.program_selected.emit("HOME", self.rb, "Rename_Boxes", 3, 0, ("First Box", "First Box to Sort", "Last Box to Sort"))))
         
+        self.sspt = pyqt_w.QPushButton("Sort_Specific_Pokemon_Types", self)
+        self.sspt.setCheckable(True)
+        self.group.addButton(self.sspt)
+        self.sspt.setProperty("tracks", [])
+        self.sspt.clicked.connect(lambda _:
+                                (self._set_program_info("Sort_Specific_Pokemon_Types"),
+                                  self.program_selected.emit("HOME", self.sspt, "Sort_Specific_Pokemon_Types", 3, 0, ("First Box", "First Box to Sort", "Last Box to Sort"))))
+
         layout.addWidget(self.sh)
+        layout.addWidget(self.rb)
+        layout.addWidget(self.sspt)
         layout.addStretch(1)
 
         self.info_img = pyqt_w.QLabel(self)
@@ -339,7 +358,7 @@ class HOMETab(pyqt_w.QWidget):
         layout.addWidget(self.info_text)
 
 class SWSHTab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, tuple)  # game, btn, program, temp_row, number
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -367,7 +386,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.ser.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
         self.ser.clicked.connect(lambda _:
                                  (self._set_program_info("Static_Encounter_SWSH"),
-                                 self.program_selected.emit("SWSH", self.ser, "Static_Encounter_SWSH", 0, 0)))
+                                 self.program_selected.emit("SWSH", self.ser, "Static_Encounter_SWSH", 0, 0, ("",))))
 
         # Static Encounter - Sword of Justice
         self.sej = pyqt_w.QPushButton("Static Encounter - Sword of Justice", self)
@@ -376,7 +395,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.sej.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
         self.sej.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_SWSH"),
-                                self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1)))
+                                self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1, ("",))))
 
         self.fr = pyqt_w.QPushButton("Fossil Reviver", self)
         self.fr.setCheckable(True)
@@ -384,19 +403,38 @@ class SWSHTab(pyqt_w.QWidget):
         self.fr.setProperty("tracks", ["actions", "resets", "shinies", "playtime_seconds"])
         self.fr.clicked.connect(lambda _:
                                 (self._set_program_info("Fossil_Reviver_SWSH"),
-                                 self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 101, 0)))
+                                 self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 101, 0, ("",))))
         
+        self.ec = pyqt_w.QPushButton("Egg Collector WIP", self)
+        self.ec.setCheckable(True)
+        self.group.addButton(self.ec)
+        self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
+        self.ec.clicked.connect(lambda _:
+                                (self._set_program_info("Static_Encounter_SWSH"),
+                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_SWSH", 1, 0, ("Number of eggs",))))
+
+        self.eh = pyqt_w.QPushButton("Egg Hatcher WIP", self)
+        self.eh.setCheckable(True)
+        self.group.addButton(self.eh)
+        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("db", ["eggs_hatched", "shinies", "playtime_seconds"])
+        self.eh.clicked.connect(lambda _:
+                                (self._set_program_info("Egg_Hatcher_SWSH"),
+                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_SWSH", 1, 0, ("Number of eggs:",))))
+
         self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.r.setCheckable(True)
         self.group.addButton(self.r)
         self.r.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.r.clicked.connect(lambda _:
                                (self._set_program_info("Pokemon_Releaser_SWSH"),
-                               self.program_selected.emit("SWSH", self.r, "Pokemon_Releaser_SWSH", 1, 0)))
+                               self.program_selected.emit("SWSH", self.r, "Pokemon_Releaser_SWSH", 1, 0, ("Boxes of pokemon",))))
 
         layout.addWidget(self.ser)
         layout.addWidget(self.sej)
         layout.addWidget(self.fr)
+        layout.addWidget(self.ec)
+        layout.addWidget(self.eh)
         layout.addWidget(self.r)
         layout.addStretch(1)
 
@@ -534,7 +572,7 @@ class LATab(pyqt_w.QWidget):
         layout.addWidget(self.info_text)
         
 class SVTab(pyqt_w.QWidget):
-    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
+    program_selected = pyqt_c.pyqtSignal(str, object, str, int, int, tuple)  # game, btn, program, temp_row, number
     
     def _set_program_info(self, program: str):
         text, img = ProgramInfo.get(program)
@@ -563,7 +601,7 @@ class SVTab(pyqt_w.QWidget):
         self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_SV"),
-                                 self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 1, 0)))
+                                 self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 1, 0, ("",))))
 
         layout.addWidget(self.pr)
         layout.addStretch(1)

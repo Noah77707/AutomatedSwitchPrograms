@@ -151,12 +151,12 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             image.egg_phase = 0
         # if this is true, then it will first put the pokemon away, and then it will finish up the collector
         if int(image.egg_count) >= int(amount):
-            if image.generic_bool == True:
-                return return_states(image, "PROGRAM_FINISHED")
-            else:
-                image.egg_count = 0
-                image.egg_phase = 0
-                return return_states(image, "COLLECTOR_FINISHED")
+            # if image.generic_bool == False:
+            return return_states(image, "PROGRAM_FINISHED")
+            # else:
+            #     image.egg_count = 0
+            #     image.egg_phase = 0
+            #     return return_states(image, "COLLECTOR_FINISHED")
         else:
             return return_states(image, "CHECK_EGG")
 
@@ -171,8 +171,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
         if vmax1 > 0.67 or vmax2 > 0.67 and image.egg_phase == 0:
             for _ in range(4):
                 ctrl.stick_left("L", 0.17); sleep(0.17)
-            sleep(0.2)
-            ctrl.tap(BTN_A)
+            sleep(0.2); ctrl.tap(BTN_A); sleep(0.4)
             text = Text.string_from_roi(image, const.BDSP_STATES['text']['text_box']['rois'][0], key= "get_egg", psm=6)
             image.debugger.log(text)
             if text.find("we") != -1 or text.find("care") != -1:
@@ -281,19 +280,31 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         return return_states(image, "IN_BOX3")
     
     elif image.state == "IN_BOX3":
-        kind, name = get_box_slot_kind(image, image.game)
-        if kind == "egg":
-            grab_pokemon(ctrl, image)
-        if len(image.box.cfg) != 5 or (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
-            if not (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
-                image.box.row, image.box.col = box_grid_advance(
-                    ctrl, image.box.row, image.box.col, sleep_time=0.33
-                )
-        else:
-            image.box.col = image.box.row = 0
-            next_box(ctrl); sleep(1)
-        image.debugger.log(kind, name, image.box.cfg, image.box.row, image.box.col)
-        return return_states(image, "IN_BOX4")
+        end_of_box = (image.box.row == image.box.rows - 1 and
+                    image.box.col == image.box.cols - 1)
+
+        if len(image.box.cfg) < 5:
+            kind, name = get_box_slot_kind(image, image.game)
+            image.debugger.log(kind, name, image.box.row, image.box.col, image.box.cfg)
+
+            if kind == "egg":
+                grab_pokemon(ctrl, image)
+        if len(image.box.cfg) >= 5:
+            return return_states(image, "IN_BOX4")
+
+        if end_of_box:
+            if len(image.box.cfg) == 0:
+                image.box.row = 0
+                image.box.col = 0
+                next_box(ctrl)
+                sleep(1)
+                return image.state
+            return return_states(image, "IN_BOX4")
+
+        image.box.row, image.box.col = box_grid_advance(
+            ctrl, image.box.row, image.box.col, sleep_time=0.33
+        )
+        return image.state
     
     elif image.state == "IN_BOX4":
         image.box.col = image.box.row = 0
@@ -302,25 +313,6 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             return image.state
         return return_states(image, "WALKING")
     
-    # elif image.state == "CHECK_BIKE":
-    #     if not image.bike_riding == True:
-    #         ctrl.tap(BTN_PLUS, 0.05, 1)
-    #         statement, index = match_any_slot(image.original_image, const.BDSP_STATES['quick_select'], image.bike)
-    #         if statement:
-    #             image.bike_riding = True
-    #             match index:
-    #                 case 1:
-    #                     ctrl.stick_up("L", 0.13)
-    #                 case 2:
-    #                     ctrl.stick_right("L", 0.13)
-    #                 case 3:
-    #                     ctrl.stick_down("L", 0.13)
-    #                 case 4:
-    #                     ctrl.stick_left("L", 0.13)    
-    #         image.debugger.log(statement)
-    #     else:
-    #         return return_states(image, "WALKING")
-
     elif image.state == "WALKING":
         ctrl.down(BTN_B)
         for _ in range(20):

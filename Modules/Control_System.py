@@ -38,6 +38,8 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('SWSH', 'Static_Encounter_SWSH'): Static_Encounter_SWSH,
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
     ('SWSH', "Fossil_Reviver_SWSH"): Fossil_Reviver_SWSH,
+    ('SWSH', 'Egg_Collector_SWSH'): Egg_Collector_SWSH,
+    ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
     ('SWSH', 'Pokemon_Releaser_SWSH'): Pokemon_Releaser_SWSH,
 
     # BDSP

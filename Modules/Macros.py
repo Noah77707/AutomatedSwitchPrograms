@@ -51,24 +51,27 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
     Should work for SWSH, BDSP, LA, and SV.\n
     LZA has a shiny symbol roi check instead of a state check.\n
     """
-    def _slot_flags(image: Image_Processing, game: str) -> tuple[bool, bool, bool]:
-        has_pokemon = check_state(image, game, "pokemon", "pokemon_in_box")
-        has_shiny   = check_state(image, game, "pokemon", "shiny_symbol")
-        has_egg     = check_state(image, game, "pokemon", "egg_in_box")
-        return has_pokemon, has_shiny, has_egg
+    match image.game:
+        case "SWSH":
+            sleeptime = 0.2
+        case "BDSP":
+            sleeptime = 0.2
 
-    def _release_pokemon(ctrl: Controller, game: str):
+    def _release_pokemon(ctrl: Controller):
         ctrl.tap(BTN_A)
-        wait_state(image, image.game, False, 0.1, "text", "text_arrow")
-        ctrl.stick_up("L", 0.17); sleep(0.2)
-        ctrl.stick_up("L", 0.17); sleep(0.2)
-        ctrl.tap(BTN_A); sleep(0.2)
-        wait_state(image, image.game, False, 0.1, "text", "text_arrow")
-        ctrl.stick_up("L", 0.17); sleep(0.2)
-        ctrl.tap(BTN_A); sleep(0.1)
-        wait_state(image, image.game, False, 0.1, "text", "text_arrow")
-        sleep(0.2); ctrl.tap(BTN_A)
-        wait_state(image, image.game, True, 0.1, "text", "text_arrow")
+        wait_state(image, image.game, False, 0.1, "text", "reply")
+        sleep(sleeptime); ctrl.stick_up("L", 0.17)
+        sleep(sleeptime); ctrl.stick_up("L", 0.17)
+        sleep(sleeptime); ctrl.tap(BTN_A); sleep(sleeptime)
+        wait_state(image, image.game, False, 0.4, "text", "reply")
+        sleep(sleeptime); ctrl.stick_up("L", 0.17) 
+        sleep(sleeptime); ctrl.tap(BTN_A); sleep(sleeptime)
+        match image.game:
+            case "SWSH":
+                    wait_state(image, image.game, False, 0.1, "text", "text_ended")
+                    ctrl.tap(BTN_A)
+            case "BDSP":
+                    sleep(1); ctrl.tap(BTN_A)
 
     if image.state == "IN_BOX":
         if image.box.box_i < image.box.box_amount:
@@ -78,14 +81,13 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
         
     elif image.state == "GO_THROUGH_BOX":
         sleep(0.17)
-        image.debugger.log(image.box.row, image.box.col)
         if hasattr(image, "wait_new_frame"):
             image.wait_new_frame(timeout_s=0.35)
         
         kind, name = get_box_slot_kind(image, image.game)
-        image.debugger.log(kind, name)
+        image.debugger.log(kind, name, image.box.row, image.box.col)
         if kind == "pokemon":
-            _release_pokemon(ctrl, image.game) 
+            _release_pokemon(ctrl) 
             
             cleared = wait_state(
                 image, image.game, True, 3.0, "pokemon", "pokemon_in_box",
@@ -115,7 +117,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
     elif image.state == "NEXT_BOX":
         image.box.row = image.box.col = 0
         image.box.box_i += 1
-        next_box(ctrl); sleep(0.33)
+        next_box(ctrl); sleep(0.5)
         return return_states(image, "IN_BOX")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:
@@ -253,12 +255,12 @@ def mash_a_while_textbox(
     return saw_watch
 
 def grab_pokemon(ctrl, image):
-    image.box.cfg.append([image.box.current_row, image.box.current_col])
+    image.box.cfg.append([image.box.row, image.box.col])
     ctrl.tap(BTN_A)
     
-    for _ in range(image.box.current_col):
+    for _ in range(image.box.col):
         ctrl.stick_left("L", 0.05); sleep(0.33)
-    for _ in range(image.box.current_row):
+    for _ in range(image.box.row):
         ctrl.stick_up("L", 0.05); sleep(0.33)
         
     ctrl.stick_left("L", 0.05); sleep(0.33)
@@ -269,9 +271,9 @@ def grab_pokemon(ctrl, image):
         ctrl.stick_up("L", 0.05); sleep(0.33)
     ctrl.stick_right("L", 0.05); sleep(0.33)
     
-    for _ in range(image.box.current_col):
+    for _ in range(image.box.col):
         ctrl.stick_right("L", 0.05); sleep(0.33)
-    for _ in range(image.box.current_row):
+    for _ in range(image.box.row):
         ctrl.stick_down("L", 0.05); sleep(0.33)
 
 def put_pokemon(ctrl, image):

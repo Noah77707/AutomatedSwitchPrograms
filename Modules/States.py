@@ -53,29 +53,50 @@ def wait_state(
     timeout_s: float,
     *path: str,
     stable_frames: int = 2,
-    poll_sleep: float = 0.002,
+    poll_sleep: float = 0.005,
+    require_cfg: bool = True,
 ) -> bool:
     """
     check_if_not=True  -> wait until NOT check_state(...)
     check_if_not=False -> wait until check_state(...)
     Condition must be true for `stable_frames` *new frames* in a row.
+
+    require_cfg=True prevents accidental early-True when config/path is missing.
     """
+    if require_cfg:
+        states = getattr(const, "GAME_STATES", {}).get(game)
+        cfg = states
+        for key in path:
+            if not isinstance(cfg, dict) or key not in cfg:
+                return False
+            cfg = cfg[key]
+
     t0 = monotonic()
     streak = 0
     last_fid = int(getattr(image, "frame_id", 0))
 
-    while monotonic() - t0 < timeout_s:
+    while True:
+        elapsed = monotonic() - t0
+        remaining = timeout_s - elapsed
+        if remaining <= 0:
+            return False
+
         if hasattr(image, "wait_new_frame"):
-            image.wait_new_frame(last_id=last_fid, timeout_s=min(0.35, timeout_s))
+            try:
+                image.wait_new_frame(last_id=last_fid, timeout_s=min(0.35, remaining))
+            except TypeError:
+                image.wait_new_frame(timeout_s=min(0.35, remaining))
+
         fid = int(getattr(image, "frame_id", 0))
         if fid == last_fid:
-            sleep(poll_sleep)
+            sleep(min(poll_sleep, max(0.0, remaining)))
             continue
         last_fid = fid
 
         frame = getattr(image, "original_image", None)
         if frame is None:
             streak = 0
+            sleep(min(poll_sleep, max(0.0, remaining)))
             continue
 
         ok = check_state(image, game, *path)
@@ -87,10 +108,6 @@ def wait_state(
                 return True
         else:
             streak = 0
-
-        sleep(poll_sleep)
-
-    return False
 
 def split_state(s: str | None) -> tuple[str, str | None]:
     if not s:
@@ -110,6 +127,7 @@ def get_box_slot_kind(image, game: str) -> tuple[str, str]:
     name: name
     """
     name_rois = const.GAME_STATES[game]["pokemon"]["pokemon_in_box"]["rois"] 
+    image.debugger.set_rois_for_state(image.state, name_rois, (0, 0,0 ))
     best = ""
     for roi in name_rois:
         raw = Text.recognize_box_name(image, roi)
