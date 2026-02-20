@@ -411,7 +411,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
         self.ec.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_SWSH"),
-                                  self.program_selected.emit("BDSP", self.ec, "Egg_Collector_SWSH", 1, 0, ("Number of eggs",))))
+                                  self.program_selected.emit("SWSH", self.ec, "Egg_Collector_SWSH", 1, 0, ("Number of eggs",))))
 
         self.eh = pyqt_w.QPushButton("Egg Hatcher WIP", self)
         self.eh.setCheckable(True)
@@ -420,7 +420,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.eh.setProperty("db", ["eggs_hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_SWSH"),
-                                  self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_SWSH", 1, 0, ("Number of eggs:",))))
+                                  self.program_selected.emit("SWSH", self.eh, "Egg_Hatcher_SWSH", 1, 0, ("Number of eggs:",))))
 
         self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.r.setCheckable(True)
@@ -518,11 +518,21 @@ class BDSPTab(pyqt_w.QWidget):
                                 (self._set_program_info("Pokemon_Releaser_BDSP"),
                                   self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0, ("Boxes of pokemon",))))
 
+
+        self.ct = pyqt_w.QPushButton("Cursor Test", self)
+        self.ct.setCheckable(True)
+        self.group.addButton(self.ct)
+        self.ct.setProperty("tracks", [])
+        self.ct.clicked.connect(lambda _:
+                                (self._set_program_info("Cursor_Test_BDSP"),
+                                    self.program_selected.emit("BDSP", self.ct, "Cursor_Test_BDSP", 0, 0, ("",))))
+        
         layout.addWidget(self.se)
         layout.addWidget(self.ec)
         layout.addWidget(self.eh)
         layout.addWidget(self.ae)
         layout.addWidget(self.pr)
+        layout.addWidget(self.ct)
         layout.addStretch(1)
 
         self.info_img = pyqt_w.QLabel(self)

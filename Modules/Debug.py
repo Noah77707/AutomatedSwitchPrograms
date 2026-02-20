@@ -40,7 +40,10 @@ class Debug:
             self._items = [DebugROI(tuple(map(int, r)), color, int(thickness)) for r in rois]
             self._focus = None
 
-    def add_roi(self, roi, color = (0, 0, 255), thickness: int = 2) -> None:
+    def add_roi(self,
+                roi: tuple[int, int, int, int],
+                color = (0, 0, 255),
+                thickness: int = 2) -> None:
         with self._lock:
             self._items.append(DebugROI(tuple(map(int, roi)), color, int(thickness)))
 

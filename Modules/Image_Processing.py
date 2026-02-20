@@ -11,6 +11,7 @@ from time import time, sleep, monotonic
 import re, json
 
 import Constants as const
+from Modules.Window_Capture import WindowCapture
 from .Dataclasses import *
 from .Debug import Debug
 
@@ -36,6 +37,7 @@ class Image_Processing():
         self.capture = CaptureState()
         self.box = Box()
         self.egg = Egg()
+        self.rois: Tuple[int, int, int, int] = (0, 0, 0, 0)
 
         self.egg_count = 0
         self.egg_phase = 0
@@ -146,6 +148,25 @@ class Image_Processing():
             sleep(sleep_s)
 
         return None
+
+    def auto_trim_borders(frame_bgr, thresh=8):
+        gray = cv.cvtColor(frame_bgr, cv.COLOR_BGR2GRAY)
+        # pixels > thresh are “content”
+        mask = gray > thresh
+        ys, xs = np.where(mask)
+        if len(xs) == 0 or len(ys) == 0:
+            return frame_bgr, (0, 0)  # no trim
+
+        x0, x1 = xs.min(), xs.max()
+        y0, y1 = ys.min(), ys.max()
+
+        cropped = frame_bgr[y0:y1+1, x0:x1+1]
+        return cropped, (x0, y0)
+
+    def normalize_frame(frame_bgr):
+        cropped, (ox, oy) = WindowCapture.auto_trim_borders(frame_bgr)
+        norm = cv.resize(cropped, (1280, 720), interpolation=cv.INTER_LINEAR)
+        return norm
 
 class Text:
     @staticmethod

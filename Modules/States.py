@@ -126,8 +126,8 @@ def get_box_slot_kind(image, game: str) -> tuple[str, str]:
     kind: "empty", "egg", "pokemon", "shiny"
     name: name
     """
-    name_rois = const.GAME_STATES[game]["pokemon"]["pokemon_in_box"]["rois"] 
-    image.debugger.set_rois_for_state(image.state, name_rois, (0, 0,0 ))
+    name_rois = const.GAME_STATES[game]["pokemon"]["pokemon_in_box"]["rois"]
+    image.debugger.add_roi(name_rois[0], (0, 0, 0), 2)
     best = ""
     for roi in name_rois:
         raw = Text.recognize_box_name(image, roi)

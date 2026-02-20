@@ -59,6 +59,31 @@ GENERIC_STATES = {
     },
 }
 
+HOME_STATES = {
+    "images": {
+        "path": "Media/HOME_Images/pokedex_home_sprites.json",
+        "roi": (194, 400, 136, 35)
+    },
+    "box": {
+        "grid": {
+            "grid_roi": [40, 107, 577, 404],
+            "origin": [93, 112],
+            "dx": 184,
+            "dy": 92,
+            "rows": 5,
+            "cols": 6,
+
+            "cursor_template_paths": [
+            "Media/BDSP_Images/cursor_outline.png",
+            "Media/BDSP_Images/cursor_filled.png"
+            ],
+            "cursor_use_edges": True,
+            "cursor_threshold": 0.6,
+            "snap_tol_px": 30
+        }
+    },
+}
+
 SWSH_STATES = {
     "screens": {
         "title_screen": {
@@ -130,6 +155,9 @@ SWSH_STATES = {
             
         },
     }, 
+    "box": {
+        "spaces": {},
+        },
     "text": {
         "encounter_text": {
             "color": (51, 51, 51),
@@ -320,8 +348,12 @@ SWSH_STATES = {
         (683, 491, 344, 46), #item 7
         ]
     },
+    "egg": {
+        "nusery_lady": ()
+    }
 }
-
+# 78, 108
+# 170, 184
 BDSP_STATES = {
     "screens": {
         "loading_title": {
@@ -363,7 +395,7 @@ BDSP_STATES = {
         "pokemon_in_box": {
             "color": (182, 162, 100),
             "rois": [
-                (938, 16, 201, 40),
+                (935, 16, 201, 40),
                 # (999, 63, 177, 37)
             ],
             "positions": [
@@ -374,7 +406,7 @@ BDSP_STATES = {
         "egg_in_box": {
             "color": (234, 234, 234),
             "rois": [                
-                (938, 16, 201, 40)
+                (935, 16, 201, 40)
             ],
             "positions": [(986, 166), (995, 166)],
         },
@@ -386,6 +418,24 @@ BDSP_STATES = {
             "color": (80, 164, 76),
             "positions": [(258, 8), (257, 59)],
         },
+    },
+    "box": {
+        "grid": {
+            "grid_roi": [316, 120, 580, 491],
+            "origin": [348, 154],
+            "dx": 184,
+            "dy": 92,
+            "rows": 5,
+            "cols": 6,
+
+            "cursor_template_paths": [
+            "Media/BDSP_Images/cursor_outline.png",
+            "Media/BDSP_Images/cursor_filled.png"
+            ],
+            "cursor_use_edges": True,
+            "cursor_threshold": 0.6,
+            "snap_tol_px": 30
+        }
     },
     "text": {
         "text_box": {
@@ -474,10 +524,6 @@ BDSP_STATES = {
                 (963, 299)
             ]
         },
-    },
-    "box": {
-        # "party":
-            
     },
     "bag": {},
     "quick_select": [
@@ -606,6 +652,9 @@ SV_STATES = {
             ]
         },
     },
+    "box": {
+        "spaces": {},
+        },
     "text": {
         "text_box": {
             "color": (12, 212, 242),
@@ -825,6 +874,9 @@ LZA_STATES = {
             "roi": (1045, 82, 42, 22)
         },
     },
+    "box": {
+        "spaces": {},
+        },
     "text": {
         "text_box": {
             "color": (239, 238, 239),
@@ -884,6 +936,7 @@ LZA_STATES = {
 # Map a game string to its state dict
 GAME_STATES = {
     "GENERIC": GENERIC_STATES,
+    "HOME": HOME_STATES,
     "SWSH": SWSH_STATES,
     "BDSP": BDSP_STATES,
     "LA": LA_STATES,

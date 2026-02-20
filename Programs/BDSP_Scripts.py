@@ -266,7 +266,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
         sleep(0.17)
         image.debugger.log(image.box.cfg)
         if image.box.cfg:
-            put_pokemon(ctrl, image)
+            Pokemon_Boxes.put_pokemon(ctrl, image)
             return image.state
         return return_states(image, "IN_BOX2")
     
@@ -275,11 +275,12 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             ctrl.tap(BTN_R)
             image.egg_phase = 0
         sleep(0.25)
-        if image.database_component.eggs_hatched == image.cfg['inputs'][0]:
+        if image.database_component.eggs_hatched >= image.cfg['inputs'][0]:
             return return_states(image, "PROGRAM_FINISHED")
         return return_states(image, "IN_BOX3")
     
     elif image.state == "IN_BOX3":
+        image.debugger.set_rois_for_state(image.state, [const.BDSP_STATES["box"]["grid"]["grid_roi"]], (0, 0, 0))
         end_of_box = (image.box.row == image.box.rows - 1 and
                     image.box.col == image.box.cols - 1)
 
@@ -288,7 +289,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             image.debugger.log(kind, name, image.box.row, image.box.col, image.box.cfg)
 
             if kind == "egg":
-                grab_pokemon(ctrl, image)
+                Pokemon_Boxes.grab_pokemon(ctrl, image)
         if len(image.box.cfg) >= 5:
             return return_states(image, "IN_BOX4")
 
@@ -296,12 +297,12 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             if len(image.box.cfg) == 0:
                 image.box.row = 0
                 image.box.col = 0
-                next_box(ctrl)
+                Pokemon_Boxes.next_box(ctrl)
                 sleep(1)
                 return image.state
             return return_states(image, "IN_BOX4")
 
-        image.box.row, image.box.col = box_grid_advance(
+        image.box.row, image.box.col = Pokemon_Boxes.box_grid_advance(
             ctrl, image.box.row, image.box.col, sleep_time=0.33
         )
         return image.state
@@ -416,4 +417,31 @@ def Pokemon_Releaser_BDSP(image: Image_Processing, ctrl: Controller, state: str 
     elif image.state in ("IN_BOX", "GO_THROUGH_BOX", "NEXT_BOX"):
         return release_pokemon(ctrl, image)
            
+    return image.state
+
+def Cursor_Test_BDSP(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
+    if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
+        image.state = Start_BDSP(image, ctrl, image.state)
+    
+    elif image.state == "IN_GAME" or image.state == "PROGRAM":
+        if not check_state(image, "BDSP", "in_game", "poketch"):
+            ctrl.tap(BTN_R)
+        else:
+            ctrl.tap(BTN_X, 0.05, 0.45)
+            ctrl.tap(BTN_A, 0.05, 1.2)
+            ctrl.tap(BTN_R, 0.05, 1.2)
+            return_states(image, "IN_BOX_SCREEN")
+        
+    elif image.state == "IN_BOX_SCREEN":
+        if check_state(image, "BDSP", "screens", "box_screen"):
+            return return_states(image, "IN_BOX")
+    
+    elif image.state == "IN_BOX":
+        Pokemon_Boxes.box_grid_final(ctrl, image, "BDSP", 3, 2, verify=True)
+        Pokemon_Boxes.box_grid_final(ctrl, image, "BDSP", 1, 0, verify=True)
+        Pokemon_Boxes.box_grid_final(ctrl, image, "BDSP", 4, 5, verify=True)
+        Pokemon_Boxes.box_grid_final(ctrl, image, "BDSP", 0, 0, verify=True)
+        return return_states(image, "test")
+
+
     return image.state

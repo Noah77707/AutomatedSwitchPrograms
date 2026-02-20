@@ -1,5 +1,6 @@
-import os, sqlite3, re, json
-from typing import Optional
+from email.mime import image
+import os, sqlite3, re, json, time
+from typing import Optional, Any
 
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Media", "Database.db"))
 
@@ -243,3 +244,106 @@ def format_hms(seconds: int) -> str:
     m = (seconds % 3600) // 60
     s = seconds % 60
     return f"{h:02d}:{m:02d}:{s:02d}"
+
+class Persistance:
+    def _atomic_write_json(path: str, data: dict) -> None:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)  # atomic on Windows & POSIX
+
+    def load_json(path: str) -> dict | None:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return None
+        except Exception:
+            # corrupted file: keep it for inspection, but ignore it
+            return None
+
+    def slot_key(box: int, row: int, col: int) -> str:
+        return f"{int(box)}:{int(row)}:{int(col)}"
+
+    def parse_slot_key(k: str) -> tuple[int, int, int]:
+        b, r, c = k.split(":")
+        return int(b), int(r), int(c)
+
+    def now_iso_utc() -> str:
+        return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    
+    def sorter_to_cache(image) -> dict[str, Any]:
+        s = getattr(image, "sorter", None)
+        if not isinstance(s, dict):
+            return {}
+
+        # expect:
+        # s["slot_to_uid"]: dict[SlotKey(str), int|None]  OR dict[SlotTuple, ...]
+        # s["mons"]: dict[int, {...}]
+        # s["desired_uid_at"]: dict[SlotKey, int|None]
+
+        cache = {
+            "version": 1,
+            "game": getattr(image, "game", ""),
+            "program": "Box_Sorter",
+            "created_at": s.get("created_at") or Persistance.now_iso_utc(),
+            "phase": s.get("phase", "scan"),
+            "box_count": int(s.get("box_count", 0)),
+            "rows": int(s.get("rows", 5)),
+            "cols": int(s.get("cols", 6)),
+
+            "scan_progress": {
+                "box": int(s.get("scan_box", 0)),
+                "row": int(s.get("scan_row", 0)),
+                "col": int(s.get("scan_col", 0)),
+            },
+            "sort_progress": {
+                "target_index": int(s.get("target_index", 0)),
+                "empty_slot": s.get("empty_slot", None),  # already slot_key string
+            },
+
+            "slot_to_uid": s.get("slot_to_uid", {}),
+            "mons": s.get("mons", {}),
+            "desired_uid_at": s.get("desired_uid_at", {}),
+        }
+        return cache
+
+    def cache_to_sorter(image, cache: dict) -> dict:
+        # basic validation
+        if not isinstance(cache, dict) or cache.get("version") != 1:
+            return {}
+        if cache.get("game") != getattr(image, "game", None):
+            return {}
+
+        s = {
+            "created_at": cache.get("created_at") or Persistance.now_iso_utc(),
+            "phase": cache.get("phase", "scan"),
+            "box_count": int(cache.get("box_count", 0)),
+            "rows": int(cache.get("rows", 5)),
+            "cols": int(cache.get("cols", 6)),
+
+            "scan_box": int(cache.get("scan_progress", {}).get("box", 0)),
+            "scan_row": int(cache.get("scan_progress", {}).get("row", 0)),
+            "scan_col": int(cache.get("scan_progress", {}).get("col", 0)),
+
+            "target_index": int(cache.get("sort_progress", {}).get("target_index", 0)),
+            "empty_slot": cache.get("sort_progress", {}).get("empty_slot", None),
+
+            "slot_to_uid": cache.get("slot_to_uid", {}) or {},
+            "mons": cache.get("mons", {}) or {},
+            "desired_uid_at": cache.get("desired_uid_at", {}) or {},
+        }
+        return s
+
+    def save_sorter(image, CACHE_PATH: str):
+        cache = Persistance.sorter_to_cache(image)
+        if cache:
+            Persistance._atomic_write_json(CACHE_PATH, cache)
+
+    def load_sorter(image, CACHE_PATH: str):
+        cache = Persistance.load_json(CACHE_PATH)
+        if cache:
+            image.sorter = Persistance.cache_to_sorter(image, cache)

@@ -287,7 +287,7 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         if target_count > 0 and image.generic_count >= target_count:
             return return_states(image, "RESET_GAME")
 
-        image.box_row, image.box_col = box_grid_advance(
+        image.box_row, image.box_col = Pokemon_Boxes.box_grid_advance(
             ctrl, image.box_row, image.box_col, sleep_time=0.33
         )
         
@@ -314,26 +314,22 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
     
-    if check_state(image, "SWSH", "in_game", "in_game"):
-        return return_states(image, "TALKING")
+    elif image.state == "IN_GAME":
+        if check_state(image, "SWSH", "in_game", "in_game"):
+            sleep(1)
+            ctrl.stick_up("L", 0.5); sleep(0.33)
+            ctrl.stick_down("L", 0.5); sleep(0.33)
+            return return_states(image, "WALKING")
     
-    # elif image.state == "IN_GAME":
-    #     image.debugger.clear()
-    #     if not hasattr(image, "egg_count"):
-    #         image.egg_count = 0
-    #     if not hasattr(image, "egg_phase"):
-    #         image.egg_phase = 0
-    #     # if this is true, then it will first put the pokemon away, and then it will finish up the collector
-    #     if int(image.egg_count) >= int(int(image.cfg['inputs'][0])):
-    #         # if image.generic_bool == False:
-    #         return return_states(image, "PROGRAM_FINISHED")
-    #         # else:
-    #         #     image.egg_count = 0
-    #         #     image.egg_phase = 0
-    #         #     return return_states(image, "COLLECTOR_FINISHED")
-    #     else:
-    #         return return_states(image, "CHECK_EGG")
-
+    elif image.state == "WALKING":
+        ctrl.stick_right("L", 4)
+        return return_states(image, "WALKING1")
+    
+    elif image.state == "WALKING1":
+        ctrl.stick_left("L", 4)
+        return return_states(image, "WALKING")
+    
+        
     # elif image.state == "CHECK_EGG":
     #     image.debugger.clear()
     #     image.debugger.set_rois_for_state("CHECK_EGG", [const.BDSP_STATES["Egg"]["nursery_man"]], (0, 0, 0))

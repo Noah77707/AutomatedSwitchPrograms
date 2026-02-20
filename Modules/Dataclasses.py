@@ -76,6 +76,10 @@ class Running:
 
 @dataclass
 class Box:
+    """
+    offsetx: amount of pixels between the box spaces on the x axis
+    offsety: amount of pixels between the box spaces on the y axis
+    """
     box_amount: int = 1
     box_i: int = 0
     box_start: int = 0
@@ -83,8 +87,24 @@ class Box:
     col: int = 0
     rows: int = 5
     cols: int = 6
+    offsetx: int = 0
+    offsety: int = 0
     cfg: List[COORD] = field(default_factory=list)
-        
+    
+@dataclass(frozen=True)
+class Slot:
+    box: int
+    row: int
+    col: int
+
+@dataclass
+class Mon:
+    uid: int                 # unique per encountered slot (scan order)
+    name: str                # species/forme display name
+    dex: int                 # national dex #
+    is_shiny: bool
+    slot: Slot               # current slot (updates as you move it)
+  
 @dataclass
 class Egg:
     egg_count: int = 0
