@@ -30,7 +30,7 @@ def Sort_Home(image: Image_Processing, ctrl: Controller, state: str | None, inpu
     CACHE_PATH = "Media/box_sort_cache.json"
 
     if os.path.exists(CACHE_PATH):
-        cache = Persistance.load_json(CACHE_PATH)  
+        cache = Persistance.load_json(CACHE_PATH)
     return None
 
 def Rename_Boxes(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:

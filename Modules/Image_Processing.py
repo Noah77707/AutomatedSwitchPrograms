@@ -21,8 +21,10 @@ class Image_Processing():
     def __init__(self, image: Union[str, np.ndarray] = ''):
         self._lock = threading.Lock()
 
-        self.original_image = None
+        self._frame_lock = threading.Lock()
+        self._packet: Optional[FramePacket] = None
         self.frame_id = 0
+        self.original_image = None
         self.state = None
         self.phase = None
         self.playing = False
@@ -33,11 +35,13 @@ class Image_Processing():
         self.program = None
 
         self.debugger = Debug()
+        self.gate = FrameGate()
         self.database_component = RunStats()
         self.capture = CaptureState()
         self.box = Box()
         self.egg = Egg()
         self.rois: Tuple[int, int, int, int] = (0, 0, 0, 0)
+        self.pokemon_name_set = Text.load_pokemon_name_set("Media/pokemon_names.json")
 
         self.egg_count = 0
         self.egg_phase = 0
@@ -56,7 +60,7 @@ class Image_Processing():
         if isinstance(image, str):
             path = image.strip()
             if path:
-                self.original_image = cv.imread(path, cv.IMREAD_UNCHANGED)
+                self.publish_frame(cv.imread(path, cv.IMREAD_UNCHANGED))
             else:
                 self.original_image = None
         elif image is None:
@@ -64,31 +68,24 @@ class Image_Processing():
         else:
             self.original_image = image
 
-    def attach_capture(self, cap):
-        self.capture.cap = cap
-        self.original_image = None
-        self.frame_id = 0
+    def publish_frame(self, frame_bgr: np.ndarray, *, fid: Optional[int] = None) -> None:
+        """Publish a frame into (original_image, frame_id) atomically."""
+        if frame_bgr is None or getattr(frame_bgr, "size", 0) == 0:
+            with self._lock:
+                self.original_image = None
+                self.frame_id += 1 if fid is None else int(fid)
+            return
 
-    def pull_frame(self) -> bool:
-        """
-        Pull latest frame from capture into image.* fields.
-        Returns True if a NEW frame arrived.
-        """
-        if self.capture.cap is None:
-            return False
+        norm, (ox, oy), (sx, sy) = self.normalize_frame(frame_bgr, out_w=1280, out_h=720)
 
-        frame, fid = self.capture.cap.read_latest()
-        if frame is None:
-            return False
+        with self._lock:
+            self.original_image = norm
+            self.frame_id = int(fid) if fid is not None else (self.frame_id + 1)
 
-        if fid == self.frame_id:
-            return False
+        with self.capture.lock:
+            self.capture.norm_offset = (int(ox), int(oy))
+            self.capture.norm_scale = (float(sx), float(sy))
 
-        self.original_image = frame
-        self.frame_id = fid
-        return True
-
-# these three functions are for the capture cards. These allow the user to change the card to whatever they are using
     def request_capture_index(self, idx: int) -> None:
         idx = int(idx)
         with self.capture.lock:
@@ -110,45 +107,7 @@ class Image_Processing():
             self.capture.pending_index = None
             return idx
 
-    def _reopen_capture_if_needed(self) -> None:
-        with self.capture.lock:
-            pending = self.capture.pending_index
-            if pending is None or pending == self.capture.capture_index:
-                return
-            self.capture.pending_index = None
-            new_index = pending
-
-        # do IO outside lock
-        if self._cap is not None:
-            try:
-                self._cap.release()
-            except Exception:
-                pass
-            self._cap = None
-
-        cap = cv.VideoCapture(new_index)
-        ok, _ = cap.read()
-        if not ok:
-            cap.release()
-            # keep old index unchanged if failed
-            return
-
-        self.capture.cap = cap
-        self.capture.capture_index = new_index
-
-    def wait_new_frame(self, *, last_id: int | None = None, timeout_s: float = 0.35, sleep_s: float = 0.002) -> int | None:
-        start = monotonic()
-        if last_id is None:
-            last_id = int(getattr(self, "frame_id", 0))
-
-        while monotonic() - start < timeout_s:
-            fid = int(getattr(self, "frame_id", 0))
-            if fid != last_id:
-                return fid
-            sleep(sleep_s)
-
-        return None
-
+    @staticmethod
     def auto_trim_borders(frame_bgr, thresh=8):
         gray = cv.cvtColor(frame_bgr, cv.COLOR_BGR2GRAY)
         # pixels > thresh are “content”
@@ -163,11 +122,52 @@ class Image_Processing():
         cropped = frame_bgr[y0:y1+1, x0:x1+1]
         return cropped, (x0, y0)
 
-    def normalize_frame(frame_bgr):
-        cropped, (ox, oy) = WindowCapture.auto_trim_borders(frame_bgr)
-        norm = cv.resize(cropped, (1280, 720), interpolation=cv.INTER_LINEAR)
-        return norm
+    @staticmethod
+    def normalize_frame(frame_bgr, out_w: int = 1280, out_h: int = 720, *, trim_thresh: int = 8):
+        """
+        Returns:
+          norm_frame_bgr, (ox, oy), (sx, sy)
 
+        ox, oy: crop offset in original frame
+        sx, sy: scale from cropped -> normalized (pixels multiply by sx/sy)
+        """
+        cropped, (ox, oy) = Image_Processing.auto_trim_borders(frame_bgr, thresh=trim_thresh)
+
+        if cropped is None or getattr(cropped, "size", 0) == 0:
+            return None, (0, 0), (1.0, 1.0)
+
+        ch, cw = cropped.shape[:2]
+        if cw <= 0 or ch <= 0:
+            return None, (0, 0), (1.0, 1.0)
+
+        sx = float(out_w) / float(cw)
+        sy = float(out_h) / float(ch)
+
+        norm = cv.resize(cropped, (int(out_w), int(out_h)), interpolation=cv.INTER_LINEAR)
+        return norm, (ox, oy), (sx, sy)
+
+    @staticmethod
+    def normalize_to_canon(frame_bgr: np.ndarray, canon_w: int, canon_h: int) -> np.ndarray:
+        # Optional: trim near-black borders (letterbox)
+        gray = cv.cvtColor(frame_bgr, cv.COLOR_BGR2GRAY)
+        mask = gray > 8
+        ys, xs = np.where(mask)
+        if len(xs) and len(ys):
+            x0, x1 = xs.min(), xs.max()
+            y0, y1 = ys.min(), ys.max()
+            cropped = frame_bgr[y0:y1+1, x0:x1+1]
+        else:
+            cropped = frame_bgr
+
+        if cropped.shape[1] != canon_w or cropped.shape[0] != canon_h:
+            cropped = cv.resize(cropped, (canon_w, canon_h), interpolation=cv.INTER_LINEAR)
+
+        return cropped
+
+    def snapshot(self) -> Tuple[int, Optional[np.ndarray]]:
+        with self._frame_lock:
+            return int(self.frame_id), self.original_image
+        
 class Text:
     @staticmethod
     def load_pokemon_name_set(path: str) -> set[str]:
@@ -403,6 +403,181 @@ class Text:
             lines.append(line)
         return lines
 
+class Calibration:
+    def calibrate_offset(
+        frame_bgr,
+        tpl_gray,
+        *,
+        search_roi: Tuple[int,int,int,int],
+        expected_center_xy: Tuple[int,int],
+        threshold: float = 0.75,
+    ) -> Optional[Tuple[int,int,float]]:
+        x, y, w, h = map(int, search_roi)
+        crop = frame_bgr[y:y+h, x:x+w]
+        if crop.size == 0:
+            return None
+
+        gray = cv.cvtColor(crop, cv.COLOR_BGR2GRAY)
+        res = cv.matchTemplate(gray, tpl_gray, cv.TM_CCOEFF_NORMED)
+        _, maxv, _, maxloc = cv.minMaxLoc(res)
+        if maxv < threshold:
+            return None
+
+        th, tw = tpl_gray.shape[:2]
+        found_cx = x + maxloc[0] + tw // 2
+        found_cy = y + maxloc[1] + th // 2
+
+        exp_cx, exp_cy = expected_center_xy
+        dx = int(found_cx - exp_cx)
+        dy = int(found_cy - exp_cy)
+        return dx, dy, float(maxv)
+
+    def apply_offset_to_roi(roi: Tuple[int,int,int,int], dx: int, dy: int) -> Tuple[int,int,int,int]:
+        x, y, w, h = map(int, roi)
+        return (x + dx, y + dy, w, h)
+
+    def apply_offset_to_xy(xy: Tuple[int,int], dx: int, dy: int) -> Tuple[int,int]:
+        x, y = map(int, xy)
+        return (x + dx, y + dy)
+   
+class FrameGate:
+    def __init__(self, downscale_w: int = 320, downscale_h: int = 180):
+        self._last_seen_fid: int = -1
+        self._prev_small_gray: Optional[np.ndarray] = None
+        self._curr_small_gray: Optional[np.ndarray] = None
+        self._down_w = int(downscale_w)
+        self._down_h = int(downscale_h)
+
+    def seen_fid(self) -> int:
+        return self._last_seen_fid
+
+    def update(self, image) -> bool:
+        """
+        Pulls current published frame from image and updates cached grayscale.
+        Returns True only when a NEW frame_id was processed.
+        """
+        fid = int(getattr(image, "frame_id", 0))
+        if fid == self._last_seen_fid:
+            return False
+
+        frame = getattr(image, "original_image", None)
+        if frame is None or getattr(frame, "size", 0) == 0:
+            # still mark as seen so we don't spin on same fid with None
+            self._last_seen_fid = fid
+            return True
+
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        small = cv.resize(gray, (self._down_w, self._down_h), interpolation=cv.INTER_AREA)
+
+        self._prev_small_gray = self._curr_small_gray
+        self._curr_small_gray = small
+        self._last_seen_fid = fid
+        return True
+
+    def _roi_to_small(self, image, roi: ROI) -> ROI:
+        frame = getattr(image, "original_image", None)
+        h, w = frame.shape[:2]
+        x, y, rw, rh = map(int, roi)
+
+        sx = self._down_w / float(w)
+        sy = self._down_h / float(h)
+
+        xs = int(x * sx)
+        ys = int(y * sy)
+        ws = max(1, int(rw * sx))
+        hs = max(1, int(rh * sy))
+        xs = max(0, min(self._down_w - 1, xs))
+        ys = max(0, min(self._down_h - 1, ys))
+        ws = min(ws, self._down_w - xs)
+        hs = min(hs, self._down_h - ys)
+        return xs, ys, ws, hs
+
+    def motion(self, image, roi: Optional[ROI] = None, *, diff_thresh: int = 12) -> MotionStats:
+        """
+        Computes motion between prev and curr cached frames.
+        Needs at least 2 frames to return meaningful values.
+        """
+        if self._prev_small_gray is None or self._curr_small_gray is None:
+            return MotionStats(mean_diff=0.0, frac_active=0.0)
+
+        prev = self._prev_small_gray
+        curr = self._curr_small_gray
+
+        if roi is not None:
+            xs, ys, ws, hs = self._roi_to_small(image, roi)
+            prev = prev[ys:ys+hs, xs:xs+ws]
+            curr = curr[ys:ys+hs, xs:xs+ws]
+
+        diff = cv.absdiff(curr, prev)
+        mean_diff = float(diff.mean())
+        frac_active = float((diff >= int(diff_thresh)).mean())
+        return MotionStats(mean_diff=mean_diff, frac_active=frac_active)
+
+    def wait_motion_condition(
+        self,
+        image,
+        *,
+        roi: Optional[ROI] = None,
+        above: bool,
+        threshold: float,
+        metric: str = "frac_active",   # "frac_active" or "mean_diff"
+        diff_thresh: int = 12,
+        stable_frames: int = 3,
+        timeout_s: float = 2.0,
+        poll_sleep: float = 0.002,
+    ) -> bool:
+        """
+        Wait until motion metric is consistently above/below threshold for stable_frames NEW frames.
+        - above=True  -> require metric >= threshold
+        - above=False -> require metric <= threshold
+        """
+        t0 = monotonic()
+        streak = 0
+        last_id = int(getattr(image, "frame_id", 0))
+
+        while monotonic() - t0 < timeout_s:
+            if hasattr(image, "wait_new_frame"):
+                image.wait_new_frame(last_id=last_id, timeout_s=min(0.35, timeout_s))
+            fid = int(getattr(image, "frame_id", 0))
+            if fid == last_id:
+                sleep(poll_sleep)
+                continue
+            last_id = fid
+
+            # update gate cache for this frame
+            self.update(image)
+
+            stats = self.motion(image, roi=roi, diff_thresh=diff_thresh)
+            value = getattr(stats, metric)
+
+            cond = (value >= threshold) if above else (value <= threshold)
+            if cond:
+                streak += 1
+                if streak >= int(stable_frames):
+                    return True
+            else:
+                streak = 0
+
+            sleep(poll_sleep)
+
+        return False
+
+    def wait_stable(self, image, *, roi: Optional[ROI] = None, frac_thresh: float = 0.01, stable_frames: int = 5, timeout_s: float = 2.0) -> bool:
+        # “stable” = little motion
+        return self.wait_motion_condition(
+            image, roi=roi, above=False, threshold=frac_thresh,
+            metric="frac_active", diff_thresh=12,
+            stable_frames=stable_frames, timeout_s=timeout_s
+        )
+
+    def wait_moving(self, image, *, roi: Optional[ROI] = None, frac_thresh: float = 0.05, stable_frames: int = 2, timeout_s: float = 2.0) -> bool:
+        # “moving” = noticeable motion
+        return self.wait_motion_condition(
+            image, roi=roi, above=True, threshold=frac_thresh,
+            metric="frac_active", diff_thresh=12,
+            stable_frames=stable_frames, timeout_s=timeout_s
+        )
+    
 class SparkleDetector:
     def __init__(self, cfg: SparkleDetectorCfg | None = None):
         self.cfg = cfg or SparkleDetectorCfg()

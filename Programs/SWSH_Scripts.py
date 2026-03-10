@@ -326,6 +326,7 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
         return return_states(image, "WALKING1")
     
     elif image.state == "WALKING1":
+        walk_until_landmark_dpad(ctrl, image, dir= 4, lm= const.SWSH_STATES["landmarks"]["nursery"])
         ctrl.stick_left("L", 4)
         return return_states(image, "WALKING")
     

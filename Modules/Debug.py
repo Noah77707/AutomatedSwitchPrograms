@@ -28,6 +28,11 @@ class Debug:
             self._items.clear()
             self._focus = None
 
+    def has_roi(self, roi: tuple[int, int, int, int]) -> bool:
+        r = tuple(map(int, roi))
+        with self._lock:
+            return any(item.roi == r for item in self._items)
+
     def set_rois_for_state(
         self,
         state: str,

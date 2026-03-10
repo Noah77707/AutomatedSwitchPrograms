@@ -1,7 +1,7 @@
 import os
 import sys
 from time import sleep
-from typing import Any, Callable
+from typing import Any, Callable, Tuple
 from queue import Queue, Full, Empty
 from threading import Event
 
@@ -18,6 +18,7 @@ from Programs.BDSP_Scripts import *
 from Programs.LA_Scripts import *
 from Programs.SV_Scripts import *
 from Programs.LZA_Scripts import *
+from .Dataclasses import *
 
 from queue import Queue, Empty
 
@@ -146,149 +147,140 @@ def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None
 
 def start_control_video(
     Device_Index,
-    Image_Queue,
+    Image_Queue,          # unused
     Shutdown_event,
     stop_event,
-    image: Image_Processing
+    image,
 ) -> None:
-    # Treat None as "no capture yet"
+    # -1 / None means "no capture yet"
     if Device_Index is None:
         Device_Index = -1
-    else:
-        Device_Index = int(Device_Index)
+    Device_Index = int(Device_Index)
 
-    # Start with nothing active unless a real index is provided
-    image.capture.capture_index = int(Device_Index)
-    image.capture.capture_status = "idle"
-    image.capture.capture_status_msg = ""
-    image.original_image = None
-    image.frame_id += 1
-
-    capture = None
+    capture: Optional[WindowCapture] = None
     last_fid = -1
 
-    def open_capture(idx: int):
-        cap = WindowCapture(int(idx), w=1280, h=720, fps=60)
-        image.attach_capture(cap)
+    def _open(idx: int) -> WindowCapture:
+        cap = WindowCapture(idx, w=1280, h=720, fps=60)
+        # optional: keep this if you use it elsewhere
+        if hasattr(image, "attach_capture"):
+            image.attach_capture(cap)
         return cap
 
-    def close_capture(cap):
+    def _close(cap: Optional[WindowCapture]) -> None:
         if cap is None:
             return
         try:
             cap.stop()
         except Exception:
             pass
-        
-    if capture is not None:
-        f, fid = capture.read_latest()
-        if f is not None and fid != last_fid:
-            last_fid = fid
-            with image.capture.lock:
-                image.original_image = f
-                image.frame_id += 1
-        else:
-            sleep(0.001)
-    else:
-        sleep(0.01)
 
-    # Only open immediately if Device_Index is valid (>=0)
-    if Device_Index >= 0:
-        capture = open_capture(Device_Index)
-        image.capture.capture_status = "ok"
-        image.capture.capture_status_msg = f"Capture index {Device_Index} opened"
+    # initialize capture state
+    try:
         image.capture.capture_index = Device_Index
+        image.capture.capture_status = "idle" if Device_Index < 0 else "pending"
+        image.capture.capture_status_msg = "" if Device_Index < 0 else f"Opening capture {Device_Index}..."
+    except Exception:
+        pass
 
-        # wait briefly for first frame
-        t0 = time()
-        while time() - t0 < 1.0 and not Shutdown_event.is_set():
-            f, fid = capture.read_latest()
-            if f is not None:
-                image.original_image = f
-                image.frame_id += 1
-                last_fid = fid
-                break
-            sleep(0.005)
+    # open immediately only if valid
+    if Device_Index >= 0:
+        try:
+            capture = _open(Device_Index)
+            try:
+                image.capture.capture_status = "ok"
+                image.capture.capture_status_msg = f"Capture index {Device_Index} ok"
+            except Exception:
+                pass
+        except Exception as e:
+            capture = None
+            try:
+                image.capture.capture_status = "fail"
+                image.capture.capture_status_msg = f"Capture open failed: {e}"
+            except Exception:
+                pass
 
-    # Main loop
     while not Shutdown_event.is_set():
-        pending = image.consume_pending_capture_index()
+        pending = None
+        if hasattr(image, "consume_pending_capture_index"):
+            pending = image.consume_pending_capture_index()
+
         if pending is not None:
             pending = int(pending)
-            cur = int(getattr(image.capture, "capture_index", -1))
 
-            if pending == cur:
-                # already on that device, do nothing
-                image.capture.capture_status = "ok"
-                image.capture.capture_status_msg = f"Capture index {cur} already active"
-            else:
-                if pending < 0:
-                    close_capture(capture)
-                    capture = None
-                    image.attach_capture(None)
+            # close current
+            _close(capture)
+            capture = None
+            last_fid = -1
 
-                    with image.capture.lock:
-                        image.capture.capture_epoch += 1
-                        image.capture.capture_index = -1
-                        image.capture.capture_status = "idle"
-                        image.capture.capture_status_msg = "No capture selected"
-
-                    image.original_image = None
-                    image.frame_id += 1
-                    last_fid = -1
+            # publish "no frame" so GUI won't show stale
+            try:
+                if hasattr(image, "publish_frame"):
+                    image.publish_frame(None, fid=None)  # if your publish_frame supports clearing
                 else:
-                    # Switch capture
-                    close_capture(capture)
-                    capture = None
-                    image.attach_capture(None)
+                    with image._lock:
+                        image.original_image = None
+                        image.frame_id += 1
+            except Exception:
+                pass
 
-                    with image.capture.lock:
-                        image.capture.capture_epoch += 1
-                        image.capture.capture_index = pending
-                        image.capture.capture_status = "idle"
-                        image.capture.capture_status_msg = f"Switching to {pending}"
+            try:
+                image.capture.capture_index = pending
+                image.capture.capture_epoch += 1
+            except Exception:
+                pass
 
-                    # Clear frame so GUI never shows a stale frame for one tick
-                    image.original_image = None
-                    image.frame_id += 1
-                    last_fid = -1
-
-                    capture = open_capture(pending)
-
-                    # Wait for first valid frame before marking OK
-                    got = False
-                    t0 = time()
-                    while time() - t0 < 1.0 and not Shutdown_event.is_set():
-                        f, fid = capture.read_latest()
-                        if f is not None:
-                            image.original_image = f
-                            image.frame_id += 1
-                            last_fid = fid
-                            got = True
-                            break
-                        sleep(0.005)
-
-                    with image.capture.lock:
-                        if got:
-                            image.capture.capture_status = "ok"
-                            image.capture.capture_status_msg = f"Capture index {pending} ok"
-                        else:
-                            image.capture.capture_status = "fail"
-                            image.capture.capture_status_msg = f"Capture index {pending} read failed"
-
-        # Publish new frames if capture active
-        if capture is not None:
-            f, fid = capture.read_latest()
-            if f is not None and fid != last_fid:
-                last_fid = fid
-                image.original_image = f
-                image.frame_id += 1
+            if pending < 0:
+                # stay disabled
+                try:
+                    image.capture.capture_status = "idle"
+                    image.capture.capture_status_msg = "No capture selected"
+                except Exception:
+                    pass
             else:
-                sleep(0.001)
-        else:
-            sleep(0.01)
+                # open new
+                try:
+                    capture = _open(pending)
+                    try:
+                        image.capture.capture_status = "ok"
+                        image.capture.capture_status_msg = f"Capture index {pending} ok"
+                    except Exception:
+                        pass
+                except Exception as e:
+                    capture = None
+                    try:
+                        image.capture.capture_status = "fail"
+                        image.capture.capture_status_msg = f"Capture index {pending} open failed: {e}"
+                    except Exception:
+                        pass
 
-    close_capture(capture)
+        # IMPORTANT: do not read if capture is disabled
+        if capture is None:
+            sleep(0.01)
+            continue
+
+        frame, fid = capture.read_latest()
+        if frame is None or fid == last_fid:
+            sleep(0.001)
+            continue
+
+        last_fid = fid
+
+        # publish
+        if hasattr(image, "publish_frame"):
+            # publish_frame(frame_bgr, fid=...)
+            try:
+                image.publish_frame(frame, fid=fid)
+            except TypeError:
+                # older signatures
+                try:
+                    image.publish_frame(fid, frame)
+                except TypeError:
+                    image.publish_frame(frame)
+        else:
+            with image._lock:
+                image.original_image = frame
+                image.frame_id = fid
 
 def controller_control(
     ctrl: Controller,
@@ -297,9 +289,9 @@ def controller_control(
     stop_event: Event,
     image: Image_Processing
 ) -> None:
-    
+
     initialize_database()
-        
+
     current_port = None
     state = None
     input = None
@@ -362,11 +354,17 @@ def controller_control(
             elif cmd == "STOP":
                 flush_runstats_to_db(image)
                 image.database_component = RunStats()
+                image.debugger = Debug()
+                image.gate = FrameGate()
+                image.capture = CaptureState()
+                image.box = Box()
+                image.egg = Egg()
+
                 running = False
                 paused = False
                 state = None
                 image.state = None
-                
+
             elif cmd == "PAUSE":
                 paused = True
 
@@ -392,15 +390,22 @@ def controller_control(
 
         state = step_fn(image, ctrl, state, input)
 
+        if getattr(image, "state", None) == "PROGRAM_FINISHED":
+            flush_runstats_to_db(image)
+            image.database_component = RunStats()
+            running = False
+            paused = False
+            state = None
+            image.state = None
+
     try:
         ctrl.close()
     except Exception:
         pass
-            
+
 def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
     while not shutdown_event.is_set():
         for thread in threads:
             if not thread['thread'].is_alive():
                 shutdown_event.set()
         sleep(1)
-

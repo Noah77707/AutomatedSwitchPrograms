@@ -15,23 +15,56 @@ class TemplateLandmark:
     hits_required: int = 3
     method: int = cv.TM_CCOEFF_NORMED
 
-@dataclass(frozen=True)
+@dataclass
 class FramePacket:
-    frame: np.ndarray
     fid: int
-    cap_index: int
-    epoch: int
+    t: float
+    frame: np.ndarray               # canonical 1280x720 BGR
+    ox: float = 0.0                 # raw->canonical crop origin
+    oy: float = 0.0
+    sx: float = 1.0                 # raw/canonical scale factors
+    sy: float = 1.0
+    capture_epoch: int = 0
+
+@dataclass
+class Calibration:
+    canon_w: int = 1280
+    canon_h: int = 720
+
+    dx: int = 0
+    dy: int = 0
+
+    sx: float = 1.0
+    sy: float = 1.0
+
+    # Debug / quality
+    score: float = 0.0
+    valid: bool = False
+
+@dataclass
+class MotionStats:
+    mean_diff: float          # mean abs diff (0..255)
+    frac_active: float        # fraction of pixels with diff >= diff_thresh (0..1)
 
 @dataclass
 class CaptureState:
-    lock: threading.Lock = field(default_factory=threading.Lock, init=False, repr=False)
-    cap: Any | None = None
+    lock: threading.Lock = field(default_factory=threading.Lock)
+
+    cap: Optional[object] = None
 
     capture_index: int = -1
-    capture_status: str = "idle"   # "idle" | "ok" | "fail"\
-    capture_status_index: Optional[object] = None      # last index tested
-    capture_status_msg: str = ""
+    pending_index: Optional[int] = None
     capture_epoch: int = 0
+
+    status: str = "idle"     # idle | pending | ok | fail
+    status_msg: str = ""
+
+    calib: Calibration = field(default_factory=Calibration)
+
+    ox: float = 0.0
+    oy: float = 0.0
+    sx: float = 1.0
+    sy: float = 1.0
 
     requested_index: int = -1
     request_epoch: int = 0
@@ -46,6 +79,7 @@ class CaptureState:
     status_msg: str = ""
 
     last_cap_fid: int = -1
+    lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
 @dataclass
 class RunStats:

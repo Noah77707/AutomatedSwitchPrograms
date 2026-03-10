@@ -46,6 +46,13 @@ def check_state(image, game: str, *path: str) -> bool:
             return False
     return True
 
+def roi_from_norm(norm_roi, frame_shape):
+    h, w = frame_shape[:2]
+    nx, ny, nw, nh = norm_roi
+    x = int(nx * w); y = int(ny * h)
+    rw = int(nw * w); rh = int(nh * h)
+    return (x, y, rw, rh)
+
 def wait_state(
     image,
     game: str,
@@ -127,7 +134,9 @@ def get_box_slot_kind(image, game: str) -> tuple[str, str]:
     name: name
     """
     name_rois = const.GAME_STATES[game]["pokemon"]["pokemon_in_box"]["rois"]
-    image.debugger.add_roi(name_rois[0], (0, 0, 0), 2)
+    if not image.debugger.has_roi(name_rois[0]):
+        image.debugger.add_roi(name_rois[0], (0, 0, 0), 2)
+        image.debugger.log("debug: added box name roi")
     best = ""
     for roi in name_rois:
         raw = Text.recognize_box_name(image, roi)
@@ -279,8 +288,8 @@ def walk_until_landmark_dpad(
     """
     directions:
     0 is up, 2 is right, 4 is down, and 6 is left
+    for stick_or_dpad, 0 is dpad, 1 is stick.
     """
-
     cache_key = id(lm)
 
     # Load + preprocess template once (optionally cached)
@@ -304,7 +313,7 @@ def walk_until_landmark_dpad(
                 _, maxv, _, _ = cv.minMaxLoc(res)
                 if maxv >= lm.threshold:
                     return True
-
+        
         ctrl.dpad(dir, hold_s)
         if pause_s:
             sleep(pause_s)

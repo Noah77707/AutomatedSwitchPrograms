@@ -18,7 +18,6 @@ if __name__ == "__main__":
         shutdown_event = Event()
         stop_event = Event()
         image = Image_Processing()
-        image.pokemon_name_set = Text.load_pokemon_name_set("Media/pokemon_names.json")
 
         threads = []
         threads.append({

@@ -27,11 +27,6 @@ def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> N
 
         hits: dict[int, int] = {}
         for _ in range(attempts):
-            try:
-                image.wait_new_frame(timeout_s=0.25)
-            except Exception:
-                pass
-            
             for name, cfg in menu.items():
                 if check_state(image, game, "menu", name):
                     idx = int(cfg["index"])
@@ -39,9 +34,9 @@ def Menu_Navigation(ctrl: Controller, image: Image_Processing, target: str) -> N
                     if hits[idx] >= required_hits:
                         return idx
                     break
-            
             sleep(0.002)
         return None
+    
     menu = const.GAME_STATES["SV"]["menu"]
     if target not in menu:
         image.debugger.log(f"Menu_Navigation: unknown target {target}")

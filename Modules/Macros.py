@@ -5,7 +5,7 @@ from time import monotonic, sleep
 import serial
 from enum import Enum
 from .Controller import Controller
-from .Image_Processing import Image_Processing, Text
+from .Image_Processing import Image_Processing, Text, FrameGate
 from .States import *
 from .Database import *
 from .Debug import *
@@ -325,13 +325,24 @@ class Pokemon_Boxes:
 
         return row, col
 
-    def next_box(ctrl) -> None:
-        for _ in range(4):
-            ctrl.stick_up("L", 0.17); sleep(0.17)
-        for _ in range(5):
-            ctrl.stick_left("L", 0.17); sleep(0.17)
-        sleep(0.17)
+    def next_box(ctrl, image) -> None:
         ctrl.tap(BTN_R)
+        image.gate.wait_stable(image)
+        sleep(0.17)
+
+    def target_box(ctrl, image, target_box: int, sleep_time: float = 0.1) -> None:
+        cur_box = getattr(image.box, "box_i", 0)
+        Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0, verify=False)
+        while cur_box != target_box:
+            if cur_box < target_box:
+                ctrl.tap(BTN_R)
+                cur_box += 1
+            else:
+                ctrl.tap(BTN_L)
+                cur_box -= 1
+            sleep(sleep_time)
+        image.box.box_i = cur_box
+        return cur_box
 
     def grab_pokemon(ctrl, image):
         image.box.cfg.append([image.box.row, image.box.col])
@@ -407,8 +418,6 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
         
     elif image.state == "GO_THROUGH_BOX":
         sleep(0.17)
-        if hasattr(image, "wait_new_frame"):
-            image.wait_new_frame(timeout_s=0.35)
         
         kind, name = get_box_slot_kind(image, image.game)
         image.debugger.log(kind, name, image.box.row, image.box.col)
@@ -441,9 +450,9 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
             return return_states(image, "NEXT_BOX")
     
     elif image.state == "NEXT_BOX":
-        image.box.row = image.box.col = 0
+        Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0)
         image.box.box_i += 1
-        Pokemon_Boxes.next_box(ctrl); sleep(0.5)
+        Pokemon_Boxes.next_box(ctrl, image); sleep(0.5)
         return return_states(image, "IN_BOX")
 
 def home_screen_checker_macro(ctrl: Controller, image: Image_Processing, state: str | None) -> str:

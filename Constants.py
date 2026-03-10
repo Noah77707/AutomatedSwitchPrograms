@@ -60,9 +60,19 @@ GENERIC_STATES = {
 }
 
 HOME_STATES = {
+    "screens": {
+        "title_screen": {
+            "path": "Media/HOME_Images/Home_Pokeball.png",
+            "rois": [(547, 351, 80, 80)],
+        },
+        "logging_in_screen": {
+            "rois": [(185, 594, 475, 42)]
+            #Text: Logging into Pokemon HOME...
+        },
+    },
     "images": {
         "path": "Media/HOME_Images/pokedex_home_sprites.json",
-        "roi": (194, 400, 136, 35)
+        "rois": [(194, 400, 136, 35)]
     },
     "box": {
         "grid": {
@@ -82,6 +92,11 @@ HOME_STATES = {
             "snap_tol_px": 30
         }
     },
+    "text": {
+        "game_name": {
+            "rois": [(53, 185, 573, 23)]
+        }
+    }
 }
 
 SWSH_STATES = {
@@ -945,6 +960,18 @@ GAME_STATES = {
 }
 
 TEXT = {
+    "HOME_SELECTION_GAMES": {
+        "Pokemon Lets Go Pikachu",
+        "Pokemon Lets Go Eevee",
+        "Pokemon Sword",
+        "Pokemon Shield",
+        "Pokemon Shining Pearl"
+        "Pokemon Brilliant Diamond",
+        "Pokemon Legends: Arceus",
+        "Pokemon Scarlet",
+        "Pokemon Violet",
+        "Start without connecting a game"
+    },
     "DONUT_POWER_OPTIONS": {
         "Sour": [
             "Item Power: Berries",

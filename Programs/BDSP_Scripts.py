@@ -295,16 +295,16 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
 
         if end_of_box:
             if len(image.box.cfg) == 0:
-                image.box.row = 0
-                image.box.col = 0
-                Pokemon_Boxes.next_box(ctrl)
-                sleep(1)
+                Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0, verify=True)
+                Pokemon_Boxes.next_box(ctrl, image)
+                image.debugger.log(image.box.row, image.box.col)
                 return image.state
             return return_states(image, "IN_BOX4")
 
         image.box.row, image.box.col = Pokemon_Boxes.box_grid_advance(
             ctrl, image.box.row, image.box.col, sleep_time=0.33
         )
+        image.gate.wait_stable(image, roi= [891, 14, 389, 42] , timeout_s= 0.07)
         return image.state
     
     elif image.state == "IN_BOX4":
@@ -316,7 +316,7 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
     
     elif image.state == "WALKING":
         ctrl.down(BTN_B)
-        for _ in range(20):
+        for _ in range(15):
             if check_state(image, "BDSP", "text", "text_box"):
                 return return_states(image, "TEXT")
             else:
