@@ -285,6 +285,7 @@ class Pokemon_Boxes:
 
         t0 = monotonic()
         while col != target_col and monotonic() - t0 < timeout_s:
+            image.debugger.log(col, row)
             if col < target_col:
                 ctrl.stick_right("L", stick_time)
                 col += 1
@@ -298,6 +299,7 @@ class Pokemon_Boxes:
 
         t0 = monotonic()
         while row != target_row and monotonic() - t0 < timeout_s:
+            image.debugger.log(col, row)
             if row < target_row:
                 ctrl.stick_down("L", stick_time)
                 row += 1
@@ -390,7 +392,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
     """
     match image.game:
         case "SWSH":
-            sleeptime = 0.2
+            sleeptime = 0.4
         case "BDSP":
             sleeptime = 0.2
 
@@ -450,7 +452,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
             return return_states(image, "NEXT_BOX")
     
     elif image.state == "NEXT_BOX":
-        Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0)
+        Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0, sleep_time= 1, verify=False)
         image.box.box_i += 1
         Pokemon_Boxes.next_box(ctrl, image); sleep(0.5)
         return return_states(image, "IN_BOX")
@@ -579,6 +581,40 @@ def mash_a_while_textbox(
             now = time.time()
             if now - last_press >= press_interval:
                 ctrl.tap(BTN_A, 0.05, 0.0)
+                last_press = now
+            sleep(0.05)
+        else:
+            gone_streak += 1
+            if gone_streak >= gone_confirm:
+                return True
+            sleep(0.1)
+
+    return saw_watch
+
+def mash_b_while_textbox(
+        ctrl,
+        image,
+        game= str,
+        max_seconds=15.0,
+        press_interval=0.20,
+        gone_confirm=30,
+        watch_state: str | None = None
+):
+    t0 = time.time()
+    last_press = 0.0
+    gone_streak = 0
+
+    while time.time() - t0 < max_seconds:
+        if watch_state and check_state(image, game, watch_state):
+            saw_watch = True
+        
+        visible = check_state(image, game, "text", "text_box")
+
+        if visible:
+            gone_streak = 0
+            now = time.time()
+            if now - last_press >= press_interval:
+                ctrl.tap(BTN_B, 0.05, 0.0)
                 last_press = now
             sleep(0.05)
         else:

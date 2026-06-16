@@ -405,7 +405,7 @@ class SWSHTab(pyqt_w.QWidget):
                                 (self._set_program_info("Fossil_Reviver_SWSH"),
                                  self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 101, 0, ("",))))
         
-        self.ec = pyqt_w.QPushButton("Egg Collector WIP", self)
+        self.ec = pyqt_w.QPushButton("Egg Collector", self)
         self.ec.setCheckable(True)
         self.group.addButton(self.ec)
         self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
@@ -413,7 +413,7 @@ class SWSHTab(pyqt_w.QWidget):
                                 (self._set_program_info("Static_Encounter_SWSH"),
                                   self.program_selected.emit("SWSH", self.ec, "Egg_Collector_SWSH", 1, 0, ("Number of eggs",))))
 
-        self.eh = pyqt_w.QPushButton("Egg Hatcher WIP", self)
+        self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
         self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])

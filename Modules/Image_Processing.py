@@ -2,9 +2,10 @@ import os, sys, threading
 import cv2 as cv
 import numpy as np
 import PyQt6.QtGui as pyqt_g
+import math
 from skimage import measure
 from imutils import contours
-from collections import deque
+from collections import deque, Counter
 from pytesseract import pytesseract as pt
 from typing import Tuple, Union, Dict, Optional, Sequence
 from time import time, sleep, monotonic
@@ -32,6 +33,7 @@ class Image_Processing():
         self.profile = 0
         self.profile_set = False
         self.game = None
+        self.game_pause_time = 0.10
         self.program = None
 
         self.debugger = Debug()
@@ -403,6 +405,14 @@ class Text:
             lines.append(line)
         return lines
 
+    def calculate_entropy(text:str):
+        if not text:
+            return 0.0
+        counter = Counter(text)
+        total = len(text)
+        entropy = -sum((count / total) * math.log2(count / total) for count in counter.values())
+        return entropy
+    
 class Calibration:
     def calibrate_offset(
         frame_bgr,
@@ -577,36 +587,3 @@ class FrameGate:
             metric="frac_active", diff_thresh=12,
             stable_frames=stable_frames, timeout_s=timeout_s
         )
-    
-class SparkleDetector:
-    def __init__(self, cfg: SparkleDetectorCfg | None = None):
-        self.cfg = cfg or SparkleDetectorCfg()
-        self._scores = deque(maxlen=self.cfg.window_frames)
-        self._hits = deque(maxlen=self.cfg.window_frames)
-        self._cooldown = 0
-        self._last_frame_id: Optional[int] = None
-        
-        self.last_score = 0.0
-        
-    def _roi_from_rel(shape, rel):
-        H, W = shape[:2]
-        rx, ry, rw, rh = rel
-        x = int(rx * W); y = int(ry * H)
-        w = int(rw * W); h = int(rh * H)
-        x = max(0, min(x, W - 1))
-        y = max(0, min(y, H - 1))
-        w = max(1, min(w, W - x))
-        h = max(1, min(h, H - y))
-        return x, y, w, h
-
-    def _mad(a: np.ndarray) -> float:
-        m = float(np.median(a))
-        return float(np.median(np.abs(a - m))) + 1e-9
-    # def ImageProcesses(self, image: Image_Processing):
-    #     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    #     blur = cv.GaussianBlur(gray, (11, 11), 0)
-    #     thresh = cv.threshold(blur, 200, 255, cv.THRESH_BINARY)[1]
-    #     thresh = cv.erode(thresh, None, iterations=2)
-    #     thresh = cv.dilate(thresh, None, iterations=4)
-    #     labels = measure.label(thresh, neightbors = 8, background=0)
-    #     mask = np.zeros(thresh.shape, dtype="uint8")

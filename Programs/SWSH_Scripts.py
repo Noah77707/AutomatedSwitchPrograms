@@ -14,7 +14,6 @@ from Modules.Macros import *
 from Modules.Database import *
 from Modules.States import *
 
-
 def Start_SWSH(image: Image_Processing, ctrl: Controller, state: str | None) -> str:
     if image.state == None:
         image.state = "PAIRING"
@@ -311,71 +310,231 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
     return return_states(image, image.state)
 
 def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
+    if not hasattr(image, "daycare_tpl"):
+        image.daycare_tpl = cv.imread("Media/SWSH_Images/Nursery_Sign.png", cv.IMREAD_GRAYSCALE)
+    tpl = image.daycare_tpl
+    landmark = TemplateLandmark(
+        template_gray=tpl, roi= const.SWSH_STATES["egg"]["nursery_sign"]["rois"], threshold=0.65, hits_required= 2)
+   
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
     
     elif image.state == "IN_GAME":
         if check_state(image, "SWSH", "in_game", "in_game"):
             sleep(1)
-            ctrl.stick_up("L", 0.5); sleep(0.33)
-            ctrl.stick_down("L", 0.5); sleep(0.33)
             return return_states(image, "WALKING")
     
     elif image.state == "WALKING":
-        ctrl.stick_right("L", 4)
+        image.debugger.clear()
+        ctrl.stick_up("L", 0.5); sleep(0.33)
+        ctrl.stick_right("L", 8)
         return return_states(image, "WALKING1")
     
     elif image.state == "WALKING1":
-        walk_until_landmark_dpad(ctrl, image, dir= 4, lm= const.SWSH_STATES["landmarks"]["nursery"])
-        ctrl.stick_left("L", 4)
-        return return_states(image, "WALKING")
+        image.debugger.set_rois_for_state("WALKING1", [const.SWSH_STATES["egg"]["nursery_sign"]["rois"]], (0, 0, 0))
+        walk_until_landmark_dpad(ctrl, image, dir=6, lm=landmark, stick_or_dpad= 1, hold_s= 0.17, pause_s= 0)
+        return return_states(image, "CHECK_EGG")
     
+    elif image.state == "CHECK_EGG":
+        """
+        This is to ask the lady and then check her text box to tell if its an egg or not.
+        """
+        image.debugger.set_rois_for_state("CHECK_EGG", [const.SWSH_STATES["text"]["text_box"]["rois"]], (0, 0, 0))
+        image.debugger.set_rois_for_state("CHECK_EGG", const.SWSH_STATES["egg"]["nursery_lady"]["rois"], (0, 0, 0))
+        ctrl.stick("L", 255, 0, 0.1); sleep(0.17)
+        ctrl.tap(BTN_A, 0.05, 0.5); sleep(2)
+        text = Text.string_from_roi(image, const.SWSH_STATES["text"]["text_box"]["rois"], key= "check_egg", psm=6)
+        image.debugger.log("Nursery lady text:", text)
+        if text and ("egg" in text.lower() and "found" in text.lower() and "holding" in text.lower()):
+            image.debugger.log("Egg found!")
+            image.database_component.eggs_collected += 1
+            return return_states(image, "TALKING")
+        else:
+            image.debugger.log("No egg found, keep walking.")
+            mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.35, gone_confirm= 25, watch_state= "egg_acquired")
+            return return_states(image, "WALKING")
         
-    # elif image.state == "CHECK_EGG":
-    #     image.debugger.clear()
-    #     image.debugger.set_rois_for_state("CHECK_EGG", [const.BDSP_STATES["Egg"]["nursery_man"]], (0, 0, 0))
-    #     sleep(1.5)
-    #     ctrl.down(BTN_B)
+    elif image.state == "TALKING":
+        text = Text.string_from_roi(image, const.SWSH_STATES["text"]["text_box"]["rois"], key= "egg_talking", psm=6)
+        if text and not ("welcome" in text.lower() and "help" in text.lower() and "nursery" in text.lower()):
+            ctrl.tap(BTN_A, 0.05, 0.5)
+        else:
+            mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.5, gone_confirm= 45, watch_state= "egg_acquired")
+            if image.egg_count == image.cfg['inputs'][0]:
+                return return_states(image, "PROGRAM_FINISHED")
+            return return_states(image, "WALKING")
+        return return_states(image, image.state)
         
-    #     vmax1 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms.png", , threshold= 0.65)
-    #     vmax2 = is_in_area(image, "Media/BDSP_Images/Egg_Man_Arms2.png", , threshold= 0.65)
-    #     if vmax1 > 0.67 or vmax2 > 0.67 and image.egg_phase == 0:
-    #         for _ in range(4):
-    #             ctrl.stick_left("L", 0.17); sleep(0.17)
-    #         sleep(0.2); ctrl.tap(BTN_A); sleep(0.4)
-    #         text = Text.string_from_roi(image, const.BDSP_STATES['text']['text_box']['rois'][0], key= "get_egg", psm=6)
-    #         image.debugger.log(text)
-    #         if text.find("we") != -1 or text.find("care") != -1:
-    #             image.egg_count += 1
-    #             image.database_component.eggs_collected += 1
-    #         mash_a_while_textbox(ctrl, image, "BDSP", press_interval= 0.35, gone_confirm= 15, watch_state= "egg_acquired")
-
-    #     return return_states(image, "WALKING")
-
-    # elif image.state == "WALKING":
-    #     image.debugger.set_rois_for_state("WALKING", [(240, 160, 180, 180)], (0, 0, 0))
-    #     ctrl.tap(BTN_PLUS, 0.17, 0.33)
-    #     ctrl.stick_right("L", 0.17)
-    #     ctrl.tap(BTN_PLUS, 0.17, 0.33)
-    #     ctrl.stick_right("L", 3)
-    #     image.egg_phase = 1
-    #     return return_states(image, "WALKING1")
-
-    # elif image.state == "WALKING1":
-    #     image.debugger.set_rois_for_state("WALKING1", [(240, 160, 180, 180)], (0, 0, 0))
-    #     walk_until_landmark_dpad(ctrl, image, dir= 4, lm= landmark)
-    #     image.egg_phase = 0
-    #     ctrl.up(BTN_B)
-    #     return return_states(image, "IN_GAME")
-    
     return image.state
 
-def Egg_Hatcher_SWSH(ctrl: Controller, image: Image_Processing, state: str | None, number: int) -> str:
+def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
+    image.walking = 10
+    image.walking_dir = 0
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
 
+    elif image.state == "IN_GAME":
+        if not check_state(image, "SWSH", "screens", "menu_screen") and check_state(image, "SWSH", "text", "text_box"):
+            ctrl.tap(BTN_B, 0.05, 0.33)
+            return image.state
+        elif not check_state(image, "SWSH", "screens", "menu_screen") and not check_state(image, "SWSH", "text", "text_box"):
+            ctrl.tap(BTN_X, 0.05, 1)
+            return image.state
+        else:
+            return return_states(image, "MENU")
+        
+    elif image.state == "MENU":
+        menu = const.SWSH_STATES["menu"]
+
+        all_rois = [
+            roi
+            for cfg in menu.values()
+            if isinstance(cfg, dict) and "rois" in cfg
+            for roi in cfg["rois"]
+        ]
+        image.debugger.set_rois_for_state("MENU", all_rois, (0, 0, 0))
+
+        Menu_Navigation(ctrl, image, "pokemon")
+        ctrl.tap(BTN_A); sleep(1.75)
+        image.debugger.clear()
+        return return_states(image, "PARTY_SCREEN")
+
+    elif image.state == "PARTY_SCREEN":
+        if check_state(image, "SWSH", "screens", "party_screen"):
+            ctrl.tap(BTN_R)
+            return return_states(image, "IN_BOX")
+        
+    elif image.state == "IN_BOX":
+        if check_state(image, "SWSH", "screens", "box_screen"):
+            ctrl.tap(BTN_Y, 0.05, 0.5)
+            return return_states(image, "IN_BOX1")
+        return image.state
+        
+    elif image.state == "IN_BOX1":
+        sleep(0.17)
+        image.debugger.log(image.box.cfg)
+        if image.box.cfg:
+            Pokemon_Boxes.put_pokemon(ctrl, image)
+            return image.state
+        return return_states(image, "IN_BOX2")
+
+    elif image.state == "IN_BOX2":
+        if image.egg_phase == 6:
+            ctrl.tap(BTN_R)
+            image.egg_phase = 0
+        sleep(0.25)
+        if image.database_component.eggs_hatched >= image.cfg['inputs'][0]:
+            return return_states(image, "PROGRAM_FINISHED")
+        return return_states(image, "IN_BOX3")
+    
+    elif image.state == "IN_BOX3":
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["box"]["grid"]["grid_roi"]], (0, 0, 0))
+        end_of_box = (image.box.row == image.box.rows - 1 and
+                    image.box.col == image.box.cols - 1)
+
+        if len(image.box.cfg) < 5:
+            kind, name = get_box_slot_kind(image, image.game)
+            image.debugger.log(kind, name, image.box.row, image.box.col, image.box.cfg)
+
+            if kind == "egg":
+                Pokemon_Boxes.grab_pokemon(ctrl, image)
+        if len(image.box.cfg) >= 5:
+            return return_states(image, "IN_BOX4")
+
+        if end_of_box:
+            if len(image.box.cfg) == 0:
+                Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0, sleep_time= 0.5, verify=True)
+                Pokemon_Boxes.next_box(ctrl, image)
+                image.debugger.log(image.box.row, image.box.col)
+                return image.state
+            return return_states(image, "IN_BOX4")
+
+        image.box.row, image.box.col = Pokemon_Boxes.box_grid_advance(
+            ctrl, image.box.row, image.box.col, sleep_time=0.33
+        )
+        image.gate.wait_stable(image, roi= [891, 14, 389, 42] , timeout_s= 0.07)
+        return image.state
+    
+    elif image.state == "IN_BOX4":
+        image.box.col = image.box.row = 0
+        if not check_state(image, "SWSH", "screens", "party_screen"):
+            ctrl.tap(BTN_B)
+            sleep(0.5)
+            return image.state
+        image.debugger.clear()
+        return return_states(image, "TO_GAME")
+
+    elif image.state == "TO_GAME":
+        if not check_state(image, "SWSH", "screens", "menu_screen"):
+            ctrl.tap(BTN_B)
+            sleep(0.5)
+            return image.state
+        return return_states(image, "TO_GAME1")
+    
+    elif image.state == "TO_GAME1":
+        if not check_state(image, "SWSH", "in_game", "in_game"):
+            ctrl.tap(BTN_B)
+            sleep(0.5)
+            return image.state
+        return return_states(image, "WALKING")
+
+    elif image.state == "WALKING":
+        while image.walking > 0:
+            image.walking -= 1
+            if check_state(image, "SWSH", "text", "dark_text_box"):
+                return return_states(image, "TEXT")
+            else:
+                ctrl.stick_right("L", 1); sleep(0.17)
+        image.walking = 10
+        image.walking_dir = 1
+        return return_states(image, "WALKING1")
+    
+    elif image.state == "WALKING1":
+        while image.walking > 0:
+            image.walking -= 1
+            if check_state(image, "SWSH", "text", "dark_text_box"):
+                return return_states(image, "TEXT")
+            else:
+                ctrl.stick_left("L", 1); sleep(0.17)
+        image.walking = 10
+        image.walking_dir = 0
+        return return_states(image, "WALKING")
+    
+    elif image.state == "TEXT":
+        ctrl.tap(BTN_A, 0.05, 0.5); sleep(2)
+        return return_states(image, "HATCHING")
+    
+    elif image.state == "HATCHING":
+        image.debugger.set_rois_for_state(image.state, const.SWSH_STATES["egg"]["hatching_text"]["rois"], (0, 0, 0))
+        
+        raw = Text.recognize_pokemon(image, const.SWSH_STATES["egg"]["hatching_text"]["rois"][0])
+        raw = (raw or "").strip()
+        image.debugger.log("Hatching text:", raw)
+        if raw and image.generic_bool == False:
+            image.database_component.pokemon_name = raw
+            image.database_component.eggs_hatched += 1
+            image.egg_count += 1
+            image.generic_count += 1
+            image.generic_bool = True
+            sleep(1); ctrl.tap(BTN_A, 0.05, 0.5)
+        
+        if image.generic_bool == True:
+            sleep(2.75)
+            image.generic_bool = False
+            if check_state(image, "SWSH", "in_game", "in_game"):
+                if image.egg_count >= image.cfg['inputs'][0]:
+                    return return_states(image, "PROGRAM_FINISHED")
+                elif image.generic_count == len(image.box.cfg) and image.egg_count > 0:
+                    image.generic_count = 0
+                    return return_states(image, "IN_GAME")
+                if image.walking_dir == 0:
+                    return return_states(image, "WALKING")
+                else:
+                    return return_states(image, "WALKING1")
+
 def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
     image.box.box_amount = image.cfg["inputs"][0]
+    image.game_pause_time = 0.25
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
         
@@ -412,6 +571,7 @@ def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         return image.state
 
     elif image.state in ("IN_BOX", "GO_THROUGH_BOX", "NEXT_BOX"):
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["box"]["grid"]["grid_roi"]], (0, 0, 0))
         return release_pokemon(ctrl, image)
-        
+
     return image.state

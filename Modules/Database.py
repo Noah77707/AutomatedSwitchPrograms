@@ -3,6 +3,7 @@ import os, sqlite3, re, json, time
 from typing import Optional, Any
 
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Media", "Database.db"))
+LOGGER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Media", "Logger.db"))
 
 def _ensure_column(cur: sqlite3.Cursor, table: str, col_def_sql: str) -> None:
     """
@@ -347,3 +348,15 @@ class Persistance:
         cache = Persistance.load_json(CACHE_PATH)
         if cache:
             image.sorter = Persistance.cache_to_sorter(image, cache)
+            
+class Logger:
+    def __init__(self, game: str, program: str, db_file: str = LOGGER_PATH):
+        self.game = game
+        self.program = program
+        self.db_file = db_file
+
+    def log_run(self, **deltas):
+        add_program_deltas(self.game, self.program, db_file=self.db_file, **deltas)
+
+    def log_pokemon(self, pokemon_name: str, **deltas):
+        add_pokemon_delta(self.game, self.program, pokemon_name, db_file=self.db_file, **deltas)

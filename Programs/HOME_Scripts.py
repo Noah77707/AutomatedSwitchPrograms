@@ -14,9 +14,6 @@ UA = "national-dex-home-sprites/1.0"
 HOME_FRONT = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/{id}.png"
 HOME_SHINY = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/shiny/{id}.png"
 
-def PokeApi(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
-    return None
-
 def Sort_Home(image: Image_Processing, ctrl: Controller, state: str | None, input: int) -> str:
     """
     This sorts pokemon in to dex order. It take Four inputs:
