@@ -1,6 +1,6 @@
 import os
 import sys
-from time import sleep
+from time import sleep, time, monotonic
 from typing import Any, Callable, Tuple
 from queue import Queue, Full, Empty
 from threading import Event
@@ -62,11 +62,46 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
 
 }
 
+def has_pending_stats(rs) -> bool:
+    if rs is None:
+        return False
+
+    top_level_changed = any(
+        int(getattr(rs, k, 0)) != 0
+        for k in (
+            "runs",
+            "resets",
+            "encounters",
+            "actions",
+            "action_hits",
+            "eggs_collected",
+            "eggs_hatched",
+            "pokemon_encountered",
+            "pokemon_caught",
+            "pokemon_released",
+            "pokemon_skipped",
+            "shinies",
+            "playtime_seconds",
+        )
+    )
+
+    return top_level_changed or bool(getattr(rs, "pokemon_map", {}))
+
+def flush_runstats_to_db_if_needed(image: Image_Processing, *, min_interval_s: float = 0.75) -> bool:
+    rs = getattr(image, "database_component", None)
+    if not has_pending_stats(rs):
+        return False
+
+    now = monotonic()
+    last = float(getattr(image, "_last_event_flush_t", 0.0))
+    if now - last < min_interval_s:
+        return False
+
+    flush_runstats_to_db(image)
+    image._last_event_flush_t = now
+    return True
+
 def flush_runstats_to_db(image: Image_Processing) -> None:
-    """
-    Push everything accumulated in image.database_component (RunStats) into DB.
-    Then reset image.database_component to a fresh RunStats.
-    """
     rs = getattr(image, "database_component", None)
     if rs is None:
         return
@@ -76,7 +111,6 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
     if not game or not program:
         return
 
-    # Program-level deltas
     add_program_deltas(
         game,
         program,
@@ -95,42 +129,25 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
         playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
     )
 
-    # Pokemon-level deltas (only if we have a valid name)
-    name = (getattr(rs, "pokemon_name", None) or "").strip()
-    if name:
+    for pokemon_name, pstats in getattr(rs, "pokemon_map", {}).items():
+        name = (pokemon_name or "").strip()
+        if not name:
+            continue
+
         add_pokemon_delta(
             game,
             program,
             name,
-            encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
-            caught_delta=int(getattr(rs, "pokemon_caught", 0)),
-            shinies_delta=int(getattr(rs, "shinies", 0)),
-            eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
+            encountered_delta=int(getattr(pstats, "encountered", 0)),
+            caught_delta=int(getattr(pstats, "caught", 0)),
+            shinies_delta=int(getattr(pstats, "shinies", 0)),
+            hatched_delta=int(getattr(pstats, "hatched", 0)),
+            released_delta=int(getattr(pstats, "released", 0)),
         )
-    
-    add_run_deltas(
-        run_id=getattr(image, "current_run_id", None),
-        runs_delta=int(getattr(rs, "runs", 0)),
-        resets_delta=int(getattr(rs, "resets", 0)),
-        encounters_delta=int(getattr(rs, "encounters", 0)),
-        actions_delta=int(getattr(rs, "actions", 0)),
-        action_hits_delta=int(getattr(rs, "action_hits", 0)),
-        eggs_collected_delta=int(getattr(rs, "eggs_collected", 0)),
-        eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
-        pokemon_encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
-        pokemon_caught_delta=int(getattr(rs, "pokemon_caught", 0)),
-        pokemon_released_delta=int(getattr(rs, "pokemon_released", 0)),
-        pokemon_skipped_delta=int(getattr(rs, "pokemon_skipped", 0)),
-        shinies_delta=int(getattr(rs, "shinies", 0)),
-        playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
-    )
 
-    image.database_component = RunStats()
-# Not in use currently, Might change that if crashing becomes common after fixing up the code
+    image.database_component = RunStats2()
+
 def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None:
-    """
-    Optional safety flush so it doesn't lose everything in a crash
-    """
     now = time()
     last = getattr(image, "_last_stats_flush_t", 0.0)
     if now - last < every_s:
@@ -141,8 +158,7 @@ def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None
     if rs is None:
         return
 
-    # Only flush if something changed
-    if any(
+    changed = any(
         int(getattr(rs, k, 0)) != 0
         for k in (
             "runs",
@@ -159,9 +175,11 @@ def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None
             "shinies",
             "playtime_seconds",
         )
-    ):
-        flush_runstats_to_db(image)
+    ) or bool(getattr(rs, "pokemon_map", {}))
 
+    if changed:
+        flush_runstats_to_db(image)
+        
 def start_control_video(
     Device_Index,
     Image_Queue,          # unused
@@ -315,110 +333,143 @@ def controller_control(
     running = False
     paused = False
 
-    while not shutdown_event.is_set():
-        msg = None
-        if not running:
-            try:
-                msg = Command_queue.get(timeout=0.1)
-            except Empty:
-                msg = None
-        else:
-            try:
-                msg = Command_queue.get_nowait()
-            except Empty:
-                msg = None
+    try:
+        while not shutdown_event.is_set():
+            msg = None
+            if not running:
+                try:
+                    msg = Command_queue.get(timeout=0.1)
+                except Empty:
+                    msg = None
+            else:
+                try:
+                    msg = Command_queue.get_nowait()
+                except Empty:
+                    msg = None
 
-        if isinstance(msg, dict):
-            cmd = msg.get("cmd")
-            if getattr(image, "debugger", None) is not None:
-                image.debugger.log(msg)
+            if isinstance(msg, dict):
+                cmd = msg.get("cmd")
+                if getattr(image, "debugger", None) is not None:
+                    image.debugger.log(msg)
 
-            if cmd == "SET_DEVICES":
-                cap_idx = msg.get("capture_index", None)
-                if cap_idx is not None:
-                    image.request_capture_index(int(cap_idx))
+                if cmd == "SET_DEVICES":
+                    cap_idx = msg.get("capture_index", None)
+                    if cap_idx is not None:
+                        image.request_capture_index(int(cap_idx))
 
-                new_port = (msg.get("mcu_port") or "").strip()
-                if new_port and new_port != current_port:
-                    try:
-                        ctrl.close()
-                    except Exception:
-                        pass
-                    try:
-                        ctrl.connect(new_port)
-                        current_port = new_port
-                    except Exception as e:
-                        current_port = None
-                        if getattr(image, "debugger", None) is not None:
-                            image.debugger.log(f"MCU connect failed: {e}")
+                    new_port = (msg.get("mcu_port") or "").strip()
+                    if new_port and new_port != current_port:
+                        try:
+                            ctrl.close()
+                        except Exception:
+                            pass
+                        try:
+                            ctrl.connect(new_port)
+                            current_port = new_port
+                        except Exception as e:
+                            current_port = None
+                            if getattr(image, "debugger", None) is not None:
+                                image.debugger.log(f"MCU connect failed: {e}")
+                    continue
+
+                if cmd == "SET_PROGRAM":
+                    image.game = msg.get("game")
+                    image.program = msg.get("program")
+                    input = msg.get("number")
+
+                    image.run = int(msg.get("runs", 1))
+                    image.profile = int(msg.get("profile", 1))
+                    image.cfg = msg.get("cfg") or {}
+
+                    state = None
+                    running = True
+                    paused = False
+                    image.state = None
+                    image.database_component = RunStats2()
+
+                elif cmd == "STOP":
+                    flush_runstats_to_db(image)
+                    image.database_component = RunStats2()
+                    image.debugger = Debug()
+                    image.gate = FrameGate()
+                    image.capture = CaptureState()
+                    image.box = Box()
+                    image.egg = Egg()
+
+                    running = False
+                    paused = False
+                    state = None
+                    image.state = None
+
+                elif cmd == "PAUSE":
+                    paused = True
+
+                elif cmd == "RESUME":
+                    if running:
+                        paused = False
+
+            if stop_event.is_set():
+                if running:
+                    flush_runstats_to_db(image)
+                running = False
+
+            if not running or image.game is None or image.program is None:
                 continue
 
-            if cmd == "SET_PROGRAM":
-                image.game = msg.get("game")
-                image.program = msg.get("program")
-                input = msg.get("number")
+            if paused:
+                sleep(0.01)
+                continue
 
-                image.run = int(msg.get("runs", 1))
-                image.profile = int(msg.get("profile", 1))
-                image.cfg = msg.get("cfg") or {}
+            key = (image.game, image.program)
+            step_fn = PROGRAM_TABLE.get(key)
+            if step_fn is None:
+                sleep(0.01)
+                continue
 
-                state = None
-                running = True
-                paused = False
-                image.state = None
-                image.database_component = RunStats()
+            state = step_fn(image, ctrl, state, input)
 
-            elif cmd == "STOP":
+            maybe_periodic_flush(image, every_s=10.0)
+
+            if getattr(image, "state", None) == "PROGRAM_FINISHED":
                 flush_runstats_to_db(image)
-                image.database_component = RunStats()
-                image.debugger = Debug()
-                image.gate = FrameGate()
-                image.capture = CaptureState()
-                image.box = Box()
-                image.egg = Egg()
-
+                image.database_component = RunStats2()
                 running = False
                 paused = False
                 state = None
                 image.state = None
 
-            elif cmd == "PAUSE":
-                paused = True
+    finally:
+        try:
+            rs = getattr(image, "database_component", None)
+            if rs is not None:
+                changed = any(
+                    int(getattr(rs, k, 0)) != 0
+                    for k in (
+                        "runs",
+                        "resets",
+                        "encounters",
+                        "actions",
+                        "action_hits",
+                        "eggs_collected",
+                        "eggs_hatched",
+                        "pokemon_encountered",
+                        "pokemon_caught",
+                        "pokemon_released",
+                        "pokemon_skipped",
+                        "shinies",
+                        "playtime_seconds",
+                    )
+                ) or bool(getattr(rs, "pokemon_map", {}))
 
-            elif cmd == "RESUME":
-                if running:
-                    paused = False
+                if changed:
+                    flush_runstats_to_db(image)
+        except Exception:
+            pass
 
-        if stop_event.is_set():
-            running = False
-
-        if not running or image.game is None or image.program is None:
-            continue
-
-        if paused:
-            sleep(0.01)
-            continue
-
-        key = (image.game, image.program)
-        step_fn = PROGRAM_TABLE.get(key)
-        if step_fn is None:
-            sleep(0.01)
-            continue
-
-        state = step_fn(image, ctrl, state, input)
-
-        if getattr(image, "state", None) == "PROGRAM_FINISHED":
-            flush_runstats_to_db(image)
-            image.database_component = RunStats()
-            running = False
-            paused = False
-            state = None
-            image.state = None
-
-    try:
-        ctrl.close()
-    except Exception:
-        pass
+        try:
+            ctrl.close()
+        except Exception:
+            pass
 
 def check_threads(threads: list[dict[str, Any]], shutdown_event: Event) -> None:
     while not shutdown_event.is_set():

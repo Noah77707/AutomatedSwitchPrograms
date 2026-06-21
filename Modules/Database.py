@@ -260,14 +260,15 @@ def add_pokemon_delta(
     encountered_delta: int = 0,
     caught_delta: int = 0,
     shinies_delta: int = 0,
-    eggs_hatched_delta: int = 0,
+    hatched_delta: int = 0,
+    released_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
     if not game or not program or not pokemon_name:
         raise ValueError("game, program, pokemon_name are required")
-    if any(d < 0 for d in (encountered_delta, caught_delta, shinies_delta, eggs_hatched_delta)):
+    if any(d < 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
         raise ValueError("deltas must be >= 0")
-    if all(d == 0 for d in (encountered_delta, caught_delta, shinies_delta, eggs_hatched_delta)):
+    if all(d == 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
         return
 
     ensure_program_row(game, program, db_file=db_file)
@@ -277,18 +278,19 @@ def add_pokemon_delta(
         cur.execute("""
             INSERT INTO pokemon_stats (
                 game, program, pokemon_name,
-                encountered, caught, shinies, eggs_hatched
+                encountered, caught, shinies, hatched, released
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(game, program, pokemon_name) DO UPDATE SET
                 encountered   = encountered   + excluded.encountered,
                 caught        = caught        + excluded.caught,
                 shinies       = shinies       + excluded.shinies,
-                eggs_hatched  = eggs_hatched  + excluded.eggs_hatched,
+                hatched       = hatched       + excluded.hatched,
+                released      = released      + excluded.released,
                 updated_at    = datetime('now')
         """, (
             game, program, pokemon_name,
-            int(encountered_delta), int(caught_delta), int(shinies_delta), int(eggs_hatched_delta)
+            int(encountered_delta), int(caught_delta), int(shinies_delta), int(hatched_delta), int(released_delta)
         ))
         conn.commit()
 
@@ -396,28 +398,30 @@ def add_run_pokemon_delta(
     encountered_delta: int = 0,
     caught_delta: int = 0,
     shinies_delta: int = 0,
-    eggs_hatched_delta: int = 0,
+    hatched_delta: int = 0,
+    released_delta: int = 0,
     db_file: str = LOGGER_PATH,
 ) -> None:
     if not run_id or not pokemon_name:
         raise ValueError("run_id and pokemon_name are required")
-    if any(d < 0 for d in (encountered_delta, caught_delta, shinies_delta, eggs_hatched_delta)):
+    if any(d < 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
         raise ValueError("deltas must be >= 0")
-    if all(d == 0 for d in (encountered_delta, caught_delta, shinies_delta, eggs_hatched_delta)):
+    if all(d == 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
         return
 
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO run_pokemon_stats (
-                run_id, pokemon_name, encountered, caught, shinies, eggs_hatched
+                run_id, pokemon_name, encountered, caught, shinies, eggs_hatched, released
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id, pokemon_name) DO UPDATE SET
                 encountered  = encountered + excluded.encountered,
                 caught       = caught + excluded.caught,
                 shinies      = shinies + excluded.shinies,
                 eggs_hatched = eggs_hatched + excluded.eggs_hatched,
+                released     = released + excluded.released,
                 updated_at   = datetime('now')
         """, (
             int(run_id),
@@ -425,7 +429,8 @@ def add_run_pokemon_delta(
             int(encountered_delta),
             int(caught_delta),
             int(shinies_delta),
-            int(eggs_hatched_delta),
+            int(hatched_delta),
+            int(released_delta),
         ))
         conn.commit()
 

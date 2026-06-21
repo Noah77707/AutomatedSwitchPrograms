@@ -112,6 +112,7 @@ class PokemonRunStats:
 @dataclass
 class RunStats2:
     pokemon_map: dict[str, PokemonRunStats] = field(default_factory=dict)
+    pokemon_name: str | None = None
     runs: int = 0
     resets: int = 0
     

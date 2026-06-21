@@ -438,7 +438,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
                     stable_frames=8
                 )
 
-            
+            DatabaseHelpers.apply_connector_event(image, "release", name, is_shiny=False)
         elif kind == "shiny":
             image.database_component.shinies += 1
             image.database_component.pokemon_skipped += 1

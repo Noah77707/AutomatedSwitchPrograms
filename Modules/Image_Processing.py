@@ -38,8 +38,7 @@ class Image_Processing():
 
         self.debugger = Debug()
         self.gate = FrameGate()
-        self.database_component = RunStats()
-        self.database_component_run_stats = RunStats2()
+        self.database_component = RunStats2()
         self.capture = CaptureState()
         self.box = Box()
         self.egg = Egg()
@@ -591,31 +590,64 @@ class FrameGate:
 
 class DatabaseHelpers:
     @staticmethod
-    def apply_connector_event(image, event):
-        rs = image.database_component_run_stats
-        
-        if event.name:
-            rs.pokemon_name = event.name
-            
-        match event.type:
-            case "encounter":
-                rs.pokemon_encountered += 1
-            case "caught":
-                rs.pokemon_caught += 1
-            case "release":
-                rs.pokemon_caught = max(0, rs.pokemon_caught - 1)
-            case "hatched":
-                rs.pokemon_hatched += 1
-            case "egg_collected":
-                rs.eggs_collected += 1
-            case "skipped":
-                rs.pokemon_skipped += 1
-                
-        if event.is_shiny:
-            rs.shinies += 1
-       
-    @staticmethod     
-    def get_pokemon_bucket(rs, name: str) -> PokemonRunStats:
+    def get_pokemon_bucket(rs, name: str) -> PokemonRunStats | None:
+        name = (name or "").strip()
+        if not name:
+            return None
         if name not in rs.pokemon_map:
             rs.pokemon_map[name] = PokemonRunStats()
         return rs.pokemon_map[name]
+
+    @staticmethod
+    def apply_connector_event(image, event_type: str, name: str, is_shiny=False) -> bool:
+        rs = image.database_component
+
+        name = (name or "").strip()
+        event_type = event_type
+        is_shiny = bool(is_shiny)
+
+        if name:
+            rs.pokemon_name = name
+
+        pstats = DatabaseHelpers.get_pokemon_bucket(rs, name)
+        
+        should_flush = False
+        
+        match event_type:
+            case "encounter":
+                rs.encountered += 1
+                if pstats:
+                    pstats.encountered += 1
+                should_flush = True
+                    
+            case "caught":
+                rs.caught += 1
+                if pstats:
+                    pstats.caught += 1
+                should_flush = True 
+            
+            case "released":
+                rs.released += 1
+                if pstats:
+                    pstats.released += 1
+
+            case "hatched":
+                rs.pokemon_hatched += 1
+                if pstats:
+                    pstats.hatched += 1
+                should_flush = True
+                    
+            case "egg_collected":
+                rs.eggs_collected += 1
+                should_flush = True
+                
+            case "skipped":
+                rs.pokemon_skipped += 1
+                
+        if is_shiny:
+            rs.shinies += 1
+            if pstats is not None:
+                pstats.shinies += 1
+            should_flush = True
+        
+        return should_flush
