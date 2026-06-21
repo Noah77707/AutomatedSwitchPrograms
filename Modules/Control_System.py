@@ -102,6 +102,12 @@ def flush_runstats_to_db_if_needed(image: Image_Processing, *, min_interval_s: f
     return True
 
 def flush_runstats_to_db(image: Image_Processing) -> None:
+    """
+    Push everything accumulated in image.database_component into both:
+    - Database.db program totals
+    - Logger.db per-run tables
+    Then reset image.database_component to a fresh RunStats2.
+    """
     rs = getattr(image, "database_component", None)
     if rs is None:
         return
@@ -111,6 +117,7 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
     if not game or not program:
         return
 
+    # -------- Program totals: Database.db --------
     add_program_deltas(
         game,
         program,
@@ -129,6 +136,7 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
         playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
     )
 
+    # Per-pokemon totals: Database.db
     for pokemon_name, pstats in getattr(rs, "pokemon_map", {}).items():
         name = (pokemon_name or "").strip()
         if not name:
@@ -145,8 +153,42 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
             released_delta=int(getattr(pstats, "released", 0)),
         )
 
-    image.database_component = RunStats2()
+    # -------- Run logging: Logger.db --------
+    run_id = getattr(image, "current_run_id", None)
+    if run_id:
+        add_run_deltas(
+            run_id=run_id,
+            resets_delta=int(getattr(rs, "resets", 0)),
+            encounters_delta=int(getattr(rs, "encounters", 0)),
+            actions_delta=int(getattr(rs, "actions", 0)),
+            action_hits_delta=int(getattr(rs, "action_hits", 0)),
+            eggs_collected_delta=int(getattr(rs, "eggs_collected", 0)),
+            eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
+            pokemon_encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
+            pokemon_caught_delta=int(getattr(rs, "pokemon_caught", 0)),
+            pokemon_released_delta=int(getattr(rs, "pokemon_released", 0)),
+            pokemon_skipped_delta=int(getattr(rs, "pokemon_skipped", 0)),
+            shinies_delta=int(getattr(rs, "shinies", 0)),
+            playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
+        )
 
+        for pokemon_name, pstats in getattr(rs, "pokemon_map", {}).items():
+            name = (pokemon_name or "").strip()
+            if not name:
+                continue
+
+            add_run_pokemon_delta(
+                run_id=run_id,
+                pokemon_name=name,
+                encountered_delta=int(getattr(pstats, "encountered", 0)),
+                caught_delta=int(getattr(pstats, "caught", 0)),
+                shinies_delta=int(getattr(pstats, "shinies", 0)),
+                hatched_delta=int(getattr(pstats, "hatched", 0)),
+                released_delta=int(getattr(pstats, "released", 0)),
+            )
+
+    image.database_component = RunStats2()
+    
 def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None:
     now = time()
     last = getattr(image, "_last_stats_flush_t", 0.0)
@@ -386,7 +428,11 @@ def controller_control(
                     paused = False
                     image.state = None
                     image.database_component = RunStats2()
-
+                    
+                    image.current_run_id = start_run(
+                        image.game,
+                        image.program,
+                    )
                 elif cmd == "STOP":
                     flush_runstats_to_db(image)
                     image.database_component = RunStats2()
@@ -395,6 +441,8 @@ def controller_control(
                     image.capture = CaptureState()
                     image.box = Box()
                     image.egg = Egg()
+                    end_run(image.current_run_id)
+                    image.current_run_id = None
 
                     running = False
                     paused = False

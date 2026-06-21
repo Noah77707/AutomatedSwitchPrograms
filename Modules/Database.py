@@ -122,7 +122,8 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 encountered INTEGER NOT NULL DEFAULT 0,
                 caught INTEGER NOT NULL DEFAULT 0,
                 shinies INTEGER NOT NULL DEFAULT 0,
-                eggs_hatched INTEGER NOT NULL DEFAULT 0,
+                hatched INTEGER NOT NULL DEFAULT 0,
+                released INTEGER NOT NULL DEFAULT 0,
 
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
                 updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -295,7 +296,7 @@ def add_pokemon_delta(
         conn.commit()
 
 # New Run based functions (preferred for new code)
-def start_run(game: str, program: str, db_file: str = LOGGER_PATH) -> int:
+def start_run(game: str, program: str, db_file: str = DATABASE_PATH) -> int:
     if not game or not program:
         raise ValueError("game and program are required")
 
@@ -312,7 +313,7 @@ def start_run(game: str, program: str, db_file: str = LOGGER_PATH) -> int:
         return int(cur.lastrowid)
 
 
-def end_run(run_id: int, status: str = "completed", db_file: str = LOGGER_PATH) -> None:
+def end_run(run_id: int, status: str = "completed", db_file: str = DATABASE_PATH) -> None:
     if status not in {"running", "completed", "failed", "aborted"}:
         raise ValueError("status must be one of: running, completed, failed, aborted")
 
@@ -342,7 +343,7 @@ def add_run_deltas(
     pokemon_skipped_delta: int = 0,
     shinies_delta: int = 0,
     playtime_seconds_delta: int = 0,
-    db_file: str = LOGGER_PATH,
+    db_file: str = DATABASE_PATH,
 ) -> None:
     deltas = (
         resets_delta, encounters_delta, actions_delta, action_hits_delta,
@@ -400,7 +401,7 @@ def add_run_pokemon_delta(
     shinies_delta: int = 0,
     hatched_delta: int = 0,
     released_delta: int = 0,
-    db_file: str = LOGGER_PATH,
+    db_file: str = DATABASE_PATH,
 ) -> None:
     if not run_id or not pokemon_name:
         raise ValueError("run_id and pokemon_name are required")
@@ -442,7 +443,7 @@ def log_run_event(
     pokemon_name: Optional[str] = None,
     value: int = 1,
     payload: Optional[dict] = None,
-    db_file: str = LOGGER_PATH
+    db_file: str = DATABASE_PATH
 ) -> None:
     if not event_type:
         raise ValueError("event_type is required")
@@ -485,7 +486,7 @@ def get_pokemon_totals(game: str, program: str, pokemon_name: str, db_file: str 
         return dict(row) if row else None
 
 
-def get_run(run_id: int, db_file: str = LOGGER_PATH) -> Optional[dict]:
+def get_run(run_id: int, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
@@ -494,7 +495,7 @@ def get_run(run_id: int, db_file: str = LOGGER_PATH) -> Optional[dict]:
         return dict(row) if row else None
 
 
-def get_run_pokemon_totals(run_id: int, pokemon_name: str, db_file: str = LOGGER_PATH) -> Optional[dict]:
+def get_run_pokemon_totals(run_id: int, pokemon_name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
@@ -611,7 +612,7 @@ class Logger:
       - per-run logging (runs + run_pokemon_stats)
       - optional legacy aggregate totals (program_stats + pokemon_stats)
     """
-    def __init__(self, game: str, program: str, db_file: str = LOGGER_PATH, keep_legacy_totals: bool = True):
+    def __init__(self, game: str, program: str, db_file: str = DATABASE_PATH, keep_legacy_totals: bool = True):
         self.game = game
         self.program = program
         self.db_file = db_file

@@ -44,6 +44,7 @@ class Image_Processing():
         self.egg = Egg()
         self.rois: Tuple[int, int, int, int] = (0, 0, 0, 0)
         self.pokemon_name_set = Text.load_pokemon_name_set("Media/pokemon_names.json")
+        self.current_run_id = None
 
         self.egg_count = 0
         self.egg_phase = 0
@@ -615,19 +616,19 @@ class DatabaseHelpers:
         
         match event_type:
             case "encounter":
-                rs.encountered += 1
+                rs.pokemon_encountered += 1
                 if pstats:
                     pstats.encountered += 1
                 should_flush = True
                     
             case "caught":
-                rs.caught += 1
+                rs.pokemon_caught += 1
                 if pstats:
                     pstats.caught += 1
                 should_flush = True 
             
             case "released":
-                rs.released += 1
+                rs.pokemon_released += 1
                 if pstats:
                     pstats.released += 1
 
