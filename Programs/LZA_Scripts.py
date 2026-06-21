@@ -339,12 +339,6 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
     elif image.state == "DONUT_BAD":
         image.donut_results_processed = False
         image.donut_visible_since_t = None
-        add_program_deltas(
-            game= image.game,
-            program = image.program,
-            actions_delta=1,
-            resets_delta=1
-        )
         ctrl.tap(BTN_HOME, 0.05, 0.45)
         ctrl.tap(BTN_X, 0.05, 0.25)
         ctrl.tap(BTN_A, 0.05, 02.95)
@@ -355,12 +349,6 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
     elif image.state == "DONUT_OK":
         image.donut_results_processed = False
         image.donut_visible_since_t = None
-        add_program_deltas(
-            game= image.game,
-            program = image.program,
-            actions_delta=1,
-            action_hits_delta=1
-        )
         ctrl.tap(BTN_A, 0.05, 2)
         ctrl.tap(BTN_B, 0.05, 1)
         if image.database_component.action_hits == image.cfg["count"]:

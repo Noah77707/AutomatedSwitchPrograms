@@ -5,7 +5,7 @@ from time import monotonic, sleep
 import serial
 from enum import Enum
 from .Controller import Controller
-from .Image_Processing import Image_Processing, Text, FrameGate
+from .Image_Processing import Image_Processing, Text, FrameGate, DatabaseHelpers
 from .States import *
 from .Database import *
 from .Debug import *
@@ -438,7 +438,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
                     stable_frames=8
                 )
 
-            image.database_component.pokemon_released += 1
+            
         elif kind == "shiny":
             image.database_component.shinies += 1
             image.database_component.pokemon_skipped += 1

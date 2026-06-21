@@ -342,7 +342,7 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
         image.debugger.set_rois_for_state("CHECK_EGG", [const.SWSH_STATES["text"]["text_box"]["rois"]], (0, 0, 0))
         image.debugger.set_rois_for_state("CHECK_EGG", const.SWSH_STATES["egg"]["nursery_lady"]["rois"], (0, 0, 0))
         ctrl.stick("L", 255, 0, 0.1); sleep(0.17)
-        ctrl.tap(BTN_A, 0.05, 0.5); sleep(2)
+        ctrl.tap(BTN_A, 0.05, 0.5); sleep(1)
         text = Text.string_from_roi(image, const.SWSH_STATES["text"]["text_box"]["rois"], key= "check_egg", psm=6)
         image.debugger.log("Nursery lady text:", text)
         if text and ("egg" in text.lower() and "found" in text.lower() and "holding" in text.lower()):
@@ -359,7 +359,7 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
         if text and not ("welcome" in text.lower() and "help" in text.lower() and "nursery" in text.lower()):
             ctrl.tap(BTN_A, 0.05, 0.5)
         else:
-            mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.5, gone_confirm= 45, watch_state= "egg_acquired")
+            mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.3, gone_confirm= 45, watch_state= "egg_acquired")
             if image.egg_count == image.cfg['inputs'][0]:
                 return return_states(image, "PROGRAM_FINISHED")
             return return_states(image, "WALKING")
@@ -368,7 +368,13 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
     return image.state
 
 def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
-    image.walking = 10
+    if not hasattr(image, "daycare_tpl"):
+        image.daycare_tpl = cv.imread("Media/SWSH_Images/Nursery_Sign.png", cv.IMREAD_GRAYSCALE)
+    tpl = image.daycare_tpl
+    landmark = TemplateLandmark(
+        template_gray=tpl, roi= const.SWSH_STATES["egg"]["nursery_sign"]["rois"], threshold=0.65, hits_required= 2)
+
+    image.walking_right = image.walking_left = 10
     image.walking_dir = 0
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
@@ -479,24 +485,24 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
         return return_states(image, "WALKING")
 
     elif image.state == "WALKING":
-        while image.walking > 0:
-            image.walking -= 1
+        while image.walking_right > 0:
+            image.walking_right -= 1
             if check_state(image, "SWSH", "text", "dark_text_box"):
                 return return_states(image, "TEXT")
             else:
                 ctrl.stick_right("L", 1); sleep(0.17)
-        image.walking = 10
+        image.walking_right = 10
         image.walking_dir = 1
         return return_states(image, "WALKING1")
     
     elif image.state == "WALKING1":
-        while image.walking > 0:
-            image.walking -= 1
+        while image.walking_left > 0:
+            image.walking_left -= 1
             if check_state(image, "SWSH", "text", "dark_text_box"):
                 return return_states(image, "TEXT")
             else:
                 ctrl.stick_left("L", 1); sleep(0.17)
-        image.walking = 10
+        image.walking_left = 10
         image.walking_dir = 0
         return return_states(image, "WALKING")
     

@@ -136,7 +136,6 @@ def get_box_slot_kind(image, game: str) -> tuple[str, str]:
     name_rois = const.GAME_STATES[game]["pokemon"]["pokemon_in_box"]["rois"]
     if not image.debugger.has_roi(name_rois[0]):
         image.debugger.add_roi(name_rois[0], (0, 0, 0), 2)
-        image.debugger.log("debug: added box name roi")
     best = ""
     for roi in name_rois:
         raw = Text.recognize_box_name(image, roi)
@@ -272,7 +271,6 @@ def _clahe_gray(img: np.ndarray) -> np.ndarray:
     clahe = cv.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     return clahe.apply(gray)
 
-# this has the player move until a specified landmark is in sight
 def walk_until_landmark_dpad(
     ctrl,
     image,
@@ -284,11 +282,17 @@ def walk_until_landmark_dpad(
     pause_s: float = 0.05,
     max_steps: int = 500,
     template_cache: Optional[dict[int, np.ndarray]] = None,  # key: id(lm)
+    *,
+    stick_or_dpad: int = 0,     # 0=dpad, 1=left stick
+    stick_name: str = "L",      # "L" or "R" (if your Controller supports it)
 ) -> bool:
     """
     directions:
-    0 is up, 2 is right, 4 is down, and 6 is left
-    for stick_or_dpad, 0 is dpad, 1 is stick.
+    0=up, 2=right, 4=down, 6=left
+
+    stick_or_dpad:
+    0 = dpad
+    1 = stick (uses ctrl.stick_* on stick_name)
     """
     cache_key = id(lm)
 
@@ -299,9 +303,27 @@ def walk_until_landmark_dpad(
         tmpl = getattr(lm, "template_gray", None)
         if not isinstance(tmpl, np.ndarray):
             raise TypeError("lm.template_gray must be a numpy array (already-loaded template image).")
-        tmpl_p = _clahe_gray(tmpl)  # safe for 2D gray or 3D bgr
+        tmpl_p = _clahe_gray(tmpl)
         if template_cache is not None:
             template_cache[cache_key] = tmpl_p
+
+    def _step_move():
+        if stick_or_dpad == 0:
+            ctrl.dpad(dir, hold_s)
+            return
+
+        # stick movement (fallback to dpad if methods are missing)
+        if dir == 0 and hasattr(ctrl, "stick_up"):
+            ctrl.stick_up(stick_name, hold_s)
+        elif dir == 2 and hasattr(ctrl, "stick_right"):
+            ctrl.stick_right(stick_name, hold_s)
+        elif dir == 4 and hasattr(ctrl, "stick_down"):
+            ctrl.stick_down(stick_name, hold_s)
+        elif dir == 6 and hasattr(ctrl, "stick_left"):
+            ctrl.stick_left(stick_name, hold_s)
+        else:
+            # fallback
+            ctrl.dpad(dir, hold_s)
 
     for _ in range(max_steps):
         frame = getattr(image, "original_image", None)
@@ -313,8 +335,8 @@ def walk_until_landmark_dpad(
                 _, maxv, _, _ = cv.minMaxLoc(res)
                 if maxv >= lm.threshold:
                     return True
-        
-        ctrl.dpad(dir, hold_s)
+
+        _step_move()
         if pause_s:
             sleep(pause_s)
 

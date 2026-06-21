@@ -107,6 +107,23 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
             shinies_delta=int(getattr(rs, "shinies", 0)),
             eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
         )
+    
+    add_run_deltas(
+        run_id=getattr(image, "current_run_id", None),
+        runs_delta=int(getattr(rs, "runs", 0)),
+        resets_delta=int(getattr(rs, "resets", 0)),
+        encounters_delta=int(getattr(rs, "encounters", 0)),
+        actions_delta=int(getattr(rs, "actions", 0)),
+        action_hits_delta=int(getattr(rs, "action_hits", 0)),
+        eggs_collected_delta=int(getattr(rs, "eggs_collected", 0)),
+        eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
+        pokemon_encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
+        pokemon_caught_delta=int(getattr(rs, "pokemon_caught", 0)),
+        pokemon_released_delta=int(getattr(rs, "pokemon_released", 0)),
+        pokemon_skipped_delta=int(getattr(rs, "pokemon_skipped", 0)),
+        shinies_delta=int(getattr(rs, "shinies", 0)),
+        playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
+    )
 
     image.database_component = RunStats()
 # Not in use currently, Might change that if crashing becomes common after fixing up the code

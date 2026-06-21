@@ -140,8 +140,7 @@ SWSH_STATES = {
                 (1043, 3),
                 (160, 657)
                 ],
-        },
-    },
+        },},
     "in_game": {
         "in_game": {
             "color": (254, 254, 254),
@@ -171,8 +170,22 @@ SWSH_STATES = {
         },
     }, 
     "box": {
-        "spaces": {},
+        "grid": {
+            "grid_roi": [324, 134, 534, 444],
+            "origin": [364, 174],
+            "dx": 184,
+            "dy": 92,
+            "rows": 5,
+            "cols": 6,
+            
+            "cursor_template_paths": [
+                "Media/SWSH_Images/cursor.png"
+            ],
+            "cursor_use_edges": True,
+            "cursor_threshold": 0.6,
+            "snap_tol_px": 30
         },
+    },
     "text": {
         "encounter_text": {
             "color": (51, 51, 51),
@@ -182,6 +195,7 @@ SWSH_STATES = {
         },
         "text_box": {
             "color": (255, 255, 254),
+            "rois": (265, 580, 750, 115),
             "positions": [
                 (283, 585),
                 (283, 585),
@@ -364,11 +378,19 @@ SWSH_STATES = {
         ]
     },
     "egg": {
-        "nusery_lady": ()
+        "nursery_lady": {
+            "rois": [(600, 375, 250, 100)]
+        },
+        "nursery_sign": {
+            "path": "Media/SWSH_Images/Nursery_Sign.png",
+            "rois": (740, 320, 140, 80)
+                         },
+        "hatching_text": {
+            "rois": [(260, 610, 770, 60)]
+        }
     }
 }
-# 78, 108
-# 170, 184
+
 BDSP_STATES = {
     "screens": {
         "loading_title": {
@@ -948,7 +970,6 @@ LZA_STATES = {
     }
 }
 
-# Map a game string to its state dict
 GAME_STATES = {
     "GENERIC": GENERIC_STATES,
     "HOME": HOME_STATES,

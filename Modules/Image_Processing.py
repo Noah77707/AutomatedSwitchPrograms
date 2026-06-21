@@ -39,6 +39,7 @@ class Image_Processing():
         self.debugger = Debug()
         self.gate = FrameGate()
         self.database_component = RunStats()
+        self.database_component_run_stats = RunStats2()
         self.capture = CaptureState()
         self.box = Box()
         self.egg = Egg()
@@ -587,3 +588,34 @@ class FrameGate:
             metric="frac_active", diff_thresh=12,
             stable_frames=stable_frames, timeout_s=timeout_s
         )
+
+class DatabaseHelpers:
+    @staticmethod
+    def apply_connector_event(image, event):
+        rs = image.database_component_run_stats
+        
+        if event.name:
+            rs.pokemon_name = event.name
+            
+        match event.type:
+            case "encounter":
+                rs.pokemon_encountered += 1
+            case "caught":
+                rs.pokemon_caught += 1
+            case "release":
+                rs.pokemon_caught = max(0, rs.pokemon_caught - 1)
+            case "hatched":
+                rs.pokemon_hatched += 1
+            case "egg_collected":
+                rs.eggs_collected += 1
+            case "skipped":
+                rs.pokemon_skipped += 1
+                
+        if event.is_shiny:
+            rs.shinies += 1
+       
+    @staticmethod     
+    def get_pokemon_bucket(rs, name: str) -> PokemonRunStats:
+        if name not in rs.pokemon_map:
+            rs.pokemon_map[name] = PokemonRunStats()
+        return rs.pokemon_map[name]
