@@ -28,7 +28,7 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     # TEST
     ('TEST', 'Connect_Controller_Test'): Connect_Controller_Test,
     ('TEST', 'Return_Home_Test'): Return_Home_Test,
-    ('TEST', "Press_A_Repeatadly"): Press_A_Repeatadly,
+    ('TEST', "Press_A_Repeatedly"): Press_A_Repeatedly,
 
     # HOME
     ("HOME", "Sort_Home"): Sort_Home,
@@ -173,6 +173,7 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
         )
 
         for pokemon_name, pstats in getattr(rs, "pokemon_map", {}).items():
+            image.debugger
             name = (pokemon_name or "").strip()
             if not name:
                 continue
@@ -459,6 +460,8 @@ def controller_control(
             if stop_event.is_set():
                 if running:
                     flush_runstats_to_db(image)
+                    end_run(image.current_run_id)
+                    image.current_run_id = None
                 running = False
 
             if not running or image.game is None or image.program is None:
@@ -481,6 +484,9 @@ def controller_control(
             if getattr(image, "state", None) == "PROGRAM_FINISHED":
                 flush_runstats_to_db(image)
                 image.database_component = RunStats2()
+                end_run(image.current_run_id)
+                image.current_run_id = None
+
                 running = False
                 paused = False
                 state = None

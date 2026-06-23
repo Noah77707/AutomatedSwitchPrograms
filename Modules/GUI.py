@@ -416,8 +416,8 @@ class SWSHTab(pyqt_w.QWidget):
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])
-        self.eh.setProperty("db", ["eggs_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("tracks", ["pokemon_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("db", ["pokemon_hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_SWSH"),
                                   self.program_selected.emit("SWSH", self.eh, "Egg_Hatcher_SWSH", 1, 0, ("Number of eggs:",))))
@@ -494,8 +494,8 @@ class BDSPTab(pyqt_w.QWidget):
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["eggs_hatched", "shinies", "playtime_seconds"])
-        self.eh.setProperty("db", ["eggs_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("tracks", ["pokemon_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("db", ["pokemon_hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
                                   self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, ("Number of eggs:",))))
@@ -504,7 +504,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
         self.ae.setCheckable(True)
         self.group.addButton(self.ae)
-        self.ae.setProperty("tracks", ["eggs_collected", "eggs_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
+        self.ae.setProperty("tracks", ["eggs_collected", "pokemon_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
         self.ae.clicked.connect(lambda _:
                                 (self._set_program_info("Automated_Egg_BDSP"),
                                   self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, ("Number of eggs",))))
@@ -933,7 +933,6 @@ class GUI(pyqt_w.QWidget):
                 self.stop_scripts()
                 return
             
-            # GUI-only updates. No cvtColor. No pixmaps. No frame operations.
             rs = getattr(self.image, "database_component", None)
             if rs is not None:
                 self.items["stats_label"].setText(self.update_stats())
@@ -1019,27 +1018,30 @@ class GUI(pyqt_w.QWidget):
             traceback.print_exc()
 
     def update_stats(self):
-        s = getattr(self.image, "database_component", None)
-        if not s:
+        s = getattr(self.image, "run_stats", None)
+        if s is None:
             return ""
-        
-        now = monotonic()
-        if now - self._db_totals_t >= 1.0:
-            self._db_totals_cache = get_program_totals(str(self.game), str(self.program)) or {}
-            self._db_totals_t = now
 
-        db = self._db_totals_cache
+        if not self.game or not self.program:
+            db = {}
+        else:
+            now = monotonic()
+            if now - self._db_totals_t >= 1.0:
+                self._db_totals_cache = get_program_totals(str(self.game), str(self.program)) or {}
+                self._db_totals_t = now
+            db = self._db_totals_cache
+
         parts = []
 
         for key in self.tracks:
-            val = getattr(s, key, 0)
-            db_val = db.get(key, 0)
+            run_val = int(getattr(s, key, 0))
+            db_val = int(db.get(key, 0))
 
             if key == "playtime_seconds":
-                parts.append(f"run_time: {format_hms(int(val))}")
-                parts.append(f"total_time: {format_hms(int(db_val + val))}")
+                parts.append(f"run_time: {format_hms(run_val)}")
+                parts.append(f"total_time: {format_hms(db_val + run_val)}")
             else:
-                parts.append(f"{key}: {val} (total {db_val + val})")
+                parts.append(f"{key}: {run_val} (total {db_val + run_val})")
 
         return " | ".join(parts)
 
@@ -1047,21 +1049,25 @@ class GUI(pyqt_w.QWidget):
         try:
             if self.run.running and not self.run.paused:
                 now = monotonic()
+
                 if self.run.run_last_t == 0.0:
                     self.run.run_last_t = now
                 else:
                     dt = now - self.run.run_last_t
                     self.run.run_last_t = now
+
                     if dt > 0:
                         self.run.run_seconds += dt
                         whole = int(self.run.run_seconds)
+
                         if whole > 0:
                             self.run.run_seconds -= whole
-                            database = getattr(self.image, "database_component", None)
-                            if database is not None:
-                                database.playtime_seconds += whole
+                            rs = getattr(self.image, "run_stats", None)
+                            if rs is not None:
+                                rs.playtime_seconds += whole
 
             self.items["stats_label"].setText(self.update_stats())
+
         except Exception:
             traceback.print_exc()
 

@@ -2,7 +2,6 @@ import os, sqlite3, json, time
 from typing import Optional, Any
 
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Media", "Database.db"))
-LOGGER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Media", "Logger.db"))
 
 
 def _ensure_column(cur: sqlite3.Cursor, table: str, col_def_sql: str) -> None:
@@ -15,7 +14,6 @@ def _ensure_column(cur: sqlite3.Cursor, table: str, col_def_sql: str) -> None:
     existing = {row[1] for row in cur.fetchall()}  # row[1] is name
     if col_name not in existing:
         cur.execute(f"ALTER TABLE {table} ADD COLUMN {col_def_sql}")
-
 
 def initialize_database(db_file: str = DATABASE_PATH) -> None:
     os.makedirs(os.path.dirname(db_file), exist_ok=True)
@@ -161,7 +159,6 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
 
         conn.commit()
 
-
 # Old Backwards-compatible functions for legacy aggregate totals (kept for compatibility with old code)
 def ensure_program_row(game: str, program: str, db_file: str = DATABASE_PATH) -> None:
     with sqlite3.connect(db_file, timeout=5) as conn:
@@ -171,7 +168,6 @@ def ensure_program_row(game: str, program: str, db_file: str = DATABASE_PATH) ->
             VALUES (?, ?)
         """, (game, program))
         conn.commit()
-
 
 def add_program_deltas(
     game: str,
@@ -252,7 +248,6 @@ def add_program_deltas(
         )
         conn.commit()
 
-
 def add_pokemon_delta(
     game: str,
     program: str,
@@ -312,7 +307,6 @@ def start_run(game: str, program: str, db_file: str = DATABASE_PATH) -> int:
         conn.commit()
         return int(cur.lastrowid)
 
-
 def end_run(run_id: int, status: str = "completed", db_file: str = DATABASE_PATH) -> None:
     if status not in {"running", "completed", "failed", "aborted"}:
         raise ValueError("status must be one of: running, completed, failed, aborted")
@@ -326,7 +320,6 @@ def end_run(run_id: int, status: str = "completed", db_file: str = DATABASE_PATH
             WHERE id = ?
         """, (status, int(run_id)))
         conn.commit()
-
 
 def add_run_deltas(
     run_id: int,
@@ -391,7 +384,6 @@ def add_run_deltas(
         ))
         conn.commit()
 
-
 def add_run_pokemon_delta(
     run_id: int,
     pokemon_name: str,
@@ -414,14 +406,14 @@ def add_run_pokemon_delta(
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO run_pokemon_stats (
-                run_id, pokemon_name, encountered, caught, shinies, eggs_hatched, released
+                run_id, pokemon_name, encountered, caught, shinies, hatched, released
             )
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id, pokemon_name) DO UPDATE SET
                 encountered  = encountered + excluded.encountered,
                 caught       = caught + excluded.caught,
                 shinies      = shinies + excluded.shinies,
-                eggs_hatched = eggs_hatched + excluded.eggs_hatched,
+                hatched = hatched + excluded.hatched,
                 released     = released + excluded.released,
                 updated_at   = datetime('now')
         """, (
@@ -434,7 +426,6 @@ def add_run_pokemon_delta(
             int(released_delta),
         ))
         conn.commit()
-
 
 def log_run_event(
     run_id: int,
@@ -464,7 +455,6 @@ def log_run_event(
         ))
         conn.commit()
 
-
 def get_program_totals(game: str, program: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row
@@ -472,7 +462,6 @@ def get_program_totals(game: str, program: str, db_file: str = DATABASE_PATH) ->
         cur.execute("SELECT * FROM program_stats WHERE game=? AND program=?", (game, program))
         row = cur.fetchone()
         return dict(row) if row else None
-
 
 def get_pokemon_totals(game: str, program: str, pokemon_name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
@@ -485,7 +474,6 @@ def get_pokemon_totals(game: str, program: str, pokemon_name: str, db_file: str 
         row = cur.fetchone()
         return dict(row) if row else None
 
-
 def get_run(run_id: int, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row
@@ -493,7 +481,6 @@ def get_run(run_id: int, db_file: str = DATABASE_PATH) -> Optional[dict]:
         cur.execute("SELECT * FROM runs WHERE id=?", (int(run_id),))
         row = cur.fetchone()
         return dict(row) if row else None
-
 
 def get_run_pokemon_totals(run_id: int, pokemon_name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
@@ -506,13 +493,11 @@ def get_run_pokemon_totals(run_id: int, pokemon_name: str, db_file: str = DATABA
         row = cur.fetchone()
         return dict(row) if row else None
 
-
 def format_hms(seconds: int) -> str:
     h = seconds // 3600
     m = (seconds % 3600) // 60
     s = seconds % 60
     return f"{h:02d}:{m:02d}:{s:02d}"
-
 
 class Persistance:
     def _atomic_write_json(path: str, data: dict) -> None:
@@ -606,62 +591,3 @@ class Persistance:
         if cache:
             image.sorter = Persistance.cache_to_sorter(image, cache)
 
-class Logger:
-    """
-    Logger now supports:
-      - per-run logging (runs + run_pokemon_stats)
-      - optional legacy aggregate totals (program_stats + pokemon_stats)
-    """
-    def __init__(self, game: str, program: str, db_file: str = DATABASE_PATH, keep_legacy_totals: bool = True):
-        self.game = game
-        self.program = program
-        self.db_file = db_file
-        self.keep_legacy_totals = keep_legacy_totals
-        self.run_id: Optional[int] = None
-
-    def start_run(self) -> int:
-        self.run_id = start_run(self.game, self.program, db_file=self.db_file)
-
-        if self.keep_legacy_totals:
-            add_program_deltas(
-                self.game, self.program,
-                runs_delta=1,
-                db_file=self.db_file
-            )
-
-        return self.run_id
-
-    def end_run(self, status: str = "completed") -> None:
-        if self.run_id is not None:
-            end_run(self.run_id, status=status, db_file=self.db_file)
-            self.run_id = None
-
-    def log_run(self, **deltas):
-        # per-run totals
-        if self.run_id is not None:
-            add_run_deltas(self.run_id, db_file=self.db_file, **deltas)
-
-        # legacy totals (optional)
-        if self.keep_legacy_totals:
-            add_program_deltas(self.game, self.program, db_file=self.db_file, **deltas)
-
-    def log_pokemon(self, pokemon_name: str, **deltas):
-        # per-run pokemon totals
-        if self.run_id is not None:
-            add_run_pokemon_delta(self.run_id, pokemon_name, db_file=self.db_file, **deltas)
-
-        # legacy lifetime totals (optional)
-        if self.keep_legacy_totals:
-            add_pokemon_delta(self.game, self.program, pokemon_name, db_file=self.db_file, **deltas)
-
-    def event(self, event_type: str, *, pokemon_name: Optional[str] = None, value: int = 1, payload: Optional[dict] = None):
-        if self.run_id is None:
-            return
-        log_run_event(
-            self.run_id,
-            event_type,
-            pokemon_name=pokemon_name,
-            value=value,
-            payload=payload,
-            db_file=self.db_file
-        )

@@ -39,12 +39,14 @@ class Image_Processing():
         self.debugger = Debug()
         self.gate = FrameGate()
         self.database_component = RunStats2()
+        self.run_stats = RunStats2()
         self.capture = CaptureState()
         self.box = Box()
         self.egg = Egg()
         self.rois: Tuple[int, int, int, int] = (0, 0, 0, 0)
         self.pokemon_name_set = Text.load_pokemon_name_set("Media/pokemon_names.json")
         self.current_run_id = None
+        self.flush_requested = False
 
         self.egg_count = 0
         self.egg_phase = 0
@@ -595,6 +597,8 @@ class DatabaseHelpers:
         name = (name or "").strip()
         if not name:
             return None
+        if not hasattr(rs, "pokemon_map") or rs.pokemon_map is None:
+            rs.pokemon_map = {}
         if name not in rs.pokemon_map:
             rs.pokemon_map[name] = PokemonRunStats()
         return rs.pokemon_map[name]
@@ -604,51 +608,49 @@ class DatabaseHelpers:
         rs = image.database_component
 
         name = (name or "").strip()
-        event_type = event_type
         is_shiny = bool(is_shiny)
 
         if name:
             rs.pokemon_name = name
 
         pstats = DatabaseHelpers.get_pokemon_bucket(rs, name)
-        
         should_flush = False
-        
+
         match event_type:
             case "encounter":
                 rs.pokemon_encountered += 1
-                if pstats:
+                if pstats is not None:
                     pstats.encountered += 1
-                should_flush = True
-                    
+
             case "caught":
                 rs.pokemon_caught += 1
-                if pstats:
+                if pstats is not None:
                     pstats.caught += 1
-                should_flush = True 
-            
-            case "released":
+                should_flush = True
+
+            case "release":
                 rs.pokemon_released += 1
-                if pstats:
-                    pstats.released += 1
+                should_flush = True
 
             case "hatched":
-                rs.pokemon_hatched += 1
-                if pstats:
-                    pstats.hatched += 1
+                rs.eggs_hatched += 1
+                if pstats is not None:
+                    pstats.eggs_hatched += 1
                 should_flush = True
-                    
+
             case "egg_collected":
                 rs.eggs_collected += 1
-                should_flush = True
-                
+
             case "skipped":
                 rs.pokemon_skipped += 1
-                
+
         if is_shiny:
             rs.shinies += 1
             if pstats is not None:
                 pstats.shinies += 1
             should_flush = True
-        
+
+        if should_flush:
+            image.flush_requested = True
+
         return should_flush

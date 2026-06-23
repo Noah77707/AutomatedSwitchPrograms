@@ -9,6 +9,7 @@ from .Image_Processing import Image_Processing, Text, FrameGate, DatabaseHelpers
 from .States import *
 from .Database import *
 from .Debug import *
+
 # controller_buttons.py
 BTN_Y = 0
 BTN_B = 1
@@ -376,7 +377,12 @@ class Pokemon_Boxes:
         ctrl.stick_down("L", 0.05); sleep(0.33)
         kind, name = get_box_slot_kind(image, image.game)
         if kind == "shiny":
-            image.database_component.shinies += 1
+            add_run_pokemon_delta(
+                image.run_id,
+                pokemon_name=image.run_stats.pokemon_name,
+                shinies_delta=1
+            )
+            image.run_stats.shinies += 1
         ctrl.tap(BTN_A)
         ctrl.stick_up("L", 0.05); sleep(0.33)
         ctrl.stick_right("L", 0.05); sleep(0.33)
@@ -424,8 +430,8 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
         kind, name = get_box_slot_kind(image, image.game)
         image.debugger.log(kind, name, image.box.row, image.box.col)
         if kind == "pokemon":
-            _release_pokemon(ctrl) 
-            
+            _release_pokemon(ctrl)
+
             cleared = wait_state(
                 image, image.game, True, 3.0, "pokemon", "pokemon_in_box",
                 stable_frames=10
@@ -438,12 +444,44 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
                     stable_frames=8
                 )
 
-            DatabaseHelpers.apply_connector_event(image, "release", name, is_shiny=False)
+            if cleared:
+                DatabaseHelpers.apply_connector_event(image, "release", name, is_shiny=False)
+
+                run_id = getattr(image, "current_run_id", None)
+                if run_id:
+                    add_run_pokemon_delta(
+                        run_id,
+                        pokemon_name=name,
+                        released_delta=1,
+                    )
+
+            else:
+                image.debugger.log("Release not confirmed:", name)
+
         elif kind == "shiny":
             image.database_component.shinies += 1
             image.database_component.pokemon_skipped += 1
+
+            run_id = getattr(image, "current_run_id", None)
+            if run_id:
+                log_run_event(
+                    run_id,
+                    "skipped_shiny",
+                    pokemon_name=name,
+                    value=1,
+                )
+
         else:
             image.database_component.pokemon_skipped += 1
+
+            run_id = getattr(image, "current_run_id", None)
+            if run_id and name:
+                log_run_event(
+                    run_id,
+                    "skipped",
+                    pokemon_name=name,
+                    value=1,
+        )
 
         if not (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
             image.box.row, image.box.col = Pokemon_Boxes.box_grid_advance(ctrl, image.box.row, image.box.col, sleep_time=0.17)

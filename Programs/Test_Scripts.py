@@ -19,5 +19,5 @@ def Return_Home_Test(image: Image_Processing, ctrl: Controller):
     ctrl.tap(BTN_X, 0.05, 0.20)
     ctrl.tap(BTN_A, 0.05, 2.45)
 
-def Press_A_Repeatadly(image: Image_Processing, ctrl: Controller, state: str | None, number: int | None) -> None:
+def Press_A_Repeatedly(image: Image_Processing, ctrl: Controller, state: str | None, number: int | None) -> None:
     ctrl.tap(BTN_A)
