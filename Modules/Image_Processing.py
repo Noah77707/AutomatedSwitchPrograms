@@ -43,13 +43,11 @@ class Image_Processing():
         self.capture = CaptureState()
         self.box = Box()
         self.egg = Egg()
+        self.movement = Movement()
         self.rois: Tuple[int, int, int, int] = (0, 0, 0, 0)
         self.pokemon_name_set = Text.load_pokemon_name_set("Media/pokemon_names.json")
         self.current_run_id = None
         self.flush_requested = False
-
-        self.egg_count = 0
-        self.egg_phase = 0
         self.cfg = []
         
         self.generic_state = None
@@ -113,7 +111,7 @@ class Image_Processing():
             return idx
 
     @staticmethod
-    def auto_trim_borders(frame_bgr, thresh=8):
+    def auto_trim_borders(frame_bgr, thresh=8, min_w= 1280, min_h=720):
         gray = cv.cvtColor(frame_bgr, cv.COLOR_BGR2GRAY)
         # pixels > thresh are “content”
         mask = gray > thresh
@@ -123,7 +121,14 @@ class Image_Processing():
 
         x0, x1 = xs.min(), xs.max()
         y0, y1 = ys.min(), ys.max()
-
+        
+        crop_w = int(x1 - x0 + 1)
+        crop_h = int(y1 - y0 + 1)
+        
+        # Keeps it from going below the screen size.
+        if crop_w < min_w or crop_h < min_h:
+            return frame_bgr, (0, 0)  # no trim
+        
         cropped = frame_bgr[y0:y1+1, x0:x1+1]
         return cropped, (x0, y0)
 
@@ -324,11 +329,18 @@ class Text:
 
     @staticmethod
     def clean_box_name(raw: str) -> str:
+        """
+        This has a main problem in not being able to detect porygon 2, due to removing trailing digits.
+        I'll fix this later.
+        It also has the issue of only detecting english names right now, might want to detect the pokedex name instead.
+        Last thing is that I think it just gets rid of Q and y, which is a problem for some names like Qwilfish, but I'll fix that later too.
+        """
         s = (raw or "").strip()
         # common ocr junk
         s = s.replace("’", "'").replace("`", "'")
         # remove gender symbols
         s = re.sub(r"[♀♂]", "", s)
+        s = re.sub(r"[Qy]", "", s)
         s = re.sub(r"[\*\?_¢”\"“´`]", "", s)
         s = re.sub(r"\s+", " ", s).strip()
 
@@ -597,11 +609,11 @@ class DatabaseHelpers:
         name = (name or "").strip()
         if not name:
             return None
-        if not hasattr(rs, "pokemon_map") or rs.pokemon_map is None:
-            rs.pokemon_map = {}
-        if name not in rs.pokemon_map:
-            rs.pokemon_map[name] = PokemonRunStats()
-        return rs.pokemon_map[name]
+        if not hasattr(rs, "map") or rs.map is None:
+            rs.map = {}
+        if name not in rs.map:
+            rs.map[name] = PokemonRunStats()
+        return rs.map[name]
 
     @staticmethod
     def apply_connector_event(image, event_type: str, name: str, is_shiny=False) -> bool:
@@ -610,39 +622,41 @@ class DatabaseHelpers:
         name = (name or "").strip()
         is_shiny = bool(is_shiny)
 
-        if name:
-            rs.pokemon_name = name
+        if name:    
+            rs.name = name
 
         pstats = DatabaseHelpers.get_pokemon_bucket(rs, name)
         should_flush = False
 
         match event_type:
             case "encounter":
-                rs.pokemon_encountered += 1
+                rs.encountered += 1
                 if pstats is not None:
                     pstats.encountered += 1
 
             case "caught":
-                rs.pokemon_caught += 1
+                rs.caught += 1
                 if pstats is not None:
                     pstats.caught += 1
                 should_flush = True
 
             case "release":
-                rs.pokemon_released += 1
+                rs.released += 1
+                if pstats is not None:
+                    pstats.released += 1
                 should_flush = True
 
             case "hatched":
-                rs.eggs_hatched += 1
+                rs.hatched += 1
                 if pstats is not None:
-                    pstats.eggs_hatched += 1
+                    pstats.hatched += 1
                 should_flush = True
 
             case "egg_collected":
                 rs.eggs_collected += 1
 
             case "skipped":
-                rs.pokemon_skipped += 1
+                rs.skipped += 1
 
         if is_shiny:
             rs.shinies += 1

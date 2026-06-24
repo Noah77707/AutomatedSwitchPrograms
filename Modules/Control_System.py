@@ -75,17 +75,17 @@ def has_pending_stats(rs) -> bool:
             "actions",
             "action_hits",
             "eggs_collected",
-            "eggs_hatched",
-            "pokemon_encountered",
-            "pokemon_caught",
-            "pokemon_released",
-            "pokemon_skipped",
+            "hatched",
+            "encountered",
+            "caught",
+            "released",
+            "skipped",
             "shinies",
             "playtime_seconds",
         )
     )
 
-    return top_level_changed or bool(getattr(rs, "pokemon_map", {}))
+    return top_level_changed or bool(getattr(rs, "map", {}))
 
 def flush_runstats_to_db_if_needed(image: Image_Processing, *, min_interval_s: float = 0.75) -> bool:
     rs = getattr(image, "database_component", None)
@@ -127,18 +127,18 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
         actions_delta=int(getattr(rs, "actions", 0)),
         action_hits_delta=int(getattr(rs, "action_hits", 0)),
         eggs_collected_delta=int(getattr(rs, "eggs_collected", 0)),
-        eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
-        pokemon_encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
-        pokemon_caught_delta=int(getattr(rs, "pokemon_caught", 0)),
-        pokemon_released_delta=int(getattr(rs, "pokemon_released", 0)),
-        pokemon_skipped_delta=int(getattr(rs, "pokemon_skipped", 0)),
+        hatched_delta=int(getattr(rs, "hatched", 0)),
+        encountered_delta=int(getattr(rs, "encountered", 0)),
+        caught_delta=int(getattr(rs, "caught", 0)),
+        released_delta=int(getattr(rs, "released", 0)),
+        skipped_delta=int(getattr(rs, "skipped", 0)),
         shinies_delta=int(getattr(rs, "shinies", 0)),
         playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
     )
 
     # Per-pokemon totals: Database.db
-    for pokemon_name, pstats in getattr(rs, "pokemon_map", {}).items():
-        name = (pokemon_name or "").strip()
+    for name, pstats in getattr(rs, "map", {}).items():
+        name = (name or "").strip()
         if not name:
             continue
 
@@ -163,24 +163,24 @@ def flush_runstats_to_db(image: Image_Processing) -> None:
             actions_delta=int(getattr(rs, "actions", 0)),
             action_hits_delta=int(getattr(rs, "action_hits", 0)),
             eggs_collected_delta=int(getattr(rs, "eggs_collected", 0)),
-            eggs_hatched_delta=int(getattr(rs, "eggs_hatched", 0)),
-            pokemon_encountered_delta=int(getattr(rs, "pokemon_encountered", 0)),
-            pokemon_caught_delta=int(getattr(rs, "pokemon_caught", 0)),
-            pokemon_released_delta=int(getattr(rs, "pokemon_released", 0)),
-            pokemon_skipped_delta=int(getattr(rs, "pokemon_skipped", 0)),
+            hatched_delta=int(getattr(rs, "hatched", 0)),
+            encountered_delta=int(getattr(rs, "encountered", 0)),
+            caught_delta=int(getattr(rs, "caught", 0)),
+            released_delta=int(getattr(rs, "released", 0)),
+            skipped_delta=int(getattr(rs, "skipped", 0)),
             shinies_delta=int(getattr(rs, "shinies", 0)),
             playtime_seconds_delta=int(getattr(rs, "playtime_seconds", 0)),
         )
 
-        for pokemon_name, pstats in getattr(rs, "pokemon_map", {}).items():
+        for name, pstats in getattr(rs, "map", {}).items():
             image.debugger
-            name = (pokemon_name or "").strip()
+            name = (name or "").strip()
             if not name:
                 continue
 
             add_run_pokemon_delta(
                 run_id=run_id,
-                pokemon_name=name,
+                name=name,
                 encountered_delta=int(getattr(pstats, "encountered", 0)),
                 caught_delta=int(getattr(pstats, "caught", 0)),
                 shinies_delta=int(getattr(pstats, "shinies", 0)),
@@ -210,15 +210,15 @@ def maybe_periodic_flush(image: Image_Processing, every_s: float = 10.0) -> None
             "actions",
             "action_hits",
             "eggs_collected",
-            "eggs_hatched",
-            "pokemon_encountered",
-            "pokemon_caught",
-            "pokemon_released",
-            "pokemon_skipped",
+            "hatched",
+            "encountered",
+            "caught",
+            "released",
+            "skipped",
             "shinies",
             "playtime_seconds",
         )
-    ) or bool(getattr(rs, "pokemon_map", {}))
+    ) or bool(getattr(rs, "map", {}))
 
     if changed:
         flush_runstats_to_db(image)
@@ -505,15 +505,15 @@ def controller_control(
                         "actions",
                         "action_hits",
                         "eggs_collected",
-                        "eggs_hatched",
-                        "pokemon_encountered",
-                        "pokemon_caught",
-                        "pokemon_released",
-                        "pokemon_skipped",
+                        "hatched",
+                        "encountered",
+                        "caught",
+                        "released",
+                        "skipped",
                         "shinies",
                         "playtime_seconds",
                     )
-                ) or bool(getattr(rs, "pokemon_map", {}))
+                ) or bool(getattr(rs, "map", {}))
 
                 if changed:
                     flush_runstats_to_db(image)

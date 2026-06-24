@@ -115,18 +115,21 @@ def Static_Encounter_SWSH(image: Image_Processing, ctrl: Controller, state: str 
         return return_states(image, image.state)
     
     elif image.state == "FOUND_SHINY":
+        DatabaseHelpers.apply_connector_event(image, "shiny_found", name=image.run_stats.name, is_shiny=True)
         image.debugger.clear()
         image.state = "PROGRAM_FINISHED"
 
     elif image.state == "NOT_SHINY":
         image.debugger.clear()
         if number == 0:
+            image.run_stats.encountered += 1
             ctrl.tap(BTN_HOME, 0.05, 0.45)
             ctrl.tap(BTN_X, 0.05, 0.25)
             ctrl.tap(BTN_A, 0.05, 2.95)
             return return_states(image, "PAIRING")
         elif number == 1:
             if check_state(image, "SWSH", "screens" "battle_screen"):
+                image.run_stats.encountered += 1
                 ctrl.dpad(0, 0.05); sleep(0.33)
                 ctrl.tap(BTN_A)
                 return return_states(image, "BATTLE_FLEE")
@@ -221,16 +224,11 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         raw = Text.recognize_pokemon(image, const.SWSH_STATES["text"]["sent_to_box"]["rois"][0])
         raw = (raw or "").strip()
         if raw:
-            add_run_pokemon_delta(
-                image.run_id,
-                raw,
-                encountered_delta=1
-            )
-            image.run_stats.pokemon_name = raw
-            image.run_stats.pokemon_encountered += 1
+            image.run_stats.name = raw
+            image.run_stats.encountered += 1
             ctrl.tap(BTN_A)
             image.debugger.clear()
-            if image.run_stats.pokemon_encountered % image.cfg["count"] == 0:
+            if image.run_stats.encountered % image.cfg["count"] == 0:
                 sleep(1)
                 return return_states(image, "TO_MENU")
             sleep(1)
@@ -279,11 +277,7 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
         target_count = int(cfg.get("count", 0))
 
         if check_state(image, "SWSH", "pokemon", "shiny_symbol"):
-            add_run_pokemon_delta(
-                image.run_id,
-                pokemon_name=image.run_stats.pokemon_name,
-                shinies_delta=1
-            )
+            DatabaseHelpers.apply_connector_event(image, "shiny_found", name=image.run_stats.name, is_shiny=True)
             return return_states(image, "PROGRAM_FINISHED")
         else:
             image.debugger.log("NOT SHINY")
@@ -355,10 +349,7 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
         image.debugger.log("Nursery lady text:", text)
         if text and ("egg" in text.lower() and "found" in text.lower() and "holding" in text.lower()):
             image.debugger.log("Egg found!")
-            add_run_deltas(
-                image.run_id,
-                eggs_collected_delta=1
-            )
+            DatabaseHelpers.apply_connector_event(image, "egg_collected", name=None, is_shiny=False)
             image.run_stats.eggs_collected += 1
             return return_states(image, "TALKING")
         else:
@@ -372,7 +363,7 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
             ctrl.tap(BTN_A, 0.05, 0.5)
         else:
             mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.3, gone_confirm= 45, watch_state= "egg_acquired")
-            # if image.egg_count == image.cfg['inputs'][0]:
+            # if image.pokemon_hatched == image.cfg['inputs'][0]:
             #     return return_states(image, "PROGRAM_FINISHED")
             return return_states(image, "WALKING")
         return return_states(image, image.state)
@@ -386,8 +377,6 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
     landmark = TemplateLandmark(
         template_gray=tpl, roi= const.SWSH_STATES["egg"]["nursery_sign"]["rois"], threshold=0.65, hits_required= 2)
 
-    image.walking_right = image.walking_left = 10
-    image.walking_dir = 0
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
 
@@ -437,11 +426,8 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
         return return_states(image, "IN_BOX2")
 
     elif image.state == "IN_BOX2":
-        if image.egg_phase == 6:
-            ctrl.tap(BTN_R)
-            image.egg_phase = 0
         sleep(0.25)
-        if image.run_stats.eggs_hatched >= image.cfg['inputs'][0]:
+        if image.run_stats.hatched >= image.cfg['inputs'][0]:
             return return_states(image, "PROGRAM_FINISHED")
         return return_states(image, "IN_BOX3")
     
@@ -494,31 +480,34 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
             ctrl.tap(BTN_B)
             sleep(0.5)
             return image.state
-        return return_states(image, "WALKING")
+        return return_states(image, "WALKING1")
 
     elif image.state == "WALKING":
-        image.walking_dir = 0
-        while image.walking_right > 0:
-            image.walking_right -= 1
+        image.movement.direction = "right"
+        while image.movement.steps > 0:
+            image.movement.steps -= 1
             if check_state(image, "SWSH", "text", "dark_text_box"):
                 return return_states(image, "TEXT")
             else:
                 ctrl.stick_right("L", 1); sleep(0.17)
-        image.walking_right = 10
+        image.movement.direction = "left"
+        image.movement.steps = 10
         return return_states(image, "WALKING1")
     
     elif image.state == "WALKING1":
-        image.walking_dir = 1
-        while image.walking_left > 0:
-            image.walking_left -= 1
+        image.movement.direction = "left"
+        while image.movement.steps > 0:
+            image.movement.steps -= 1
             if check_state(image, "SWSH", "text", "dark_text_box"):
                 return return_states(image, "TEXT")
             else:
                 ctrl.stick_left("L", 1); sleep(0.17)
-        image.walking_left = 10
+        image.movement.direction = "right"
+        image.movement.steps = 10
         return return_states(image, "WALKING")
     
     elif image.state == "TEXT":
+        image.movement.steps += 1
         ctrl.tap(BTN_A, 0.05, 0.5); sleep(2)
         return return_states(image, "HATCHING")
     
@@ -528,13 +517,8 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
         raw = (raw or "").strip()
         image.debugger.log("Hatching text:", raw)
         if raw and image.generic_bool == False:
-            add_run_pokemon_delta(
-                image.current_run_id,
-                pokemon_name=raw,
-                hatched_delta=1,
-            )
-            image.run_stats.pokemon_name = raw
-            image.run_stats.pokemon_hatched += 1
+            image.run_stats.name = raw
+            image.run_stats.hatched += 1
             image.generic_count += 1
             image.generic_bool = True
             sleep(1); ctrl.tap(BTN_A, 0.05, 0.5)
@@ -543,12 +527,12 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
             sleep(2.75)
             image.generic_bool = False
             if check_state(image, "SWSH", "in_game", "in_game"):
-                if image.run_stats.pokemon_hatched >= image.cfg['inputs'][0]:
+                if image.run_stats.hatched >= image.cfg['inputs'][0]:
                     return return_states(image, "PROGRAM_FINISHED")
-                elif image.generic_count == len(image.box.cfg) and image.run_stats.pokemon_hatched > 0:
+                elif image.generic_count == len(image.box.cfg) and image.run_stats.hatched > 0:
                     image.generic_count = 0
                     return return_states(image, "IN_GAME")
-                elif image.generic_count != len(image.box.cfg) and image.walking_dir == 0:
+                elif image.generic_count != len(image.box.cfg) and image.movement.direction == "right":
                     return return_states(image, "WALKING")
                 else:
                     return return_states(image, "WALKING1")

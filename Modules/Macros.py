@@ -377,11 +377,7 @@ class Pokemon_Boxes:
         ctrl.stick_down("L", 0.05); sleep(0.33)
         kind, name = get_box_slot_kind(image, image.game)
         if kind == "shiny":
-            add_run_pokemon_delta(
-                image.run_id,
-                pokemon_name=image.run_stats.pokemon_name,
-                shinies_delta=1
-            )
+            DatabaseHelpers.apply_connector_event(image, "shiny", name, is_shiny=True)
             image.run_stats.shinies += 1
         ctrl.tap(BTN_A)
         ctrl.stick_up("L", 0.05); sleep(0.33)
@@ -433,7 +429,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
             _release_pokemon(ctrl)
 
             cleared = wait_state(
-                image, image.game, True, 3.0, "pokemon", "pokemon_in_box",
+                image, image.game, True, 2.0, "pokemon", "pokemon_in_box",
                 stable_frames=10
             )
 
@@ -446,42 +442,18 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
 
             if cleared:
                 DatabaseHelpers.apply_connector_event(image, "release", name, is_shiny=False)
-
-                run_id = getattr(image, "current_run_id", None)
-                if run_id:
-                    add_run_pokemon_delta(
-                        run_id,
-                        pokemon_name=name,
-                        released_delta=1,
-                    )
-
+                image.run_stats.released += 1
             else:
                 image.debugger.log("Release not confirmed:", name)
 
         elif kind == "shiny":
-            image.database_component.shinies += 1
-            image.database_component.pokemon_skipped += 1
-
-            run_id = getattr(image, "current_run_id", None)
-            if run_id:
-                log_run_event(
-                    run_id,
-                    "skipped_shiny",
-                    pokemon_name=name,
-                    value=1,
-                )
+            image.run_stats.shinies += 1
+            image.run_stats.skipped += 1
+            DatabaseHelpers.apply_connector_event(image, "skipped", name, is_shiny=True)
 
         else:
-            image.database_component.pokemon_skipped += 1
-
-            run_id = getattr(image, "current_run_id", None)
-            if run_id and name:
-                log_run_event(
-                    run_id,
-                    "skipped",
-                    pokemon_name=name,
-                    value=1,
-        )
+            image.run_stats.skipped += 1
+            DatabaseHelpers.apply_connector_event(image, "skipped", name, is_shiny=False)
 
         if not (image.box.row == image.box.rows - 1 and image.box.col == image.box.cols - 1):
             image.box.row, image.box.col = Pokemon_Boxes.box_grid_advance(ctrl, image.box.row, image.box.col, sleep_time=0.17)
@@ -490,7 +462,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
             return return_states(image, "NEXT_BOX")
     
     elif image.state == "NEXT_BOX":
-        Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0, sleep_time= 1, verify=False)
+        Pokemon_Boxes.box_grid_final(ctrl, image, image.game, 0, 0, sleep_time= sleeptime, verify=False)
         image.box.box_i += 1
         Pokemon_Boxes.next_box(ctrl, image); sleep(0.5)
         return return_states(image, "IN_BOX")
@@ -716,9 +688,9 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
                 image.name_streak = 1
 
             if image.name_streak >= stable_frames:
-                image.database_component.pokemon_name = raw
+                image.run_stats.name = raw
                 image.name_captured = True
-                image.debugger.log("Name:", image.database_component.pokemon_name)
+                image.debugger.log("Name:", image.run_stats.name)
 
     # Falling edge: textbox disappears
     if (not text_visible) and image.generic_bool:
@@ -734,7 +706,7 @@ def shiny_wait_checker(image, game, roi, frames: int, time_range_max: float, sta
         image.name_prev = ""
         image.name_streak = 0
         image.name_captured = False
-        image.database_component.pokemon_encountered += 1
+        image.database_component.encountered += 1       
 
         if dt < time_range_max:
             image.database_component.resets += 1

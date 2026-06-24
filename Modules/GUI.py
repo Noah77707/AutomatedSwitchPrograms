@@ -383,7 +383,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.ser = pyqt_w.QPushButton("Static Encounter - Regi", self)
         self.ser.setCheckable(True)
         self.group.addButton(self.ser)
-        self.ser.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
+        self.ser.setProperty("tracks", ["encountered", "resets", "shinies", "playtime_seconds"])
         self.ser.clicked.connect(lambda _:
                                  (self._set_program_info("Static_Encounter_SWSH"),
                                  self.program_selected.emit("SWSH", self.ser, "Static_Encounter_SWSH", 0, 0, ("",))))
@@ -392,7 +392,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.sej = pyqt_w.QPushButton("Static Encounter - Sword of Justice", self)
         self.sej.setCheckable(True)
         self.group.addButton(self.sej)
-        self.sej.setProperty("tracks", ["pokemon_encountered", "resets", "shinies", "playtime_seconds"])
+        self.sej.setProperty("tracks", ["encountered", "resets", "shinies", "playtime_seconds"])
         self.sej.clicked.connect(lambda _:
                                 (self._set_program_info("Static_Encounter_SWSH"),
                                 self.program_selected.emit("SWSH", self.sej, "Static_Encounter_SWSH", 0, 1, ("",))))
@@ -416,8 +416,8 @@ class SWSHTab(pyqt_w.QWidget):
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["pokemon_hatched", "shinies", "playtime_seconds"])
-        self.eh.setProperty("db", ["pokemon_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("tracks", ["hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("db", ["hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_SWSH"),
                                   self.program_selected.emit("SWSH", self.eh, "Egg_Hatcher_SWSH", 1, 0, ("Number of eggs:",))))
@@ -425,7 +425,7 @@ class SWSHTab(pyqt_w.QWidget):
         self.r = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.r.setCheckable(True)
         self.group.addButton(self.r)
-        self.r.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
+        self.r.setProperty("tracks", ["released", "skipped", "playtime_seconds"])
         self.r.clicked.connect(lambda _:
                                (self._set_program_info("Pokemon_Releaser_SWSH"),
                                self.program_selected.emit("SWSH", self.r, "Pokemon_Releaser_SWSH", 1, 0, ("Boxes of pokemon",))))
@@ -494,8 +494,8 @@ class BDSPTab(pyqt_w.QWidget):
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
         self.eh.setCheckable(True)
         self.group.addButton(self.eh)
-        self.eh.setProperty("tracks", ["pokemon_hatched", "shinies", "playtime_seconds"])
-        self.eh.setProperty("db", ["pokemon_hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("tracks", ["hatched", "shinies", "playtime_seconds"])
+        self.eh.setProperty("db", ["hatched", "shinies", "playtime_seconds"])
         self.eh.clicked.connect(lambda _:
                                 (self._set_program_info("Egg_Hatcher_BDSP"),
                                   self.program_selected.emit("BDSP", self.eh, "Egg_Hatcher_BDSP", 1, 0, ("Number of eggs:",))))
@@ -504,7 +504,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
         self.ae.setCheckable(True)
         self.group.addButton(self.ae)
-        self.ae.setProperty("tracks", ["eggs_collected", "pokemon_hatched", "pokemon_released", "shinies", "playtime_seconds", "phase"])
+        self.ae.setProperty("tracks", ["eggs_collected", "hatched", "released", "shinies", "playtime_seconds", "phase"])
         self.ae.clicked.connect(lambda _:
                                 (self._set_program_info("Automated_Egg_BDSP"),
                                   self.program_selected.emit("BDSP", self.ae, "Automated_Egg_BDSP", 1, 0, ("Number of eggs",))))
@@ -513,7 +513,7 @@ class BDSPTab(pyqt_w.QWidget):
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.pr.setCheckable(True)
         self.group.addButton(self.pr)
-        self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
+        self.pr.setProperty("tracks", ["released", "skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_BDSP"),
                                   self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0, ("Boxes of pokemon",))))
@@ -608,7 +608,7 @@ class SVTab(pyqt_w.QWidget):
         self.pr = pyqt_w.QPushButton("Pokemon Releaser", self)
         self.pr.setCheckable(True)
         self.group.addButton(self.pr)
-        self.pr.setProperty("tracks", ["pokemon_released", "pokemon_skipped", "playtime_seconds"])
+        self.pr.setProperty("tracks", ["released", "skipped", "playtime_seconds"])
         self.pr.clicked.connect(lambda _:
                                 (self._set_program_info("Pokemon_Releaser_SV"),
                                  self.program_selected.emit("SV", self.pr, "Pokemon_Releaser_SV", 1, 0, ("",))))

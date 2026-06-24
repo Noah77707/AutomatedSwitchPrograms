@@ -7,7 +7,7 @@ DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "M
 def _ensure_column(cur: sqlite3.Cursor, table: str, col_def_sql: str) -> None:
     """
     Adds a column if missing. col_def_sql example:
-    "pokemon_skipped INTEGER NOT NULL DEFAULT 0"
+    "skipped INTEGER NOT NULL DEFAULT 0"
     """
     col_name = col_def_sql.split()[0]
     cur.execute(f"PRAGMA table_info({table})")
@@ -38,12 +38,12 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 action_hits INTEGER NOT NULL DEFAULT 0,
 
                 eggs_collected INTEGER NOT NULL DEFAULT 0,
-                eggs_hatched INTEGER NOT NULL DEFAULT 0,
+                hatched INTEGER NOT NULL DEFAULT 0,
 
-                pokemon_encountered INTEGER NOT NULL DEFAULT 0,
-                pokemon_caught INTEGER NOT NULL DEFAULT 0,
-                pokemon_released INTEGER NOT NULL DEFAULT 0,
-                pokemon_skipped INTEGER NOT NULL DEFAULT 0,
+                encountered INTEGER NOT NULL DEFAULT 0,
+                caught INTEGER NOT NULL DEFAULT 0,
+                released INTEGER NOT NULL DEFAULT 0,
+                skipped INTEGER NOT NULL DEFAULT 0,
 
                 shinies INTEGER NOT NULL DEFAULT 0,
                 playtime_seconds INTEGER NOT NULL DEFAULT 0,
@@ -56,31 +56,32 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
         """)
 
         _ensure_column(cur, "program_stats", "encounters INTEGER NOT NULL DEFAULT 0")
-        _ensure_column(cur, "program_stats", "pokemon_skipped INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(cur, "program_stats", "skipped INTEGER NOT NULL DEFAULT 0")
 
         # ---- Legacy aggregate per-pokemon totals (kept for compatibility) ----
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS pokemon_stats (
+            CREATE TABLE IF NOT EXISTS stats (
                 game TEXT NOT NULL,
                 program TEXT NOT NULL,
-                pokemon_name TEXT NOT NULL,
+                name TEXT NOT NULL,
 
                 encountered INTEGER NOT NULL DEFAULT 0,
                 caught INTEGER NOT NULL DEFAULT 0,
                 shinies INTEGER NOT NULL DEFAULT 0,
-                eggs_hatched INTEGER NOT NULL DEFAULT 0,
+                hatched INTEGER NOT NULL DEFAULT 0,
+                released INTEGER NOT NULL DEFAULT 0,
 
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
                 updated_at TEXT NOT NULL DEFAULT (datetime('now')),
 
-                PRIMARY KEY (game, program, pokemon_name),
+                PRIMARY KEY (game, program, name),
 
                 FOREIGN KEY (game, program)
                 REFERENCES program_stats(game, program)
                 ON DELETE CASCADE
             )
         """)
-        _ensure_column(cur, "pokemon_stats", "eggs_hatched INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(cur, "stats", "hatched INTEGER NOT NULL DEFAULT 0")
 
         # ---- NEW: one row per run instance ----
         cur.execute("""
@@ -99,12 +100,12 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 action_hits INTEGER NOT NULL DEFAULT 0,
 
                 eggs_collected INTEGER NOT NULL DEFAULT 0,
-                eggs_hatched INTEGER NOT NULL DEFAULT 0,
+                hatched INTEGER NOT NULL DEFAULT 0,
 
-                pokemon_encountered INTEGER NOT NULL DEFAULT 0,
-                pokemon_caught INTEGER NOT NULL DEFAULT 0,
-                pokemon_released INTEGER NOT NULL DEFAULT 0,
-                pokemon_skipped INTEGER NOT NULL DEFAULT 0,
+                encountered INTEGER NOT NULL DEFAULT 0,
+                caught INTEGER NOT NULL DEFAULT 0,
+                released INTEGER NOT NULL DEFAULT 0,
+                skipped INTEGER NOT NULL DEFAULT 0,
 
                 shinies INTEGER NOT NULL DEFAULT 0,
                 playtime_seconds INTEGER NOT NULL DEFAULT 0
@@ -113,9 +114,9 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
 
         # ---- NEW: per-pokemon-per-run totals ----
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS run_pokemon_stats (
+            CREATE TABLE IF NOT EXISTS run_stats (
                 run_id INTEGER NOT NULL,
-                pokemon_name TEXT NOT NULL,
+                name TEXT NOT NULL,
 
                 encountered INTEGER NOT NULL DEFAULT 0,
                 caught INTEGER NOT NULL DEFAULT 0,
@@ -126,7 +127,7 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
                 updated_at TEXT NOT NULL DEFAULT (datetime('now')),
 
-                PRIMARY KEY (run_id, pokemon_name),
+                PRIMARY KEY (run_id, name),
                 FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE
             )
         """)
@@ -138,7 +139,7 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
                 run_id INTEGER NOT NULL,
                 ts TEXT NOT NULL DEFAULT (datetime('now')),
                 event_type TEXT NOT NULL,            -- encounter|catch|reset|etc
-                pokemon_name TEXT,
+                name TEXT,
                 value INTEGER NOT NULL DEFAULT 1,
                 payload_json TEXT,
                 FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE
@@ -146,16 +147,16 @@ def initialize_database(db_file: str = DATABASE_PATH) -> None:
         """)
 
         cur.execute("CREATE INDEX IF NOT EXISTS idx_program_stats_game ON program_stats(game)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_pokemon_stats_game_program ON pokemon_stats(game, program)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_stats_game_program ON stats(game, program)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_runs_game_program ON runs(game, program)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_runs_started_at ON runs(started_at)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_run_pokemon_name ON run_pokemon_stats(pokemon_name)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_run_name ON run_stats(name)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_run_events_run_id ON run_events(run_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_run_events_type ON run_events(event_type)")
 
         # IMPORTANT: remove old rollup triggers to prevent double counting
-        cur.execute("DROP TRIGGER IF EXISTS trg_pokemon_stats_ai;")
-        cur.execute("DROP TRIGGER IF EXISTS trg_pokemon_stats_au;")
+        cur.execute("DROP TRIGGER IF EXISTS trg_stats_ai;")
+        cur.execute("DROP TRIGGER IF EXISTS trg_stats_au;")
 
         conn.commit()
 
@@ -179,11 +180,11 @@ def add_program_deltas(
     actions_delta: int = 0,
     action_hits_delta: int = 0,
     eggs_collected_delta: int = 0,
-    eggs_hatched_delta: int = 0,
-    pokemon_encountered_delta: int = 0,
-    pokemon_caught_delta: int = 0,
-    pokemon_released_delta: int = 0,
-    pokemon_skipped_delta: int = 0,
+    hatched_delta: int = 0,
+    encountered_delta: int = 0,
+    caught_delta: int = 0,
+    released_delta: int = 0,
+    skipped_delta: int = 0,
     shinies_delta: int = 0,
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
@@ -194,9 +195,9 @@ def add_program_deltas(
     deltas = (
         runs_delta, resets_delta, encounters_delta,
         actions_delta, action_hits_delta,
-        eggs_collected_delta, eggs_hatched_delta,
-        pokemon_encountered_delta, pokemon_caught_delta,
-        pokemon_released_delta, pokemon_skipped_delta,
+        eggs_collected_delta, hatched_delta,
+        encountered_delta, caught_delta,
+        released_delta, skipped_delta,
         shinies_delta, playtime_seconds_delta,
     )
     if any(d < 0 for d in deltas):
@@ -218,11 +219,11 @@ def add_program_deltas(
                 actions = actions + ?,
                 action_hits = action_hits + ?,
                 eggs_collected = eggs_collected + ?,
-                eggs_hatched = eggs_hatched + ?,
-                pokemon_encountered = pokemon_encountered + ?,
-                pokemon_caught = pokemon_caught + ?,
-                pokemon_released = pokemon_released + ?,
-                pokemon_skipped = pokemon_skipped + ?,
+                hatched = hatched + ?,
+                encountered = encountered + ?,
+                caught = caught + ?,
+                released = released + ?,
+                skipped = skipped + ?,
                 shinies = shinies + ?,
                 playtime_seconds = playtime_seconds + ?,
                 updated_at = datetime('now')
@@ -235,11 +236,11 @@ def add_program_deltas(
                 int(actions_delta),
                 int(action_hits_delta),
                 int(eggs_collected_delta),
-                int(eggs_hatched_delta),
-                int(pokemon_encountered_delta),
-                int(pokemon_caught_delta),
-                int(pokemon_released_delta),
-                int(pokemon_skipped_delta),
+                int(hatched_delta),
+                int(encountered_delta),
+                int(caught_delta),
+                int(released_delta),
+                int(skipped_delta),
                 int(shinies_delta),
                 int(playtime_seconds_delta),
                 game,
@@ -251,7 +252,7 @@ def add_program_deltas(
 def add_pokemon_delta(
     game: str,
     program: str,
-    pokemon_name: str,
+    name: str,
     *,
     encountered_delta: int = 0,
     caught_delta: int = 0,
@@ -260,8 +261,8 @@ def add_pokemon_delta(
     released_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
-    if not game or not program or not pokemon_name:
-        raise ValueError("game, program, pokemon_name are required")
+    if not game or not program or not name:
+        raise ValueError("game, program, name are required")
     if any(d < 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
         raise ValueError("deltas must be >= 0")
     if all(d == 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
@@ -272,12 +273,12 @@ def add_pokemon_delta(
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO pokemon_stats (
-                game, program, pokemon_name,
+            INSERT INTO stats (
+                game, program, name,
                 encountered, caught, shinies, hatched, released
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(game, program, pokemon_name) DO UPDATE SET
+            ON CONFLICT(game, program, name) DO UPDATE SET
                 encountered   = encountered   + excluded.encountered,
                 caught        = caught        + excluded.caught,
                 shinies       = shinies       + excluded.shinies,
@@ -285,7 +286,7 @@ def add_pokemon_delta(
                 released      = released      + excluded.released,
                 updated_at    = datetime('now')
         """, (
-            game, program, pokemon_name,
+            game, program, name,
             int(encountered_delta), int(caught_delta), int(shinies_delta), int(hatched_delta), int(released_delta)
         ))
         conn.commit()
@@ -329,20 +330,20 @@ def add_run_deltas(
     actions_delta: int = 0,
     action_hits_delta: int = 0,
     eggs_collected_delta: int = 0,
-    eggs_hatched_delta: int = 0,
-    pokemon_encountered_delta: int = 0,
-    pokemon_caught_delta: int = 0,
-    pokemon_released_delta: int = 0,
-    pokemon_skipped_delta: int = 0,
+    hatched_delta: int = 0,
+    encountered_delta: int = 0,
+    caught_delta: int = 0,
+    released_delta: int = 0,
+    skipped_delta: int = 0,
     shinies_delta: int = 0,
     playtime_seconds_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
     deltas = (
         resets_delta, encounters_delta, actions_delta, action_hits_delta,
-        eggs_collected_delta, eggs_hatched_delta,
-        pokemon_encountered_delta, pokemon_caught_delta, pokemon_released_delta,
-        pokemon_skipped_delta, shinies_delta, playtime_seconds_delta,
+        eggs_collected_delta, hatched_delta,
+        encountered_delta, caught_delta, released_delta,
+        skipped_delta, shinies_delta, playtime_seconds_delta,
     )
     if any(d < 0 for d in deltas):
         raise ValueError("deltas must be >= 0")
@@ -359,11 +360,11 @@ def add_run_deltas(
                 actions = actions + ?,
                 action_hits = action_hits + ?,
                 eggs_collected = eggs_collected + ?,
-                eggs_hatched = eggs_hatched + ?,
-                pokemon_encountered = pokemon_encountered + ?,
-                pokemon_caught = pokemon_caught + ?,
-                pokemon_released = pokemon_released + ?,
-                pokemon_skipped = pokemon_skipped + ?,
+                hatched = hatched + ?,
+                encountered = encountered + ?,
+                caught = caught + ?,
+                released = released + ?,
+                skipped = skipped + ?,
                 shinies = shinies + ?,
                 playtime_seconds = playtime_seconds + ?
             WHERE id = ?
@@ -373,11 +374,11 @@ def add_run_deltas(
             int(actions_delta),
             int(action_hits_delta),
             int(eggs_collected_delta),
-            int(eggs_hatched_delta),
-            int(pokemon_encountered_delta),
-            int(pokemon_caught_delta),
-            int(pokemon_released_delta),
-            int(pokemon_skipped_delta),
+            int(hatched_delta),
+            int(encountered_delta),
+            int(caught_delta),
+            int(released_delta),
+            int(skipped_delta),
             int(shinies_delta),
             int(playtime_seconds_delta),
             int(run_id),
@@ -386,7 +387,7 @@ def add_run_deltas(
 
 def add_run_pokemon_delta(
     run_id: int,
-    pokemon_name: str,
+    name: str,
     *,
     encountered_delta: int = 0,
     caught_delta: int = 0,
@@ -395,8 +396,8 @@ def add_run_pokemon_delta(
     released_delta: int = 0,
     db_file: str = DATABASE_PATH,
 ) -> None:
-    if not run_id or not pokemon_name:
-        raise ValueError("run_id and pokemon_name are required")
+    if not run_id or not name:
+        raise ValueError("run_id and name are required")
     if any(d < 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
         raise ValueError("deltas must be >= 0")
     if all(d == 0 for d in (encountered_delta, caught_delta, shinies_delta, hatched_delta, released_delta)):
@@ -405,11 +406,11 @@ def add_run_pokemon_delta(
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO run_pokemon_stats (
-                run_id, pokemon_name, encountered, caught, shinies, hatched, released
+            INSERT INTO run_stats (
+                run_id, name, encountered, caught, shinies, hatched, released
             )
             VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(run_id, pokemon_name) DO UPDATE SET
+            ON CONFLICT(run_id, name) DO UPDATE SET
                 encountered  = encountered + excluded.encountered,
                 caught       = caught + excluded.caught,
                 shinies      = shinies + excluded.shinies,
@@ -418,7 +419,7 @@ def add_run_pokemon_delta(
                 updated_at   = datetime('now')
         """, (
             int(run_id),
-            pokemon_name,
+            name,
             int(encountered_delta),
             int(caught_delta),
             int(shinies_delta),
@@ -431,7 +432,7 @@ def log_run_event(
     run_id: int,
     event_type: str,
     *,
-    pokemon_name: Optional[str] = None,
+    name: Optional[str] = None,
     value: int = 1,
     payload: Optional[dict] = None,
     db_file: str = DATABASE_PATH
@@ -444,12 +445,12 @@ def log_run_event(
     with sqlite3.connect(db_file, timeout=5) as conn:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO run_events (run_id, event_type, pokemon_name, value, payload_json)
+            INSERT INTO run_events (run_id, event_type, name, value, payload_json)
             VALUES (?, ?, ?, ?, ?)
         """, (
             int(run_id),
             event_type,
-            pokemon_name,
+            name,
             int(value),
             json.dumps(payload, ensure_ascii=False) if payload is not None else None
         ))
@@ -463,13 +464,13 @@ def get_program_totals(game: str, program: str, db_file: str = DATABASE_PATH) ->
         row = cur.fetchone()
         return dict(row) if row else None
 
-def get_pokemon_totals(game: str, program: str, pokemon_name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
+def get_totals(game: str, program: str, name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
         cur.execute(
-            "SELECT * FROM pokemon_stats WHERE game=? AND program=? AND pokemon_name=?",
-            (game, program, pokemon_name),
+            "SELECT * FROM stats WHERE game=? AND program=? AND name=?",
+            (game, program, name),
         )
         row = cur.fetchone()
         return dict(row) if row else None
@@ -482,14 +483,14 @@ def get_run(run_id: int, db_file: str = DATABASE_PATH) -> Optional[dict]:
         row = cur.fetchone()
         return dict(row) if row else None
 
-def get_run_pokemon_totals(run_id: int, pokemon_name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
+def get_run_totals(run_id: int, name: str, db_file: str = DATABASE_PATH) -> Optional[dict]:
     with sqlite3.connect(db_file, timeout=5) as conn:
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
         cur.execute("""
-            SELECT * FROM run_pokemon_stats
-            WHERE run_id=? AND pokemon_name=?
-        """, (int(run_id), pokemon_name))
+            SELECT * FROM run_stats
+            WHERE run_id=? AND name=?
+        """, (int(run_id), name))
         row = cur.fetchone()
         return dict(row) if row else None
 

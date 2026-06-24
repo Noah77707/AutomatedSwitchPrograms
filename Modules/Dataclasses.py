@@ -83,7 +83,7 @@ class CaptureState:
 
 @dataclass
 class RunStats:
-    pokemon_name: str = None
+    name: str = None
     runs: int = 0
     resets: int = 0
     encounters: int = 0
@@ -91,12 +91,12 @@ class RunStats:
     action_hits: int = 0
 
     eggs_collected: int = 0
-    eggs_hatched: int = 0
+    hatched: int = 0
 
-    pokemon_encountered: int = 0
-    pokemon_caught:int = 0
-    pokemon_released: int = 0
-    pokemon_skipped: int = 0
+    encountered: int = 0
+    caught:int = 0
+    released: int = 0
+    skipped: int = 0
 
     shinies: int = 0
     playtime_seconds: int = 0
@@ -111,8 +111,8 @@ class PokemonRunStats:
 
 @dataclass
 class RunStats2:
-    pokemon_map: dict[str, PokemonRunStats] = field(default_factory=dict)
-    pokemon_name: str | None = None
+    map: dict[str, PokemonRunStats] = field(default_factory=dict)
+    name: str | None = None
     runs: int = 0
     resets: int = 0
     
@@ -121,12 +121,12 @@ class RunStats2:
     action_hits: int = 0
     
     eggs_collected: int = 0
-    eggs_hatched: int = 0
-    pokemon_encountered: int = 0
-    pokemon_hatched: int = 0
-    pokemon_caught:int = 0
-    pokemon_released: int = 0
-    pokemon_skipped: int = 0
+    hatched: int = 0
+    encountered: int = 0
+    hatched: int = 0
+    caught:int = 0
+    released: int = 0
+    skipped: int = 0
     shinies: int = 0
     
     playtime_seconds: int = 0
@@ -172,6 +172,11 @@ class Mon:
 class Egg:
     egg_count: int = 0
     egg_phase: int = 0
+
+@dataclass
+class Movement:
+    direction: str = "right"  # "left" or "right"
+    steps: int = 0
   
 @dataclass 
 class SparkleDetectorCfg:
