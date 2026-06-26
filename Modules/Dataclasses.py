@@ -123,7 +123,6 @@ class RunStats2:
     eggs_collected: int = 0
     hatched: int = 0
     encountered: int = 0
-    hatched: int = 0
     caught:int = 0
     released: int = 0
     skipped: int = 0

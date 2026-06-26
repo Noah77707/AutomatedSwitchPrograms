@@ -1062,9 +1062,14 @@ class GUI(pyqt_w.QWidget):
 
                         if whole > 0:
                             self.run.run_seconds -= whole
-                            rs = getattr(self.image, "run_stats", None)
-                            if rs is not None:
-                                rs.playtime_seconds += whole
+
+                            batch_rs = getattr(self.image, "database_component", None)
+                            if batch_rs is not None:
+                                batch_rs.playtime_seconds += whole
+                                
+                            run_rs = getattr(self.image, "run_stats", None)
+                            if run_rs is not None:
+                                run_rs.playtime_seconds += whole
 
             self.items["stats_label"].setText(self.update_stats())
 

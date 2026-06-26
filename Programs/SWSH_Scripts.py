@@ -517,8 +517,9 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
         raw = (raw or "").strip()
         image.debugger.log("Hatching text:", raw)
         if raw and image.generic_bool == False:
-            image.run_stats.name = raw
+            DatabaseHelpers.apply_connector_event(image, "hatched", name=raw, is_shiny=False)
             image.run_stats.hatched += 1
+            image.run_stats.name = raw
             image.generic_count += 1
             image.generic_bool = True
             sleep(1); ctrl.tap(BTN_A, 0.05, 0.5)
