@@ -259,6 +259,23 @@ class DynamicRow(pyqt_w.QWidget):
         self.setVisible(False)
         self._active = None
 
+class DebugTab(pyqt_w.QWidget):
+    def _set_debug_output(self, image: Image_Processing):
+        for timestamp, message in image.debugger.program_log:
+            self.debug_output.append(f"[{timestamp:.2f}] {message}")
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        layout = pyqt_w.QVBoxLayout(self)
+        layout.addWidget(pyqt_w.QLabel("Debug Output"))
+        
+        self.debug_output = pyqt_w.QTextEdit(self)
+        self.debug_output.setReadOnly(True)
+        layout.addWidget(self.debug_output)
+        
+        layout.addStretch(1)
+
 class TESTTab(pyqt_w.QWidget):
     program_selected = pyqt_c.pyqtSignal(str, object, str, int, int)  # game, btn, program, temp_row, number
     
@@ -404,13 +421,21 @@ class SWSHTab(pyqt_w.QWidget):
         self.fr.clicked.connect(lambda _:
                                 (self._set_program_info("Fossil_Reviver_SWSH"),
                                  self.program_selected.emit("SWSH", self.fr, "Fossil_Reviver_SWSH", 101, 0, ("",))))
-        
+       
+        self.f = pyqt_w.QPushButton("Fishing", self)
+        self.f.setCheckable(True)
+        self.group.addButton(self.f)
+        self.f.setProperty("tracks", ["encountered", "caught", "shinies", "playtime_seconds"])
+        self.f.clicked.connect(lambda _:
+                                (self._set_program_info("Fishing_SWSH"),
+                                 self.program_selected.emit("SWSH", self.f, "Fishing_SWSH", 0, 0, ("",))))
+         
         self.ec = pyqt_w.QPushButton("Egg Collector", self)
         self.ec.setCheckable(True)
         self.group.addButton(self.ec)
         self.ec.setProperty("tracks", ["eggs_collected", "playtime_seconds"])
         self.ec.clicked.connect(lambda _:
-                                (self._set_program_info("Static_Encounter_SWSH"),
+                                (self._set_program_info("Egg_Collector_SWSH"),
                                   self.program_selected.emit("SWSH", self.ec, "Egg_Collector_SWSH", 1, 0, ("Number of eggs",))))
 
         self.eh = pyqt_w.QPushButton("Egg Hatcher", self)
@@ -432,6 +457,7 @@ class SWSHTab(pyqt_w.QWidget):
 
         layout.addWidget(self.ser)
         layout.addWidget(self.sej)
+        layout.addWidget(self.f)
         layout.addWidget(self.fr)
         layout.addWidget(self.ec)
         layout.addWidget(self.eh)
@@ -518,21 +544,12 @@ class BDSPTab(pyqt_w.QWidget):
                                 (self._set_program_info("Pokemon_Releaser_BDSP"),
                                   self.program_selected.emit("BDSP", self.pr, "Pokemon_Releaser_BDSP", 1, 0, ("Boxes of pokemon",))))
 
-
-        self.ct = pyqt_w.QPushButton("Cursor Test", self)
-        self.ct.setCheckable(True)
-        self.group.addButton(self.ct)
-        self.ct.setProperty("tracks", [])
-        self.ct.clicked.connect(lambda _:
-                                (self._set_program_info("Cursor_Test_BDSP"),
-                                    self.program_selected.emit("BDSP", self.ct, "Cursor_Test_BDSP", 0, 0, ("",))))
         
         layout.addWidget(self.se)
+        layout.addWidget(self.ae)
         layout.addWidget(self.ec)
         layout.addWidget(self.eh)
-        layout.addWidget(self.ae)
         layout.addWidget(self.pr)
-        layout.addWidget(self.ct)
         layout.addStretch(1)
 
         self.info_img = pyqt_w.QLabel(self)
@@ -771,6 +788,9 @@ class GUI(pyqt_w.QWidget):
         self.tabs.setMovable(True)
 
         # ---------- Tabs ----------
+        debug_tab = DebugTab(self)
+        self.tabs.addTab(debug_tab, "DEBUG")
+        
         test_tab = TESTTab(self)
         test_tab.program_selected.connect(self.update_script)
         self.tabs.addTab(test_tab, "TEST")

@@ -424,6 +424,7 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
         sleep(0.17)
         
         kind, name = get_box_slot_kind(image, image.game)
+        image.debugger.log_program("Releasing from box slot:", image.box.row, image.box.col, "Kind:", kind, "Name:", name)
         image.debugger.log(kind, name, image.box.row, image.box.col)
         if kind == "pokemon":
             _release_pokemon(ctrl)

@@ -311,6 +311,9 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
 
     return return_states(image, image.state)
 
+def Fishing_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
+    return return_states(image, "PROGRAM_FINISHED")
+
 def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
     if not hasattr(image, "daycare_tpl"):
         image.daycare_tpl = cv.imread("Media/SWSH_Images/Nursery_Sign.png", cv.IMREAD_GRAYSCALE)
@@ -359,13 +362,13 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
         
     elif image.state == "TALKING":
         text = Text.string_from_roi(image, const.SWSH_STATES["text"]["text_box"]["rois"], key= "egg_talking", psm=6)
-        if text and not ("welcome" in text.lower() and "help" in text.lower() and "nursery" in text.lower()):
-            ctrl.tap(BTN_A, 0.05, 0.5)
-        else:
-            mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.3, gone_confirm= 45, watch_state= "egg_acquired")
-            # if image.pokemon_hatched == image.cfg['inputs'][0]:
-            #     return return_states(image, "PROGRAM_FINISHED")
+        if text and ("welcome" in text.lower() and "help" in text.lower() and "nursery" in text.lower()):
+            mash_b_while_textbox(ctrl, image, "SWSH", press_interval= 0.3, gone_confirm= 30, watch_state= "egg_acquired")
+            if image.run_stats.eggs_collected == image.cfg['inputs'][0]:
+                return return_states(image, "PROGRAM_FINISHED")
             return return_states(image, "WALKING")
+        else:
+            ctrl.tap(BTN_A, 0.05, 0.17)
         return return_states(image, image.state)
         
     return image.state
@@ -533,11 +536,15 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
                 elif image.generic_count == len(image.box.cfg) and image.run_stats.hatched > 0:
                     image.generic_count = 0
                     return return_states(image, "IN_GAME")
-                elif image.generic_count != len(image.box.cfg) and image.movement.direction == "right":
-                    return return_states(image, "WALKING")
                 else:
-                    return return_states(image, "WALKING1")
-
+                    return return_states(image, "BACK_TO_WALKING")
+                
+    elif image.state == "BACK_TO_WALKING":
+        if image.movement.direction == "right":
+            return return_states(image, "WALKING")
+        else:
+            return return_states(image, "WALKING1")
+        
 def Pokemon_Releaser_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
     image.box.box_amount = image.cfg["inputs"][0]
     image.game_pause_time = 0.25

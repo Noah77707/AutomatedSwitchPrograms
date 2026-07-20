@@ -340,7 +340,7 @@ class Text:
         s = s.replace("’", "'").replace("`", "'")
         # remove gender symbols
         s = re.sub(r"[♀♂]", "", s)
-        s = re.sub(r"[Qy]", "", s)
+        # s = re.sub(r"[Qy®]", "", s)
         s = re.sub(r"[\*\?_¢”\"“´`]", "", s)
         s = re.sub(r"\s+", " ", s).strip()
 
@@ -348,7 +348,7 @@ class Text:
 
         s = re.sub(r"[^A-Za-z\s\-']", "", s)
         s = re.sub(r"\s+", " ", s).strip()
-
+        
         if len(s) < 3:
             return ""
         if s.upper() in {"TE", "TV", "TI", "TIE", "THE"}:
@@ -392,7 +392,9 @@ class Text:
     @staticmethod
     def recognize_box_name(image, roi) -> str:
         line = Text.ocr_line(image, roi, psm=7)
+        image.debugger.log(f"OCR box name: '{line}'")
         line = Text.clean_box_name(line)
+        image.debugger.log(f"Recognized box name: '{line}'")
         if not line:
             return ""
 

@@ -177,6 +177,7 @@ def Egg_Collector_BDSP(image: Image_Processing, ctrl: Controller, state: str | N
             if text.find("we") != -1 or text.find("care") != -1:
                 image.egg_count += 1
                 image.database_component.eggs_collected += 1
+                image.run_stats.eggs_collected += 1
             mash_a_while_textbox(ctrl, image, "BDSP", press_interval= 0.35, gone_confirm= 15, watch_state= "egg_acquired")
 
             ctrl.up(BTN_B)
@@ -345,8 +346,8 @@ def Egg_Hatcher_BDSP(image: Image_Processing, ctrl: Controller, state: str | Non
             raw = (raw or "").strip()
             if raw:
                 image.generic_bool = True
-                image.database_component.pokemon_name = raw
-                image.database_component.eggs_hatched += 1
+                DatabaseHelpers.apply_connector_event(image, "egg_hatched", raw, is_shiny=False)
+                image.run_stats.eggs_hatched += 1
                 image.egg_count += 1
                 image.generic_count += 1
                 sleep(1); ctrl.tap(BTN_A, 0.05, 5)

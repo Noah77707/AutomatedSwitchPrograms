@@ -1062,7 +1062,8 @@ TEXT = {
                                 "Make sure you have enough fossils to revive the amount you want. "
                                 "Make sure the pokemon are deposited to an empty box, and none end up in your party."
                                 "Can be used to shiny hunt", "image": "N/A"},
-        "Egg_Hatcher_SWSH": {"text": "N/A", "image": "N/A"},
+        "Egg_Collector_SWSH": {"text": "This program uses the route 5 Daycare and the bridge to collect eggs for the pokemon in that dayacare.", "image": "N/A"},
+        "Egg_Hatcher_SWSH": {"text": "This program uses the bridge by the route 5 Daycare to hatch eggs.", "image": "N/A"},
         "Pokemon_Releaser_SWSH": {"text": "N/A", "image": "N/A"},
 
         # BDSP

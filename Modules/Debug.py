@@ -18,6 +18,7 @@ class Debug:
         self._state: str | None = None
         self._items: list[DebugROI] = []
         self._focus: DebugROI | None = None
+        self.program_log: list[tuple[float, str]] = []  # (timestamp, message)
 
     def set_enabled(self, on: bool) -> None:
         self.enabled = bool(on)
@@ -83,3 +84,9 @@ class Debug:
         if self.enabled:
             print(f"[DEBUG] {' '.join(map(str, parts))}")
     
+    def log_program(self, *parts) -> None:
+        if self.enabled:
+            from time import monotonic
+            timestamp = monotonic()
+            message = ' '.join(map(str, parts))
+            self.program_log.append((timestamp, message))

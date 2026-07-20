@@ -329,8 +329,10 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
             image.donut_scored = True
 
             image.database_component.actions += 1
+            image.run_stats.actions += 1
             if ok:
                 image.database_component.action_hits += 1
+                image.run_stats.action_hits += 1
         
         if image.donut_scored == True:
             image.donut_scored = False
@@ -343,6 +345,7 @@ def Donut_Checker(image: Image_Processing, ctrl: Controller, state: str | None, 
         ctrl.tap(BTN_X, 0.05, 0.25)
         ctrl.tap(BTN_A, 0.05, 02.95)
         image.database_component.resets += 1
+        image.run_stats.resets += 1
         image.generic_bool = True
         return return_states(image, "PAIRING")
     
