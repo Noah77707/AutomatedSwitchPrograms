@@ -334,8 +334,12 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
     
     elif image.state == "WALKING1":
         image.debugger.set_rois_for_state("WALKING1", [const.SWSH_STATES["egg"]["nursery_sign"]["rois"]], (0, 0, 0))
-        walk_until_landmark_dpad(ctrl, image, dir=6, lm=landmark, stick_or_dpad= 1, hold_s= 0.17, pause_s= 0)
-        return return_states(image, "CHECK_EGG")
+        if check_state(image, "SWSH", "text", "dark_text_box"):
+            return return_states(image, "CHECK_EGG")
+        found = walk_until_landmark_dpad(ctrl, image, dir=6, lm=landmark, stick_or_dpad=1, hold_s=0.17, pause_s=0, max_steps=1)
+        if found:
+            return return_states(image, "CHECK_EGG")
+        return image.state
     
     elif image.state == "CHECK_EGG":
         """
