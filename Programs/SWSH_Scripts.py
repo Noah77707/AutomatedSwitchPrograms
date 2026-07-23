@@ -488,7 +488,7 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
 
     elif image.state == "WALKING":
         image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["nursery_sign"]["rois"]], (0, 0, 0))
-        while image.movement.steps == False:
+        while not image.movement.steps:
             if check_state(image, "SWSH", "text", "dark_text_box"):
                 return return_states(image, "TEXT")
             else:
