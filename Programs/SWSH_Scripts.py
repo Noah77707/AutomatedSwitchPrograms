@@ -487,13 +487,12 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
         return return_states(image, "WALKING1")
 
     elif image.state == "WALKING":
-        image.movement.direction = "right"
-        while image.movement.steps > 0:
-            image.movement.steps -= 1
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["nursery_sign"]["rois"]], (0, 0, 0))
+        while image.movement.steps == False:
             if check_state(image, "SWSH", "text", "dark_text_box"):
                 return return_states(image, "TEXT")
             else:
-                ctrl.stick_right("L", 1); sleep(0.17)
+                image.movement.steps = walk_until_landmark_dpad(ctrl, image, dir=2, lm=landmark, stick_or_dpad=1, hold_s=0.17, pause_s=0)
         image.movement.direction = "left"
         image.movement.steps = 10
         return return_states(image, "WALKING1")
