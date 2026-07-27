@@ -333,6 +333,7 @@ def walk_until_landmark_dpad(
                 crop_p = _clahe_gray(crop)
                 res = cv.matchTemplate(crop_p, tmpl_p, lm.method)
                 _, maxv, _, _ = cv.minMaxLoc(res)
+                image.debugger.log(maxv, f"walk_until_landmark_dpad: maxv={maxv:.4f} (lm.threshold={lm.threshold})")
                 if maxv >= lm.threshold:
                     return True
 

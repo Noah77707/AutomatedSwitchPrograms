@@ -40,6 +40,7 @@ PROGRAM_TABLE: dict[tuple[str, str], ProgramFn] = {
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
     ('SWSH', "Fossil_Reviver_SWSH"): Fossil_Reviver_SWSH,
     ('SWSH', "Fishing_SWSH"): Fishing_SWSH,
+    ('SWSH', 'Automated_Egg_SWSH'): Automated_Egg_SWSH,
     ('SWSH', 'Egg_Collector_SWSH'): Egg_Collector_SWSH,
     ('SWSH', 'Egg_Hatcher_SWSH'): Egg_Hatcher_SWSH,
     ('SWSH', 'Pokemon_Releaser_SWSH'): Pokemon_Releaser_SWSH,

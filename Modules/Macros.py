@@ -452,6 +452,9 @@ def release_pokemon(ctrl: Controller, image: Image_Processing) -> str:
             image.run_stats.skipped += 1
             DatabaseHelpers.apply_connector_event(image, "skipped", name, is_shiny=True)
 
+        elif kind == "empty":
+            image.debugger.log("Empty slot, skipping:", image.box.row, image.box.col)
+            
         else:
             image.run_stats.skipped += 1
             DatabaseHelpers.apply_connector_event(image, "skipped", name, is_shiny=False)

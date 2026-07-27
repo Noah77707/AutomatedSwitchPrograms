@@ -430,6 +430,14 @@ class SWSHTab(pyqt_w.QWidget):
                                 (self._set_program_info("Fishing_SWSH"),
                                  self.program_selected.emit("SWSH", self.f, "Fishing_SWSH", 0, 0, ("",))))
          
+        self.ae = pyqt_w.QPushButton("Automated Egg Collector/Hatcher/Releaser", self)
+        self.ae.setCheckable(True)
+        self.group.addButton(self.ae)
+        self.ae.setProperty("tracks", ["eggs_collected", "hatched", "released", "shinies", "playtime_seconds", "phase"])
+        self.ae.clicked.connect(lambda _:
+                                (self._set_program_info("Automated_Egg_SWSH"),
+                                 self.program_selected.emit("SWSH", self.ae, "Automated_Egg_SWSH", 1, 0, ("Number of eggs",))))
+         
         self.ec = pyqt_w.QPushButton("Egg Collector", self)
         self.ec.setCheckable(True)
         self.group.addButton(self.ec)
@@ -1176,7 +1184,6 @@ class GUI(pyqt_w.QWidget):
     def update_debug(self) -> None:
         dbg = getattr(self.image, "debugger", None)
         dbg.set_enabled(not dbg.enabled)
-
 
         if dbg.enabled:
             self.debug_button.setText("Debug Off")

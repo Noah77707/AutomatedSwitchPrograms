@@ -1,3 +1,4 @@
+from email.mime import image
 import os
 import sys
 import serial
@@ -314,6 +315,9 @@ def Fossil_Reviver_SWSH(image: Image_Processing, ctrl: Controller, state: str | 
 def Fishing_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
     return return_states(image, "PROGRAM_FINISHED")
 
+def Automated_Egg_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
+    return return_states(image, "PROGRAM_FINISHED")
+
 def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
     if not hasattr(image, "daycare_tpl"):
         image.daycare_tpl = cv.imread("Media/SWSH_Images/Nursery_Sign.png", cv.IMREAD_GRAYSCALE)
@@ -377,9 +381,11 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
     if not hasattr(image, "daycare_tpl"):
         image.daycare_tpl = cv.imread("Media/SWSH_Images/Nursery_Sign.png", cv.IMREAD_GRAYSCALE)
     tpl = image.daycare_tpl
-    landmark = TemplateLandmark(
-        template_gray=tpl, roi= const.SWSH_STATES["egg"]["nursery_sign"]["rois"], threshold=0.65, hits_required= 2)
-
+    Bridge_right = TemplateLandmark(
+        template_gray=tpl, roi= const.SWSH_STATES["egg"]["bridge_right"]["rois"], threshold=0.65, hits_required= 2)
+    Bridge_left = TemplateLandmark(
+        template_gray=tpl, roi= const.SWSH_STATES["egg"]["bridge_left"]["rois"], threshold=0.65, hits_required= 2)
+            
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
 
@@ -483,31 +489,25 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
             ctrl.tap(BTN_B)
             sleep(0.5)
             return image.state
-        return return_states(image, "WALKING1")
+        return return_states(image, "WALKING")
 
     elif image.state == "WALKING":
-        image.movement.direction = "right"
-        while image.movement.steps > 0:
-            image.movement.steps -= 1
-            if check_state(image, "SWSH", "text", "dark_text_box"):
-                return return_states(image, "TEXT")
-            else:
-                ctrl.stick_right("L", 1); sleep(0.17)
-        image.movement.direction = "left"
-        image.movement.steps = 10
-        return return_states(image, "WALKING1")
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["bridge_left"]["rois"]], (0, 0, 0))
+        if check_state(image, "SWSH", "text", "dark_text_box"):
+            return return_states(image, "TEXT")
+        found = walk_until_landmark_dpad(ctrl, image, dir=2, lm=Bridge_left, stick_or_dpad= 1, hold_s= 0.17, pause_s= 0, max_steps= 1)
+        if found:
+            return return_states(image, "WALKING1")
+        return image.state
     
     elif image.state == "WALKING1":
-        image.movement.direction = "left"
-        while image.movement.steps > 0:
-            image.movement.steps -= 1
-            if check_state(image, "SWSH", "text", "dark_text_box"):
-                return return_states(image, "TEXT")
-            else:
-                ctrl.stick_left("L", 1); sleep(0.17)
-        image.movement.direction = "right"
-        image.movement.steps = 10
-        return return_states(image, "WALKING")
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["bridge_right"]["rois"]], (0, 0, 0))
+        if check_state(image, "SWSH", "text", "dark_text_box"):
+            return return_states(image, "TEXT")
+        found = walk_until_landmark_dpad(ctrl, image, dir=6, lm=Bridge_right, stick_or_dpad= 1, hold_s= 0.05, pause_s= 0, max_steps= 1)
+        if found:
+            return return_states(image, "WALKING")
+        return image.state
     
     elif image.state == "TEXT":
         image.movement.steps += 1

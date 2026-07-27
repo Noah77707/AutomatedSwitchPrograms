@@ -387,6 +387,14 @@ SWSH_STATES = {
                          },
         "hatching_text": {
             "rois": [(260, 610, 770, 60)]
+        },
+        "bridge_left": {
+            "path": "Media/SWSH_Images/Bridge_left.png",
+            "rois": (100, 500, 120, 120)
+        },
+        "bridge_right": {
+            "path": "Media/SWSH_Images/Bridge_right.png",
+            "rois": (1000, 500, 120, 120)
         }
     }
 }
