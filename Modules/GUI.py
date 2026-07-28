@@ -1180,6 +1180,8 @@ class GUI(pyqt_w.QWidget):
         
         if hasattr(self, "pause_button"):
             self.pause_button.setText("Pause Program")
+        if hasattr(self, "debug_button"):
+            self.debug_button.setText("Debug On")
 
     def update_debug(self) -> None:
         dbg = getattr(self.image, "debugger", None)

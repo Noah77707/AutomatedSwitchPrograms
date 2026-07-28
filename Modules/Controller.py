@@ -12,6 +12,7 @@ class Controller:
         if port:
             self.connect(port)
 
+
     def connect(self, port: str) -> None:
         port = (port or "").strip()
         if not port:

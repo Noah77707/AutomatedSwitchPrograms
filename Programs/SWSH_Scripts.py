@@ -378,13 +378,16 @@ def Egg_Collector_SWSH(image: Image_Processing, ctrl: Controller, state: str | N
     return image.state
 
 def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | None, number: int) -> str:
-    if not hasattr(image, "daycare_tpl"):
-        image.daycare_tpl = cv.imread("Media/SWSH_Images/Nursery_Sign.png", cv.IMREAD_GRAYSCALE)
-    tpl = image.daycare_tpl
+    if not hasattr(image, "Bridge_right"):
+        image.bridge_right = cv.imread("Media/SWSH_Images/Bridge_right.png", cv.IMREAD_GRAYSCALE)
+    if not hasattr(image, "Bridge_left"):
+        image.bridge_left = cv.imread("Media/SWSH_Images/Bridge_left.png", cv.IMREAD_GRAYSCALE)
+    right_tpl = image.bridge_right
+    left_tpl = image.bridge_left
     Bridge_right = TemplateLandmark(
-        template_gray=tpl, roi= const.SWSH_STATES["egg"]["bridge_right"]["rois"], threshold=0.65, hits_required= 2)
+        template_gray=right_tpl, roi= const.SWSH_STATES["egg"]["bridge_right"]["rois"], threshold=0.55, hits_required= 2)
     Bridge_left = TemplateLandmark(
-        template_gray=tpl, roi= const.SWSH_STATES["egg"]["bridge_left"]["rois"], threshold=0.65, hits_required= 2)
+        template_gray=left_tpl, roi= const.SWSH_STATES["egg"]["bridge_left"]["rois"], threshold=0.55, hits_required= 2)
             
     if image.state in (None, "PAIRING", "HOME_SCREEN", "START_SCREEN"):
         return return_states(image, Start_SWSH(image, ctrl, image.state))
@@ -398,7 +401,7 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
             return image.state
         else:
             return return_states(image, "MENU")
-        
+
     elif image.state == "MENU":
         menu = const.SWSH_STATES["menu"]
 
@@ -492,19 +495,19 @@ def Egg_Hatcher_SWSH(image: Image_Processing, ctrl: Controller, state: str | Non
         return return_states(image, "WALKING")
 
     elif image.state == "WALKING":
-        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["bridge_left"]["rois"]], (0, 0, 0))
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["bridge_right"]["rois"]], (0, 0, 0))
         if check_state(image, "SWSH", "text", "dark_text_box"):
             return return_states(image, "TEXT")
-        found = walk_until_landmark_dpad(ctrl, image, dir=2, lm=Bridge_left, stick_or_dpad= 1, hold_s= 0.17, pause_s= 0, max_steps= 1)
+        found = walk_until_landmark_dpad(ctrl, image, dir=2, lm=Bridge_right, stick_or_dpad= 1, hold_s= 0.33, pause_s= 0, max_steps= 1)
         if found:
             return return_states(image, "WALKING1")
         return image.state
     
     elif image.state == "WALKING1":
-        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["bridge_right"]["rois"]], (0, 0, 0))
+        image.debugger.set_rois_for_state(image.state, [const.SWSH_STATES["egg"]["bridge_left"]["rois"]], (0, 0, 0))
         if check_state(image, "SWSH", "text", "dark_text_box"):
             return return_states(image, "TEXT")
-        found = walk_until_landmark_dpad(ctrl, image, dir=6, lm=Bridge_right, stick_or_dpad= 1, hold_s= 0.05, pause_s= 0, max_steps= 1)
+        found = walk_until_landmark_dpad(ctrl, image, dir=6, lm=Bridge_left, stick_or_dpad= 1, hold_s= 0.33, pause_s= 0, max_steps= 1)
         if found:
             return return_states(image, "WALKING")
         return image.state
